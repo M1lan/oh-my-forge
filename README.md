@@ -1,5 +1,7 @@
 # oh-my-forge
 
+> ⚠️ **Amateur Export** — This is an unofficial amateur export of [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) for ForgeCode. Expect imperfections. Contributions welcome!
+
 **Multi-agent orchestration for ForgeCode. Zero learning curve.**
 
 *Don't learn ForgeCode. Just use OMF.*
