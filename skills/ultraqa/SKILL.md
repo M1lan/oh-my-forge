@@ -36,6 +36,10 @@ If the same failure persists 3 times:
 
 <Steps>
 1. **Define Goal**: What does "done" mean? List acceptance criteria
+   - Present the criteria to the user
+   - Ask: "I'll run QA cycles until all these pass. Correct?"
+   - **CONFIRMATION REQUIRED before proceeding**
+
 2. **Run Tests**: Execute test suite
 3. **Diagnose**: If failures, identify root causes
 4. **Fix**: Implement fixes for root causes

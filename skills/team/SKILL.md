@@ -31,7 +31,10 @@ Team orchestrates multiple specialized agents to work on a task in parallel. Eac
 
 <Steps>
 1. **Analyze**: Break task into domains (frontend, backend, tests, docs, etc.)
-2. **Assign**: Route each domain to the appropriate agent
+2. **Show Team**: Present the agent assignments
+   - List: "Frontend → @ui-engineer, Backend → @api-designer, Tests → @test-writer"
+   - Ask: "Does this team composition look right?"
+   - **CONFIRMATION REQUIRED before proceeding**
 3. **Execute**: Run agents in parallel
 4. **Synthesize**: Combine outputs into cohesive solution
 5. **Integrate**: Ensure parts work together

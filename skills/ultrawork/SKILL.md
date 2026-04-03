@@ -31,7 +31,9 @@ Ultrawork maximizes parallel execution by decomposing tasks into independent sub
 
 <Steps>
 1. **Decompose**: Break the task into N independent subtasks
-2. **Identify Dependencies**: Confirm tasks are truly independent
+2. **Show Subtasks**: List the subtasks to the user
+   - Ask: "I'll run these N tasks in parallel. Any dependencies I missed?"
+   - **CONFIRMATION REQUIRED before proceeding**
 3. **Execute**: Run all subtasks in parallel
 4. **Aggregate**: Collect and combine results
 5. **Verify**: Run full test suite to confirm nothing broke

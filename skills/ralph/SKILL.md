@@ -30,12 +30,17 @@ Ralph enforces completion — it doesn't stop until the task is verified working
 </Execution_Policy>
 
 <Steps>
-1. **Understand**: What is the end goal? What does "done" look like?
+1. **Clarify Goal**: What is the end goal? What does "done" look like?
+   - Ask the user to confirm: "I'll keep going until [X] is verified working. Is that correct?"
+   - If goal is unclear, ask one question at a time until it's specific and verifiable
+   - **CONFIRMATION REQUIRED before proceeding**
+
 2. **Execute**: Implement the solution
 3. **Test**: Run tests to verify
 4. **Fix**: If tests fail, diagnose and fix
 5. **Repeat**: Steps 3-4 until all tests pass
 6. **Verify**: Confirm the original problem is resolved
+   - Show the user proof that the goal was achieved
 
 <Loop_Behavior>
 The ralph loop continues until:
