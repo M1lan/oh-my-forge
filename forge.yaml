@@ -115,6 +115,7 @@ custom_rules: |
   - `:ultraqa` — QA cycling (use for verification)
   - `:learner` — Pattern extraction (use to remember solutions)
   - `:tailwind-v4` — Tailwind CSS v4 patterns (use for new Tailwind projects)
+  - `:docker` — Docker best practices (use when user requests docker) 
 
   ### 5. Design Systems
 
