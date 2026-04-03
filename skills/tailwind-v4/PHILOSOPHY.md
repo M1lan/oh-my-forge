@@ -223,12 +223,42 @@ Create custom utilities in CSS:
 - [ ] Leverage the Vite plugin for speed
 - [ ] Use CSS variables for theming
 - [ ] Keep custom CSS minimal
+- [ ] **DELETE old config files** when upgrading from v3 or scaffold
 
 ### DON'T
 - [ ] Don't use `tailwind.config.js` (unless legacy project)
 - [ ] Don't use `@tailwind base/components/utilities` imports
 - [ ] Don't manually define CSS variables for theme values
 - [ ] Don't mix v3 and v4 patterns in same project
+- [ ] **DON'T keep postcss.config.js** when using `@tailwindcss/vite`
+
+---
+
+## ⚠️ CRITICAL: Config File Conflicts
+
+When using `@tailwindcss/vite` plugin, **REMOVE** these files:
+
+```bash
+# Remove these files - they conflict with @tailwindcss/vite
+rm postcss.config.js
+rm tailwind.config.js
+
+# If using PostCSS instead of Vite plugin, install the correct package
+npm install -D @tailwindcss/postcss  # NOT just "tailwindcss"
+
+# Then postcss.config.js should ONLY contain:
+module.exports = {
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+}
+```
+
+### Why This Matters
+
+- `postcss.config.js` with `tailwindcss` plugin → **Build error**
+- `tailwind.config.js` → **Ignored in v4**
+- `@tailwindcss/vite` → **Use this for Vite projects**
 
 ---
 
