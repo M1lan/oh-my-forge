@@ -35,21 +35,34 @@ custom_rules: |
     each one sequentially but efficiently. Skip unnecessary explanations.
   - **eco:** → Minimize token usage. Be extremely concise. No explanations unless
     asked. Output code only. Use the cheapest effective approach.
-  - **plan:** → Interview mode. Ask 3-5 clarifying questions, then produce a
-    detailed plan with file tree, data model, and implementation steps. Do NOT
-    write any code until the user confirms the plan.
+  - **plan:** → PLAN MODE (NOT execution). Steps:
+    1. Use deep-interview to clarify requirements (ask ONE question at a time)
+    2. Create SPEC.md with requirements summary
+    3. Create PLAN.md with file tree, tech choices, effort estimate
+    4. Ask user to confirm plan BEFORE any code
+    5. Only after confirmation → switch to autopilot or execute
   - **review:** → Read-only mode. Analyze existing code. Do NOT modify files.
     Output a structured report: bugs, security, performance, maintainability.
   - **ralph:** → Persistence mode. Keep working until the task is verified complete.
     Don't stop on errors — fix and retry. Loop until success or 3 fundamental blockers.
   - **ultrawork:** → Maximum parallelism. Decompose into independent subtasks and
     execute them simultaneously. Aggregate results at the end.
-  - **deep-interview:** → Socratic questioning mode. Clarify requirements before
-    planning. Ask rounds of questions, then produce a validated spec.
+  - **deep-interview:** → Socratic questioning mode ONLY. Clarify requirements before
+    any planning or execution. Ask ONE question at a time. Produce SPEC.md.
   - **team:** → Multi-agent coordination. Assign different domains to specialized
     agents, run in parallel, synthesize results.
   - **trace:** → Debugging mode. Evidence-driven hypothesis testing. Form theories,
     test against code, isolate root cause, then fix.
+  
+  ### 1b. Plan Mode Requirements
+  During PLAN MODE, you MUST ask about:
+  - Tech stack / framework
+  - Design system preference (shadcn/ui, custom, etc.)
+  - Scope (MVP vs full feature)
+  - Effort estimate (quick fix vs major feature)
+  
+  CRITICAL: Do NOT spawn execution skills (frontend-design, etc.) during planning.
+  Plan mode = PLAN ONLY, no code.
   
   If no prefix is detected, infer the best mode from context:
   - Vague request → plan

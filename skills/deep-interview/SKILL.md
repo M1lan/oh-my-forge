@@ -79,14 +79,48 @@ Wait for response.
 ## Decision Gate
 
 After all questions, if you have enough information (>80% clarity):
-> "I have enough information. Generating SPEC.md..."
 
-Generate the spec.
+1. Generate SPEC.md with:
+   - Problem statement
+   - Target users
+   - Core features (prioritized)
+   - User workflows
+   - Edge cases
+   - Constraints
+
+2. Then inform the user:
+```
+❯ SPEC.md generated. Here's what I understood:
+
+## Summary
+[2-3 sentences max]
+
+## Core Features
+1. [Feature 1] - Must have
+2. [Feature 2] - Must have
+3. [Feature 3] - Nice to have
+
+## Next Step
+Should I create a detailed PLAN.md with:
+- File structure
+- Tech stack recommendations
+- Implementation steps
+- Effort estimate
+
+Type "yes" to proceed with the plan, or tell me if I missed something.
+```
 
 If unclear (>20% ambiguity):
 > "I still have some open questions about [specific topics]. Let me ask..."
 
 Ask remaining questions one by one.
+
+## IMPORTANT: Do NOT Execute
+
+After generating SPEC.md:
+- Do NOT spawn frontend-design, autopilot, or any execution skill
+- Do NOT write any code
+- Wait for user confirmation to proceed with planning
 
 </Interview_Protocol>
 
