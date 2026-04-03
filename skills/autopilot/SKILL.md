@@ -33,11 +33,13 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
 
 <Steps>
 1. **Phase 0 - Clarification**: Understand the requirements
-   - If input is vague: Ask clarifying questions (one at a time)
-   - Identify: tech stack, design system, project type
-   - Ask about design system preference (shadcn/ui, Radix, Base UI, custom)
-   - Confirm scope and complexity estimate
-   - **THIS PHASE IS MANDATORY - do NOT skip to execution**
+   - **ALWAYS ask these questions - do NOT skip even if input seems clear**
+   - ❯ What tech stack? (React, Vue, Svelte, plain HTML, Next.js, Nuxt, etc.)
+   - ❯ What design system? (shadcn/ui, Tailwind + Radix, custom CSS, or none)
+   - ❯ Any design reference? (URL, screenshot, or "surprise me")
+   - ❯ Project type? (new project, add to existing, or empty dir)
+   - Wait for each answer before asking the next question
+   - **CONFIRMATION REQUIRED before proceeding**
 
 2. **Phase 1 - Spec**: Create a detailed SPEC.md
    - Product name and vision
