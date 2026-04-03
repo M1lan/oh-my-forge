@@ -44,14 +44,14 @@ Team orchestrates multiple specialized agents to work on a task in parallel. Eac
 | Frontend | @ui-engineer, @style-expert |
 | Backend | @api-designer, @db-engineer |
 | Testing | @test-writer |
-| Security | @security-auditor |
+| Security | @security-reviewer |
 | Performance | @perf-optimizer |
 | Documentation | @doc-writer |
 </Agent_Assignments>
 
 <Examples>
 <Good>
-User: "team 3 @executor @test-writer @reviewer build user authentication"
+User: "team 3 @executor @test-writer @code-reviewer build user authentication"
 Why good: Clear agent assignments, parallel workstreams
 </Good>
 

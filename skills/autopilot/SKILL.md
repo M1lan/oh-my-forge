@@ -51,8 +51,8 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
    - Stop if the same error persists 3 times (fundamental issue)
 
 5. **Phase 4 - Validation**: Multi-perspective review
-   - @reviewer: Quality review
-   - @security-auditor: Vulnerability check
+   - @code-reviewer: Quality review
+   - @security-reviewer: Vulnerability check
    - @test-writer: Coverage check
 
 6. **Phase 5 - Cleanup**: Verify everything works
@@ -63,8 +63,8 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
 <Tool_Usage>
 - Use @architect for Phase 0-1 architecture decisions
 - Use @executor for Phase 2 implementation
-- Use @reviewer for Phase 4 quality review
-- Use @security-auditor for Phase 4 security validation
+- Use @code-reviewer for Phase 4 quality review
+- Use @security-reviewer for Phase 4 security validation
 </Tool_Usage>
 
 <Examples>
