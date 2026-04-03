@@ -31,7 +31,7 @@ echo "⚒️  oh-my-forge installer"
 echo "========================"
 
 if [ "$GLOBAL" = true ]; then
-  TARGET="$HOME/.forge"
+  TARGET="$HOME/forge"
   echo "📁 Installing globally to $TARGET"
   mkdir -p "$TARGET/agents" "$TARGET/skills"
 else
