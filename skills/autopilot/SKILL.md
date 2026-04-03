@@ -24,38 +24,51 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
 
 <Execution_Policy>
 - Each phase must complete before the next begins
+- **CONFIRMATION REQUIRED**: After Phase 0 (Clarification) and Phase 1 (Spec)
 - Parallel execution is used within phases where possible
 - QA cycles repeat until tests pass (max 5 cycles)
 - Cancel with stopping the session at any time
+- **NEVER skip directly to execution - always confirm the spec first**
 </Execution_Policy>
 
 <Steps>
-1. **Phase 0 - Expansion**: Turn the user's idea into a detailed spec
-   - If input is vague: Offer redirect to `deep-interview` skill
-   - Otherwise: Analyze requirements and create technical specification
-   - Output the spec before proceeding
+1. **Phase 0 - Clarification**: Understand the requirements
+   - If input is vague: Ask clarifying questions (one at a time)
+   - Identify: tech stack, design system, project type
+   - Ask about design system preference (shadcn/ui, Radix, Base UI, custom)
+   - Confirm scope and complexity estimate
+   - **THIS PHASE IS MANDATORY - do NOT skip to execution**
 
-2. **Phase 1 - Planning**: Create an implementation plan from the spec
+2. **Phase 1 - Spec**: Create a detailed SPEC.md
+   - Product name and vision
+   - Design decisions (colors, typography, animations)
+   - Component inventory
+   - Technical approach
+   - **Output SPEC.md and ask for confirmation before proceeding**
+
+3. **Phase 2 - Planning**: Create implementation plan
    - Break down into atomic, testable tasks
    - Identify dependencies between tasks
    - Assign complexity (simple/medium/complex) to each task
+   - **Show the plan and wait for "go" or modifications**
 
-3. **Phase 2 - Execution**: Implement the plan using @executor
+4. **Phase 3 - Execution**: Implement the plan
    - Run independent tasks in parallel where possible
    - Use @architect for technical decisions
    - Use @ui-engineer for frontend components
+   - Use @designer for design system integration
 
-4. **Phase 3 - QA**: Cycle until all tests pass
+5. **Phase 4 - QA**: Cycle until all tests pass
    - Run build, lint, test
    - Fix failures iteratively
    - Stop if the same error persists 3 times (fundamental issue)
 
-5. **Phase 4 - Validation**: Multi-perspective review
+6. **Phase 5 - Validation**: Multi-perspective review
    - @code-reviewer: Quality review
    - @security-reviewer: Vulnerability check
    - @test-writer: Coverage check
 
-6. **Phase 5 - Cleanup**: Verify everything works
+7. **Phase 6 - Cleanup**: Verify everything works
    - Run final test suite
    - Summarize what was built
 </Steps>
