@@ -1,25 +1,26 @@
 # oh-my-forge
 
-> ⚠️ **Amateur Export** — This is an unofficial amateur export of [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) for ForgeCode. Expect imperfections. Contributions welcome!
+> ⚠️ **Amateur Export** — This is an unofficial amateur export of [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) for [ForgeCode](https://forgecode.dev/). It was created by an AI and likely contains errors, missing features, and imperfect conversions. Contributions, bug reports, and improvements are welcome!
 
 **Multi-agent orchestration for ForgeCode. Zero learning curve.**
 
-*Don't learn ForgeCode. Just use OMF.*
+_Don't learn ForgeCode. Just use OMF._
 
-[Get Started](#quick-start) • [Documentation](docs/) • [Agents](docs/AGENTS.md) • [Skills](skills/) • [Configuration](#configuration)
+[Get Started](#quick-start) • [Agents](docs/AGENTS.md) • [Skills](skills/) • [Configuration](#configuration) • [Contributing](#contributing)
 
 ---
 
 ## Why oh-my-forge?
 
-ForgeCode is the #1 terminal-native AI coding agent. But out of the box, you're on your own to configure agents, workflows, and conventions. **oh-my-forge** fixes that.
+ForgeCode is the terminal-native AI coding agent. But out of the box, you're on your own to configure agents, workflows, and conventions. **oh-my-forge** fixes that.
 
 - **30+ specialized agents** — architect, designer, executor, reviewer, debugger, and more
-- **Tiered agents** — fast, standard, complex for cost optimization
-- **9 execution modes** — Autopilot, Turbo, Eco, Plan, Review, Ralph, Ultrawork, Team, Trace
-- **9 skills** — reusable workflow patterns for common tasks
-- **Model-agnostic** — works with any provider ForgeCode supports (300+ models)
-- **Stack-agnostic** — works for any stack, with optional preset packs
+- **10 execution modes** — Autopilot, Turbo, Eco, Plan, Review, Ralph, Ultrawork, Team, Trace, Deep-Interview
+- **12 skills** — reusable workflow patterns for common tasks
+- **Design systems** — shadcn/ui, Radix, Base UI documentation included
+- **Docker support** — production best practices skill
+- **Model-agnostic** — works with any provider ForgeCode supports
+- **Stack-agnostic** — works for any stack
 - **Zero config** — copy the files, run forge, done
 
 ---
@@ -29,28 +30,31 @@ ForgeCode is the #1 terminal-native AI coding agent. But out of the box, you're 
 ### Option 1: Clone & Copy (recommended)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/oh-my-forge.git
+git clone https://github.com/your-username/oh-my-forge.git
 cd oh-my-forge
 ./scripts/install.sh /path/to/your/project
 ```
 
-### Option 2: Manual Setup
+### Option 2: Global Install
 
 ```bash
-# Copy agents to your project or global config
-cp -r agents/ /path/to/your/project/.forge/agents/
-# Copy the forge.yaml to your project root
-cp forge.yaml /path/to/your/project/forge.yaml
+./scripts/install.sh --global
 ```
 
-### Option 3: Global Install
+Then just run `forge` in your project.
+
+### Option 3: From Scratch
 
 ```bash
-# Install globally so every project benefits
-./scripts/install-global.sh
-```
+# Copy agents to your project
+cp -r agents/ ~/.forge/agents/
 
-Then just run `forge` in your project. That's it.
+# Copy skills to your project
+cp -r skills/ ~/.forge/skills/
+
+# Copy the forge.yaml
+cp forge.yaml ~/.forge/forge.yaml
+```
 
 ---
 
@@ -67,74 +71,65 @@ Then just run `forge` in your project. That's it.
 | **Ultrawork** | `ultrawork: <task>` | Maximum parallel throughput |
 | **Team** | `team: N:agent <task>` | Multi-agent coordinated execution |
 | **Trace** | `trace: <bug>` | Evidence-driven debugging |
-
-Modes are triggered by prefixing your prompt with the keyword. Without a keyword, OMF uses intelligent defaults based on task complexity.
+| **Deep-Interview** | `deep-interview: <idea>` | Socratic requirements clarification |
 
 ---
 
 ## Agents (30+)
 
-Agents are markdown files in `.forge/agents/` with YAML frontmatter + system prompt. OMF ships with tiered variants for optimal cost/performance balance:
+Agents are markdown files with YAML frontmatter + system prompt.
 
 ### Core
-| Agent | ID | Tier | Role |
-|-------|-----|------|------|
-| Architect | `architect` | standard | System design, tech decisions |
-| Architect (Fast) | `architect-low` | fast | Quick structure decisions |
-| Executor | `executor` | standard | Standard implementation |
-| Executor (Fast) | `executor-low` | fast | Quick changes, boilerplate |
-| Executor (Complex) | `executor-high` | complex | Large refactors, architecture |
-| Code Reviewer | `code-reviewer` | standard | Comprehensive review |
-| Planner | `planner` | standard | Task decomposition, planning |
-| Debugger | `debugger` | standard | Bug hunting, root cause |
+| Agent | Role |
+|-------|------|
+| `architect` | System design, tech decisions |
+| `executor` | Standard implementation |
+| `code-reviewer` | Comprehensive review |
+| `planner` | Task decomposition |
+| `debugger` | Bug hunting, root cause |
 
 ### Frontend
-| Agent | ID | Tier | Role |
-|-------|-----|------|------|
-| Designer | `designer` | standard | UI/UX implementation |
-| Designer (Fast) | `designer-low` | fast | Quick UI changes |
-| UI Engineer | `ui-engineer` | — | Components, responsive |
-| Style Expert | `style-expert` | — | CSS, design systems |
-| UX Analyst | `ux-analyst` | — | User flows |
+| Agent | Role |
+|-------|------|
+| `designer` | UI/UX implementation |
+| `ui-engineer` | Components, responsive |
+| `style-expert` | CSS, design systems |
+| `ux-analyst` | User flows |
 
 ### Backend
-| Agent | ID | Role |
-|-------|-----|------|
-| API Designer | `api-designer` | REST/GraphQL design |
-| DB Engineer | `db-engineer` | Schema, migrations |
-| Auth Specialist | `auth-specialist` | Auth, security |
+| Agent | Role |
+|-------|------|
+| `api-designer` | REST/GraphQL design |
+| `db-engineer` | Schema, migrations |
+| `auth-specialist` | Auth, security |
 
 ### Quality
-| Agent | ID | Tier | Role |
-|-------|-----|------|------|
-| Test Engineer | `test-engineer` | standard | TDD, QA strategy |
-| Security Reviewer | `security-reviewer` | standard | Vulnerability scanning |
-| Perf Optimizer | `perf-optimizer` | — | Performance analysis |
+| Agent | Role |
+|-------|------|
+| `test-engineer` | TDD, QA strategy |
+| `security-reviewer` | Vulnerability scanning |
+| `perf-optimizer` | Performance analysis |
 
 ### Specialist
-| Agent | ID | Role |
-|-------|-----|------|
-| Scientist | `scientist` | Data analysis, ML |
-| Doc Writer | `doc-writer` | README, API docs |
-| Refactorer | `refactorer` | Code cleanup |
-| Migrator | `migrator` | Version upgrades |
-| Data Modeler | `data-modeler` | ERD design |
-| SEO Expert | `seo-expert` | Technical SEO |
-| i18n Expert | `i18n-expert` | Internationalization |
-| Git Strategist | `git-strategist` | Git workflow |
-| Dep Auditor | `dep-auditor` | Dependencies |
+| Agent | Role |
+|-------|------|
+| `scientist` | Data analysis, ML |
+| `doc-writer` | README, API docs |
+| `refactorer` | Code cleanup |
+| `deploy-engineer` | Deployment |
+| `dep-auditor` | Dependencies |
 
 [Full agent documentation →](docs/AGENTS.md)
 
 ---
 
-## Skills (9)
+## Skills (12)
 
-Skills are reusable workflow patterns. Use them with the skill command:
+Skills are reusable workflow patterns.
 
 | Skill | Description |
 |-------|-------------|
-| `autopilot` | Full autonomous execution from idea to code |
+| `autopilot` | Full autonomous execution |
 | `ralph` | Persistence mode — doesn't stop until verified |
 | `ultrawork` | Maximum parallel throughput |
 | `deep-interview` | Socratic requirements clarification |
@@ -143,8 +138,22 @@ Skills are reusable workflow patterns. Use them with the skill command:
 | `learner` | Extract reusable patterns |
 | `ultraqa` | Autonomous QA cycling |
 | `scaffold` | Generate project boilerplate |
+| `tailwind-v4` | Tailwind CSS v4 patterns |
+| `docker` | Docker best practices |
+| `turbo` | Fast parallel execution |
+| `eco` | Lightweight minimal tasks |
 
-[Full skills documentation →](skills/)
+---
+
+## Design Systems
+
+Built-in documentation for popular UI libraries:
+
+| System | Description |
+|--------|-------------|
+| **shadcn/ui** | React + Tailwind + Radix (recommended) |
+| **Radix UI** | Headless primitives |
+| **Base UI** | Modern headless alternative |
 
 ---
 
@@ -152,63 +161,13 @@ Skills are reusable workflow patterns. Use them with the skill command:
 
 ### forge.yaml
 
-OMF provides an opinionated `forge.yaml` that you can customize:
-
-```yaml
-# oh-my-forge default configuration
-max_requests_per_turn: 80
-max_tool_failure_per_turn: 5
-temperature: 0.4
-max_tokens: 16384
-max_walker_depth: 3
-
-custom_rules: |
-  ## oh-my-forge Rules
-  
-  ### Execution Mode Detection
-  - If the user starts with "autopilot:", enter full autonomous mode
-  - If the user starts with "turbo:", decompose into parallel sub-tasks
-  - If the user starts with "eco:", minimize token usage, be concise
-  - If the user starts with "plan:", interview first, then plan, don't code yet
-  - If the user starts with "review:", analyze existing code, don't modify
-  
-  ### Agent Routing
-  - For architecture decisions → use @architect persona
-  - For implementation → use @executor persona  
-  - For code review → use @reviewer persona
-  - For debugging → use @debugger persona
-  - For testing → use @test-writer persona
-  
-  ### Quality Standards
-  - Always explain WHY before WHAT
-  - Show file paths before code blocks
-  - Run linters/tests after changes when possible
-  - Prefer small, focused commits over large changes
-  - Ask clarifying questions for ambiguous requirements
-
-commands:
-  - name: "scaffold"
-    description: "Generate project boilerplate"
-    prompt: "Analyze the project description and generate a complete boilerplate structure with files, configs, and dependencies."
-  - name: "feature"
-    description: "Plan and implement a feature end-to-end"
-    prompt: "First plan the feature architecture, then implement it step by step with tests."
-  - name: "bugfix"
-    description: "Analyze and fix a bug"
-    prompt: "Analyze the error, trace the root cause, implement a fix, and write a regression test."
-  - name: "review"
-    description: "Comprehensive code review"
-    prompt: "Review the recent changes for bugs, security issues, performance problems, and code quality. Provide actionable feedback."
-```
+OMF provides an opinionated `forge.yaml` with rules for execution modes, agent routing, and quality standards.
 
 ### Environment Variables
 
 ```bash
 # Optional: set default execution mode
 export OMF_DEFAULT_MODE=autopilot
-
-# Optional: enable cost tracking
-export OMF_TRACK_COST=true
 ```
 
 ---
@@ -220,76 +179,67 @@ oh-my-forge/
 ├── README.md
 ├── LICENSE
 ├── forge.yaml              # Default ForgeCode configuration
-├── agents/                 # Agent definitions (markdown + YAML frontmatter)
-│   ├── core/
-│   │   ├── architect.md
-│   │   ├── architect-low.md
-│   │   ├── executor.md
-│   │   ├── executor-low.md
-│   │   ├── executor-high.md
-│   │   ├── code-reviewer.md
-│   │   ├── planner.md
-│   │   └── debugger.md
-│   ├── frontend/
-│   │   ├── designer.md
-│   │   ├── designer-low.md
-│   │   ├── ui-engineer.md
-│   │   ├── style-expert.md
-│   │   └── ux-analyst.md
-│   ├── backend/
-│   │   ├── api-designer.md
-│   │   ├── db-engineer.md
-│   │   └── auth-specialist.md
-│   ├── devops/
-│   │   ├── deploy-engineer.md
-│   │   └── infra-planner.md
-│   ├── quality/
-│   │   ├── test-engineer.md
-│   │   ├── test-writer.md
-│   │   ├── security-reviewer.md
-│   │   └── perf-optimizer.md
-│   └── specialist/
-│       ├── scientist.md
-│       ├── doc-writer.md
-│       ├── refactorer.md
-│       ├── migrator.md
-│       ├── data-modeler.md
-│       ├── seo-expert.md
-│       ├── i18n-expert.md
-│       ├── git-strategist.md
-│       └── dep-auditor.md
+├── agents/                 # Agent definitions
+│   ├── core/               # Architect, executor, etc.
+│   ├── frontend/           # Designer, ui-engineer, etc.
+│   ├── backend/            # API designer, db-engineer, etc.
+│   ├── devops/             # Deploy, infra
+│   ├── quality/            # Test, security, perf
+│   └── specialist/         # Scientist, doc-writer, etc.
 ├── skills/                 # Reusable workflow skills
 │   ├── autopilot/
 │   ├── ralph/
-│   ├── ultrawork/
-│   ├── deep-interview/
-│   ├── team/
-│   ├── trace/
-│   ├── learner/
-│   ├── ultraqa/
-│   └── scaffold/
-├── scripts/                # Install & setup scripts
-│   ├── install.sh
-│   └── install-global.sh
-├── examples/               # Example configs per stack
-│   └── laravel-vue/
-└── docs/
-    ├── AGENTS.md
-    └── CONTRIBUTING.md
+│   ├── tailwind-v4/
+│   ├── docker/
+│   └── ...
+├── design-system/          # UI library documentation
+│   ├── shadcn/
+│   ├── radix/
+│   └── base-ui/
+├── scripts/                # Install scripts
+└── docs/                   # Documentation
 ```
 
 ---
 
-## Stack Presets (Optional)
+## Contributing
 
-OMF is stack-agnostic by default, but ships optional presets in `examples/`:
+> ⚠️ **This is an amateur export.** If you find errors, missing features, or want to improve anything, your contribution is welcome!
 
-```bash
-# Apply a stack preset on top of base config
-./scripts/install.sh /my/project --preset laravel-vue
-```
+### What Needs Help
 
-Available presets: `laravel-vue`, `nextjs`, `django`, `rails`, `express-react`, `fastapi-svelte`
+- **Agent improvements** — Better prompts, missing agents
+- **Skill development** — New skills for common workflows
+- **Documentation** — Fix errors, add examples
+- **Design systems** — Add more UI libraries
+- **Bug reports** — Things that don't work as expected
+- **Feature requests** — Missing oh-my-claudecode features
+
+### How to Contribute
+
+1. **Fork the repo**
+2. **Make your changes** — Fix bugs, add features, improve docs
+3. **Test locally** — Use `./scripts/install.sh /your/test/project`
+4. **Submit a PR** — Describe what you changed and why
+
+### Reporting Issues
+
+- Missing or incorrect agent prompts
+- Skills that don't follow documented behavior
+- Missing features from oh-my-claudecode
+- Documentation errors
+- Build/install issues
+
+### Ideas for Contributions
+
+- [ ] Add missing oh-my-claudecode skills (swarm, ultrapilot, etc.)
+- [ ] Improve agent prompts with better instructions
+- [ ] Add more design system documentation
+- [ ] Create stack-specific presets (Next.js, Laravel, etc.)
+- [ ] Add examples directory with sample projects
+- [ ] Improve error handling in install scripts
+- [ ] Add tests for skills and agents
+- [ ] Create a CONTRIBUTING.md with detailed guidelines
 
 ---
 
@@ -298,28 +248,16 @@ Available presets: `laravel-vue`, `nextjs`, `django`, `rails`, `express-react`, 
 | Feature | oh-my-claudecode | oh-my-forge |
 |---------|-----------------|-------------|
 | Target tool | Claude Code | ForgeCode |
-| Model support | Anthropic only | 300+ models (any provider) |
+| Model support | Anthropic only | 300+ models |
 | Installation | Plugin marketplace | Copy files / script |
-| Agents | 29 | 32+ |
-| Agent tiers | fast/standard/complex | fast/standard/complex (model-agnostic) |
-| Skills | 32 | 9 (core) |
-| Execution modes | 8 | 9 |
-| Cost optimization | Model routing | Tiered agents + eco mode |
+| Agents | 29 | 30+ |
+| Skills | 32 | 12 (core) |
+| Execution modes | 8+ | 10 |
+| Team mode | Yes | Simplified |
+| Design systems | No | Yes (shadcn, Radix, Base UI) |
+| Docker skill | No | Yes |
+| Tailwind v4 | No | Yes |
 | License | MIT | MIT |
-| Stack presets | No | Yes (optional) |
-| Hooks system | Yes (Claude Code hooks) | Planned (ForgeCode native) |
-
----
-
-## Contributing
-
-PRs welcome! See [CONTRIBUTING.md](docs/CONTRIBUTING.md).
-
-Priority areas:
-- New agent definitions
-- Additional skills
-- Stack-specific presets
-- Documentation
 
 ---
 
@@ -329,6 +267,6 @@ MIT
 
 ---
 
-**Inspired by:** [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) • [oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode) • [awesome-forge-agents](https://github.com/antinomyhq/awesome-forge-agents)
+**Inspired by:** [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) • [oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode)
 
 **Zero learning curve. Any model. Maximum power.**
