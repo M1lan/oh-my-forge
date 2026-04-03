@@ -25,6 +25,10 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
 <Execution_Policy>
 - Each phase must complete before the next begins
 - **CONFIRMATION REQUIRED**: After Phase 0 (Clarification) and Phase 1 (Spec)
+- **WORKING DIRECTORY**: Always work in the directory where Forge was invoked
+  - Check `cwd` to know the current working directory
+  - NEVER default to ~/forge/ or any fixed installation path
+  - If creating a new project in an empty directory, create it IN that directory
 - Parallel execution is used within phases where possible
 - QA cycles repeat until tests pass (max 5 cycles)
 - Cancel with stopping the session at any time
@@ -37,7 +41,10 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
    - ❯ What tech stack? (React, Vue, Svelte, plain HTML, Next.js, Nuxt, etc.)
    - ❯ What design system? (shadcn/ui, Tailwind + Radix, custom CSS, or none)
    - ❯ Any design reference? (URL, screenshot, or "surprise me")
-   - ❯ Project type? (new project, add to existing, or empty dir)
+   - ❯ Project location? **CRITICAL**: Ask "Where should I create this?"
+     - If empty dir: use current directory
+     - If existing project: use that project directory
+     - NEVER default to ~/forge/ or any fixed path
    - Wait for each answer before asking the next question
    - **CONFIRMATION REQUIRED before proceeding**
 
