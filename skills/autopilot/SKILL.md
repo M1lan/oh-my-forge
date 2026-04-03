@@ -29,6 +29,10 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
   - Check `cwd` to know the current working directory
   - NEVER default to ~/forge/ or any fixed installation path
   - If creating a new project in an empty directory, create it IN that directory
+- **CRITICAL**: When `autopilot:` is invoked, FOLLOW THESE PHASES IN ORDER
+  - Do NOT invoke other skills (frontend-design, etc.) until Phase 3
+  - Phase 0, 1, and 2 must complete with user confirmation FIRST
+  - Only during Phase 3 may you invoke other skills for execution
 - Parallel execution is used within phases where possible
 - QA cycles repeat until tests pass (max 5 cycles)
 - Cancel with stopping the session at any time
@@ -47,6 +51,7 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
      - NEVER default to ~/forge/ or any fixed path
    - Wait for each answer before asking the next question
    - **CONFIRMATION REQUIRED before proceeding**
+   - **DO NOT invoke any other skill during this phase**
 
 2. **Phase 1 - Spec**: Create a detailed SPEC.md
    - Product name and vision
@@ -54,12 +59,14 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
    - Component inventory
    - Technical approach
    - **Output SPEC.md and ask for confirmation before proceeding**
+   - **DO NOT invoke any other skill during this phase**
 
 3. **Phase 2 - Planning**: Create implementation plan
    - Break down into atomic, testable tasks
    - Identify dependencies between tasks
    - Assign complexity (simple/medium/complex) to each task
    - **Show the plan and wait for "go" or modifications**
+   - **DO NOT invoke any other skill during this phase**
 
 4. **Phase 3 - Execution**: Implement the plan
    - Run independent tasks in parallel where possible
