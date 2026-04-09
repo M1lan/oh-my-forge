@@ -23,7 +23,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 OMF_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
 # ---------- Defaults ----------
-MODE="global"             # global | project
+MODE="global" # global | project
 PROJECT_DIR=""
 DRY_RUN=false
 FORCE=false
@@ -38,20 +38,34 @@ BACKUP_DIR=""
 
 # ---------- Colours (only when stdout is a tty) ----------
 if [[ -t 1 ]]; then
-  C_RESET='\033[0m'; C_DIM='\033[2m'; C_BOLD='\033[1m'
-  C_GREEN='\033[32m'; C_YELLOW='\033[33m'; C_RED='\033[31m'; C_BLUE='\033[34m'
+  C_RESET='\033[0m'
+  C_DIM='\033[2m'
+  C_BOLD='\033[1m'
+  C_GREEN='\033[32m'
+  C_YELLOW='\033[33m'
+  C_RED='\033[31m'
+  C_BLUE='\033[34m'
 else
-  C_RESET=''; C_DIM=''; C_BOLD=''; C_GREEN=''; C_YELLOW=''; C_RED=''; C_BLUE=''
+  C_RESET=''
+  C_DIM=''
+  C_BOLD=''
+  C_GREEN=''
+  C_YELLOW=''
+  C_RED=''
+  C_BLUE=''
 fi
 
-info()  { printf '%bINFO%b %s\n'    "${C_BLUE}${C_BOLD}"   "${C_RESET}" "$*"; }
-ok()    { printf '%bOK%b   %s\n'    "${C_GREEN}${C_BOLD}"  "${C_RESET}" "$*"; }
-warn()  { printf '%bWARN%b %s\n'    "${C_YELLOW}${C_BOLD}" "${C_RESET}" "$*" >&2; }
-err()   { printf '%bERR%b  %s\n'    "${C_RED}${C_BOLD}"    "${C_RESET}" "$*" >&2; }
-die()   { err "$*"; exit 1; }
+info() { printf '%bINFO%b %s\n' "${C_BLUE}${C_BOLD}" "${C_RESET}" "$*"; }
+ok() { printf '%bOK%b   %s\n' "${C_GREEN}${C_BOLD}" "${C_RESET}" "$*"; }
+warn() { printf '%bWARN%b %s\n' "${C_YELLOW}${C_BOLD}" "${C_RESET}" "$*" >&2; }
+err() { printf '%bERR%b  %s\n' "${C_RED}${C_BOLD}" "${C_RESET}" "$*" >&2; }
+die() {
+  err "$*"
+  exit 1
+}
 
 usage() {
-  cat <<'EOF'
+  cat << 'EOF'
 oh-my-forge installer
 
 Usage:
@@ -86,25 +100,71 @@ EOF
 # ---------- Argument parsing ----------
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --global)              MODE="global"; shift ;;
-    --project)             MODE="project"; PROJECT_DIR="${2:-}"; [[ -z "$PROJECT_DIR" ]] && die "--project requires a DIR"; shift 2 ;;
-    --dry-run)             DRY_RUN=true; shift ;;
-    --force)               FORCE=true; shift ;;
-    --agents)              DO_AGENTS=true; EXPLICIT_COMPONENTS=true; shift ;;
-    --skills)              DO_SKILLS=true; EXPLICIT_COMPONENTS=true; shift ;;
-    --commands)            DO_COMMANDS=true; EXPLICIT_COMPONENTS=true; shift ;;
-    --templates)           DO_TEMPLATES=true; EXPLICIT_COMPONENTS=true; shift ;;
-    --with-mcp-example)    WITH_MCP_EXAMPLE=true; shift ;;
-    --with-toml-example)   WITH_TOML_EXAMPLE=true; shift ;;
-    --backup-dir)          BACKUP_DIR="${2:-}"; [[ -z "$BACKUP_DIR" ]] && die "--backup-dir requires a DIR"; shift 2 ;;
-    -h|--help)             usage; exit 0 ;;
-    *)                     die "Unknown argument: $1 (try --help)" ;;
+    --global)
+      MODE="global"
+      shift
+      ;;
+    --project)
+      MODE="project"
+      PROJECT_DIR="${2:-}"
+      [[ -z "$PROJECT_DIR" ]] && die "--project requires a DIR"
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --force)
+      FORCE=true
+      shift
+      ;;
+    --agents)
+      DO_AGENTS=true
+      EXPLICIT_COMPONENTS=true
+      shift
+      ;;
+    --skills)
+      DO_SKILLS=true
+      EXPLICIT_COMPONENTS=true
+      shift
+      ;;
+    --commands)
+      DO_COMMANDS=true
+      EXPLICIT_COMPONENTS=true
+      shift
+      ;;
+    --templates)
+      DO_TEMPLATES=true
+      EXPLICIT_COMPONENTS=true
+      shift
+      ;;
+    --with-mcp-example)
+      WITH_MCP_EXAMPLE=true
+      shift
+      ;;
+    --with-toml-example)
+      WITH_TOML_EXAMPLE=true
+      shift
+      ;;
+    --backup-dir)
+      BACKUP_DIR="${2:-}"
+      [[ -z "$BACKUP_DIR" ]] && die "--backup-dir requires a DIR"
+      shift 2
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *) die "Unknown argument: $1 (try --help)" ;;
   esac
 done
 
 # Default all components on when the user didn't specify any
 if [[ "$EXPLICIT_COMPONENTS" == false ]]; then
-  DO_AGENTS=true; DO_SKILLS=true; DO_COMMANDS=true; DO_TEMPLATES=true
+  DO_AGENTS=true
+  DO_SKILLS=true
+  DO_COMMANDS=true
+  DO_TEMPLATES=true
 fi
 
 # ---------- Resolve target ----------
@@ -125,7 +185,7 @@ if [[ "$TARGET_ROOT" == "$OMF_DIR" || "$TARGET_ROOT" == "$OMF_DIR/"* ]]; then
 fi
 
 # ---------- Tool check ----------
-need() { command -v "$1" >/dev/null 2>&1 || die "required tool missing: $1"; }
+need() { command -v "$1" > /dev/null 2>&1 || die "required tool missing: $1"; }
 need find
 need rsync
 
@@ -140,9 +200,9 @@ info "Dry run: ${DRY_RUN}"
 
 # ---------- Plan & confirm ----------
 components=()
-$DO_AGENTS    && components+=("agents")
-$DO_SKILLS    && components+=("skills")
-$DO_COMMANDS  && [[ -d "$OMF_DIR/commands" ]] && components+=("commands")
+$DO_AGENTS && components+=("agents")
+$DO_SKILLS && components+=("skills")
+$DO_COMMANDS && [[ -d "$OMF_DIR/commands" ]] && components+=("commands")
 $DO_TEMPLATES && [[ -d "$OMF_DIR/templates" ]] && components+=("templates")
 info "Components: ${components[*]:-none}"
 
@@ -187,7 +247,10 @@ backup_if_exists() {
 # Collision detection: if two source files share the same basename, abort.
 install_flat_md() {
   local src="$1" dst="$2" label="$3"
-  [[ -d "$src" ]] || { info "skipping $label (no $src)"; return; }
+  [[ -d "$src" ]] || {
+    info "skipping $label (no $src)"
+    return
+  }
   info "installing $label -> $dst"
   ensure_dir "$dst"
 
@@ -197,8 +260,9 @@ install_flat_md() {
   # Inline cleanup rather than a RETURN trap (trap fires after locals are gone under `set -u`).
   local dup=0
   while IFS= read -r -d '' f; do
-    local base; base="$(basename "$f")"
-    if grep -Fxq "$base" "$seen" 2>/dev/null; then
+    local base
+    base="$(basename "$f")"
+    if grep -Fxq "$base" "$seen" 2> /dev/null; then
       err "collision: two sources share basename $base (second: $f)"
       dup=1
     else
@@ -213,7 +277,8 @@ install_flat_md() {
 
   # Install each file
   while IFS= read -r -d '' f; do
-    local base; base="$(basename "$f")"
+    local base
+    base="$(basename "$f")"
     local target="$dst/$base"
     if [[ -e "$target" ]]; then
       if ! $FORCE && ! $DRY_RUN; then
@@ -230,12 +295,16 @@ install_flat_md() {
 # than one level.
 install_skills() {
   local src="$1" dst="$2"
-  [[ -d "$src" ]] || { info "skipping skills (no $src)"; return; }
+  [[ -d "$src" ]] || {
+    info "skipping skills (no $src)"
+    return
+  }
   info "installing skills -> $dst"
   ensure_dir "$dst"
   for skill_dir in "$src"/*/; do
     [[ -d "$skill_dir" ]] || continue
-    local name; name="$(basename "$skill_dir")"
+    local name
+    name="$(basename "$skill_dir")"
     local target="$dst/$name"
     if [[ -e "$target" ]] && ! $FORCE && ! $DRY_RUN; then
       backup_if_exists "$target"
@@ -254,7 +323,10 @@ install_commands() {
 
 install_templates() {
   local src="$OMF_DIR/templates" dst="$TARGET_ROOT/templates"
-  [[ -d "$src" ]] || { info "skipping templates (no $src)"; return; }
+  [[ -d "$src" ]] || {
+    info "skipping templates (no $src)"
+    return
+  }
   info "installing templates -> $dst"
   ensure_dir "$dst"
   run "rsync -a \"$src/\" \"$dst/\""
@@ -263,7 +335,10 @@ install_templates() {
 
 install_mcp_example() {
   local src="$OMF_DIR/.mcp.json.example" dst="$TARGET_ROOT/.mcp.json.example"
-  [[ -f "$src" ]] || { warn "no $src — skipping --with-mcp-example"; return; }
+  [[ -f "$src" ]] || {
+    warn "no $src — skipping --with-mcp-example"
+    return
+  }
   info "installing .mcp.json.example -> $dst"
   [[ -e "$dst" ]] && ! $FORCE && ! $DRY_RUN && backup_if_exists "$dst"
   run "install -m 0644 \"$src\" \"$dst\""
@@ -272,7 +347,10 @@ install_mcp_example() {
 
 install_toml_example() {
   local src="$OMF_DIR/.forge.toml" dst="$TARGET_ROOT/.forge.toml.example"
-  [[ -f "$src" ]] || { warn "no $src — skipping --with-toml-example"; return; }
+  [[ -f "$src" ]] || {
+    warn "no $src — skipping --with-toml-example"
+    return
+  }
   info "installing .forge.toml.example -> $dst"
   [[ -e "$dst" ]] && ! $FORCE && ! $DRY_RUN && backup_if_exists "$dst"
   run "install -m 0644 \"$src\" \"$dst\""
@@ -298,7 +376,7 @@ if $DO_TEMPLATES; then
   install_templates
 fi
 
-$WITH_MCP_EXAMPLE  && install_mcp_example
+$WITH_MCP_EXAMPLE && install_mcp_example
 $WITH_TOML_EXAMPLE && install_toml_example
 
 # ---------- Summary ----------
@@ -313,7 +391,7 @@ else
   ok "install complete: ${TARGET_ROOT}"
 fi
 
-cat <<EOF
+cat << EOF
 
 Next steps:
   1. ${C_BOLD}Review the installed files${C_RESET} at $TARGET_ROOT

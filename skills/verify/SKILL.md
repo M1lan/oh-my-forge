@@ -31,7 +31,7 @@ Confidence requires evidence.
 
 ## Output format
 
-```
+```text
 ## Verification Report
 
 **Target**: what was supposed to be verified (one sentence)

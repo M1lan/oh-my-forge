@@ -22,6 +22,7 @@ Structured read-only exploration. Build an accurate mental map of an unfamiliar 
 </Purpose>
 
 <When_To_Use>
+
 - First touch on an unfamiliar codebase or subsystem.
 - Before a risky refactor or migration.
 - User says "walk me through", "where is X handled", "what does this do".
@@ -29,6 +30,7 @@ Structured read-only exploration. Build an accurate mental map of an unfamiliar 
 </When_To_Use>
 
 <Method>
+
 1. **Anchor scope.** What directory? What subsystem? Do not attempt the whole repo unless asked.
 2. **Read the map.** README, AGENTS.md, CONTRIBUTING, docs/, package/Cargo manifest, CI config.
 3. **Find entry points.** main.*, lib.*, index.*, route tables, cmd/*.
@@ -39,6 +41,7 @@ Structured read-only exploration. Build an accurate mental map of an unfamiliar 
 </Method>
 
 <Rules>
+
 - Read-only.
 - Cite every claim with `path:line`.
 - Do not attempt to map every file. Map the skeleton and one representative path.

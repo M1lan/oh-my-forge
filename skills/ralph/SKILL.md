@@ -8,6 +8,7 @@ Ralph enforces completion — it doesn't stop until the task is verified working
 </Purpose>
 
 <Use_When>
+
 - User says "ralph", "don't stop", "must complete", "until done", "don't give up"
 - Task MUST complete regardless of setbacks
 - User wants verification that the fix actually worked
@@ -15,12 +16,14 @@ Ralph enforces completion — it doesn't stop until the task is verified working
 </Use_When>
 
 <Do_Not_Use_When>
+
 - Quick exploratory tasks where partial completion is fine
 - Tasks that require human decision-making at each step
 - Research tasks without a clear completion criteria
 </Do_Not_Use_When>
 
 <Execution_Policy>
+
 - Don't stop on errors — fix and retry
 - Don't stop on test failures — debug and fix
 - Don't stop on partial completion — verify fully done
@@ -28,6 +31,7 @@ Ralph enforces completion — it doesn't stop until the task is verified working
 </Execution_Policy>
 
 <Steps>
+
 1. **Clarify Goal**: What is the end goal? What does "done" look like?
    - Ask the user to confirm: "I'll keep going until [X] is verified working. Is that correct?"
    - If goal is unclear, ask one question at a time until it's specific and verifiable
@@ -42,6 +46,7 @@ Ralph enforces completion — it doesn't stop until the task is verified working
 
 <Loop_Behavior>
 The ralph loop continues until:
+
 - All tests pass
 - The user explicitly stops
 - The same fundamental issue blocks progress 3 times

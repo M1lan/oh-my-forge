@@ -8,6 +8,7 @@ Explore: {{parameters}}
 Load the `explore` skill and follow its workflow.
 
 Read-only. Do not modify any file. Output a structured exploration report with:
+
 1. **Scope** -- what was explored and what wasn't
 2. **Entry points** -- where execution starts for this feature
 3. **Key files** -- cited with `path:line` ranges and one-sentence summaries

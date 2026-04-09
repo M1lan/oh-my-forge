@@ -205,9 +205,9 @@ The `scripts/install.sh --with-templates` flag installs them. Users who customiz
 
 ## Commit trailer protocol
 
-oh-my-forge agents append structured git trailers to commits to document decisions and constraints. See [`AGENTS.md`](./AGENTS.md#commit-trailer-protocol) for the full spec. Example:
+oh-my-forge agents append structured git trailers to commits to document decisions and constraints. See [`AGENTS.md`](./AGENTS.md#4-lore-commit-protocol) for the full spec. Example:
 
-```
+```text
 feat(auth): add refresh token rotation
 
 Constraint: must stay backward-compatible with v1 clients

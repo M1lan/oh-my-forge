@@ -38,6 +38,7 @@ Base UI is a comprehensive React component library built by the same team that c
 ## When to Use Base UI
 
 ### Use Base UI When
+
 - Building a custom design system from scratch
 - Need components not in shadcn/ui
 - Using CSS-in-JS or CSS Modules (not Tailwind)
@@ -45,6 +46,7 @@ Base UI is a comprehensive React component library built by the same team that c
 - Building highly customized interfaces
 
 ### Use shadcn/ui Instead When
+
 - Using Tailwind CSS
 - Need rapid development
 - Want "copy-paste-own" model
@@ -88,6 +90,7 @@ function FAQ() {
 - And more...
 
 ## Resources
+
 - [Base UI Docs](https://base-ui.com)
 - [Base UI GitHub](https://github.com/mui/base-ui)
 - [Discord Community](https://discord.gg/g6C3hUtuxz)

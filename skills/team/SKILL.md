@@ -8,6 +8,7 @@ Team orchestrates multiple specialized agents to work on a task in parallel. Eac
 </Purpose>
 
 <Use_When>
+
 - User says "team", "multiple agents", "coordinate"
 - Complex task with distinct domains (frontend + backend + tests)
 - User wants parallel expertise (security + performance + functionality)
@@ -15,12 +16,14 @@ Team orchestrates multiple specialized agents to work on a task in parallel. Eac
 </Use_When>
 
 <Do_Not_Use_When>
+
 - Simple single-domain task
 - Tasks requiring sequential thinking
 - Quick fixes
 </Do_Not_Use_When>
 
 <Execution_Policy>
+
 - Assign agents to distinct, non-overlapping responsibilities
 - Agents work in parallel on their domains
 - Synthesize results into unified solution
@@ -28,6 +31,7 @@ Team orchestrates multiple specialized agents to work on a task in parallel. Eac
 </Execution_Policy>
 
 <Steps>
+
 1. **Analyze**: Break task into domains (frontend, backend, tests, docs, etc.)
 2. **Show Team**: Present the agent assignments
    - List: "Frontend → @ui-engineer, Backend → @api-designer, Tests → @test-writer"
@@ -39,6 +43,7 @@ Team orchestrates multiple specialized agents to work on a task in parallel. Eac
 6. **Test**: Run full test suite
 
 <Agent_Assignments>
+
 | Domain | Agent |
 |--------|-------|
 | Architecture | @architect |
@@ -48,6 +53,7 @@ Team orchestrates multiple specialized agents to work on a task in parallel. Eac
 | Security | @security-reviewer |
 | Performance | @perf-optimizer |
 | Documentation | @doc-writer |
+
 </Agent_Assignments>
 
 <Examples>

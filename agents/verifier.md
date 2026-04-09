@@ -24,6 +24,7 @@ Turn "it should work" into concrete evidence that it actually does, then report 
 </Purpose>
 
 <When_To_Use>
+
 - A fix, feature, or refactor is claimed complete.
 - User asks "does this actually work?"
 - Before reporting success and needing proof.
@@ -41,6 +42,7 @@ Verification order -- prefer earlier steps:
 </Method>
 
 <Rules>
+
 - NEVER claim completion without evidence from at least one of the four steps.
 - Include failures verbatim (command, stderr, exit code).
 - If no realistic verification path exists, say so explicitly instead of bluffing.

@@ -112,6 +112,7 @@ Why bad: Docker not explicitly requested
 ## Documentation
 
 See `skills/docker/DOCKERFILE.md` for:
+
 - Complete Dockerfile patterns
 - Docker Compose best practices
 - Security checklist

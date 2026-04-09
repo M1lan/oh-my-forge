@@ -39,20 +39,24 @@ oh-my-forge skills use this body structure (not required by forge, but recommend
 # <Skill Title>
 
 ## When to invoke
+
 - User says "X" / "Y"
 - Condition Z applies
 - Pre-step before skill W
 
 ## Workflow
+
 1. Step one
 2. Step two
 3. ...
 
 ## Rules
+
 - Hard constraints
 - Things to never do
 
 ## Output
+
 Expected format the skill should hand back.
 ```
 
@@ -103,12 +107,14 @@ The body is a Handlebars template. User-supplied arguments are available as `{{p
 name: feature
 description: Implement a new feature from a short description
 ---
+
 Plan and implement a new feature in this codebase.
 
 Feature description:
 {{parameters}}
 
 Follow these steps:
+
 1. Read AGENTS.md for project conventions
 2. Propose an implementation plan (files to touch, tests to add)
 3. Wait for user approval before writing code
@@ -118,7 +124,7 @@ Follow these steps:
 
 From the REPL:
 
-```
+```text
 > /feature add user profile picture upload
 ```
 

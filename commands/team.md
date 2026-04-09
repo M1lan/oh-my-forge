@@ -8,6 +8,7 @@ Coordinate a team on: {{parameters}}
 Load the `team` skill and follow its workflow.
 
 Workflow:
+
 1. **Decompose** the task into independent subtasks
 2. **Assign** each subtask to the most appropriate specialist agent
 3. **Launch** agents in parallel (use the `task` tool with multiple invocations in one message)

@@ -6,6 +6,7 @@ description: Diagnose oh-my-forge installation health. Runs the doctor skill and
 Run the installation diagnostic.
 
 Load the `doctor` skill. Then run `scripts/doctor.sh` if available. Collect:
+
 1. `forge --version`
 2. `~/forge/` contents + permissions
 3. `.forge.toml` validity

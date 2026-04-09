@@ -39,7 +39,7 @@ Safe, graceful exit from autonomous or long-running work.
 
 ## Output
 
-```
+```text
 ## Cancel Report
 
 **Cancelled**: {workflow name, e.g. "autopilot: add user auth"}

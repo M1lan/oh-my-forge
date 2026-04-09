@@ -27,25 +27,29 @@ ForgeCode supports multiple design systems. Each design system is modular and ca
 
 ## Choosing a Design System
 
-### Use shadcn/ui when:
+### Use shadcn/ui when
+
 - Building with Next.js, Vite, or Remix
 - Using Tailwind CSS
 - Want "copy-paste-own" model
 - Need excellent accessibility out of the box
 - Want to own and customize every line of code
 
-### Use Radix Themes when:
+### Use Radix Themes when
+
 - Quick prototyping
 - Internal tools / admin dashboards
 - Want styled components without design effort
 - Using CSS Modules or CSS-in-JS
 
-### Use Radix Primitives when:
+### Use Radix Primitives when
+
 - Building a completely custom design system
 - Need full control over every pixel
 - Building on top of shadcn/ui
 
-### Use Base UI when:
+### Use Base UI when
+
 - Need modern APIs and active development
 - Building highly customized interfaces
 - Using CSS-in-JS or CSS Modules (not Tailwind)
@@ -55,7 +59,7 @@ ForgeCode supports multiple design systems. Each design system is modular and ca
 
 ## Quick Decision Tree
 
-```
+```text
 Is your project using Tailwind CSS?
 ├── YES → Use shadcn/ui (recommended)
 └── NO
@@ -75,6 +79,7 @@ Is your project using Tailwind CSS?
 **Not recommended.** Pick one design system per project to maintain consistency.
 
 If you need multiple:
+
 1. Use Radix Primitives as the foundation
 2. Layer shadcn/ui components on top
 3. Use Base UI for specialized components only
@@ -85,7 +90,7 @@ If you need multiple:
 
 To add a new design system:
 
-```
+```text
 design-system/
 └── your-system/
     ├── PHILOSOPHY.md   # Core principles
@@ -116,7 +121,7 @@ When working on a frontend task:
 
 ### Quick Reference
 
-```
+```text
 Task → Identify design system → Follow patterns → Deliver
 ```
 
@@ -125,25 +130,28 @@ Task → Identify design system → Follow patterns → Deliver
 ## Resources
 
 ### shadcn/ui
-- Docs: https://ui.shadcn.com
-- GitHub: https://github.com/shadcn-ui/ui
-- Components: https://ui.shadcn.com/docs/components
+
+- Docs: <https://ui.shadcn.com>
+- GitHub: <https://github.com/shadcn-ui/ui>
+- Components: <https://ui.shadcn.com/docs/components>
 
 ### Radix UI
-- Primitives: https://www.radix-ui.com/primitives
-- Themes: https://themes.radix-ui.com
-- GitHub: https://github.com/radix-ui
+
+- Primitives: <https://www.radix-ui.com/primitives>
+- Themes: <https://themes.radix-ui.com>
+- GitHub: <https://github.com/radix-ui>
 
 ### Base UI
-- Docs: https://base-ui.com
-- GitHub: https://github.com/mui/base-ui
-- Discord: https://discord.gg/g6C3hUtuxz
+
+- Docs: <https://base-ui.com>
+- GitHub: <https://github.com/mui/base-ui>
+- Discord: <https://discord.gg/g6C3hUtuxz>
 
 ---
 
 ## Relationship Between Systems
 
-```
+```text
 Base UI (successor to Radix)
     ↓
 Radix Primitives (foundation)

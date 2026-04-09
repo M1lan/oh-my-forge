@@ -5,23 +5,27 @@
 ## Core Philosophy
 
 ### 1. Not a Component Library
+
 - **NOT** a npm package to install
 - **NOT** a theme to configure
 - **IS** a collection of copy-paste components you own
 
 ### 2. Ownership Model
-```
+
+```text
 You → own → your-components/
   ├── button.tsx
   ├── dialog.tsx
   ├── form.tsx
   └── ...
 ```
+
 - Modify freely
 - Full control over styling
 - No external dependencies breaking your UI
 
 ### 3. Stack
+
 | Layer | Technology |
 |-------|------------|
 | Styling | Tailwind CSS |
@@ -34,17 +38,21 @@ You → own → your-components/
 ## Design Principles
 
 ### Clarity First
+
 - Components are stripped to essential functionality
 - Remove opinionated styling, keep semantic structure
 - Use CSS variables for theming, not hardcoded values
 
 ### Composition Over Configuration
+
 **BAD:**
+
 ```tsx
 <Button variant="primary" size="large" rounded={true} />
 ```
 
 **GOOD:**
+
 ```tsx
 <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
   Click me
@@ -52,6 +60,7 @@ You → own → your-components/
 ```
 
 ### Accessibility is Mandatory
+
 - All components use Radix primitives
 - Full keyboard navigation
 - Screen reader support built-in
@@ -62,6 +71,7 @@ You → own → your-components/
 ## Color System
 
 ### Semantic Colors
+
 ```css
 --background      /* Page background */
 --foreground      /* Text color */
@@ -82,6 +92,7 @@ You → own → your-components/
 ```
 
 ### Usage Rules
+
 1. Use semantic colors, not raw values
 2. Primary = one per project
 3. Destructive only for dangerous actions
@@ -105,6 +116,7 @@ You → own → your-components/
 ## Spacing System
 
 ### Tailwind Default Scale
+
 ```css
 0: 0px
 1: 4px
@@ -120,6 +132,7 @@ You → own → your-components/
 ```
 
 ### Common Patterns
+
 | Pattern | Classes | Usage |
 |---------|---------|-------|
 | Card padding | `p-6` | Standard card |
@@ -132,6 +145,7 @@ You → own → your-components/
 ## Component Patterns
 
 ### Button
+
 ```tsx
 // Primary action
 <Button>Save changes</Button>
@@ -149,6 +163,7 @@ You → own → your-components/
 ```
 
 ### Card
+
 ```tsx
 <Card>
   <CardHeader>
@@ -165,6 +180,7 @@ You → own → your-components/
 ```
 
 ### Form
+
 ```tsx
 <FormField
   control={form.control}
@@ -173,7 +189,7 @@ You → own → your-components/
     <FormItem>
       <FormLabel>Email</FormLabel>
       <FormControl>
-        <Input placeholder="you@example.com" {...field} />
+        <Input placeholder="<you@example.com>" {...field} />
       </FormControl>
       <FormDescription>We'll never share your email.</FormDescription>
       <FormMessage />
@@ -187,6 +203,7 @@ You → own → your-components/
 ## Dark Mode
 
 ### Implementation
+
 ```tsx
 // Tailwind dark mode class strategy
 <div className="dark">
@@ -198,6 +215,7 @@ You → own → your-components/
 ```
 
 ### Color Variables for Dark Mode
+
 ```css
 .dark {
   --background: 0 0% 100%;
@@ -211,6 +229,7 @@ You → own → your-components/
 ## Motion & Animation
 
 ### When to Animate
+
 | Animation | Purpose |
 |-----------|---------|
 | `fade-in` | Content appearing |
@@ -219,6 +238,7 @@ You → own → your-components/
 | `press` | Button clicks |
 
 ### Framer Motion Usage
+
 ```tsx
 <motion.div
   initial={{ opacity: 0, y: 10 }}
@@ -230,6 +250,7 @@ You → own → your-components/
 ```
 
 ### Timing
+
 | Duration | Usage |
 |----------|-------|
 | `150ms` | Hover states, micro-interactions |
@@ -241,7 +262,7 @@ You → own → your-components/
 
 ## File Structure
 
-```
+```text
 src/
 ├── components/ui/     # shadcn/ui components (owned)
 │   ├── button.tsx
@@ -259,6 +280,7 @@ src/
 ## DO's & DON'Ts
 
 ### DO
+
 - [ ] Copy components, don't import from npm
 - [ ] Use semantic color variables
 - [ ] Compose small components into bigger ones
@@ -267,6 +289,7 @@ src/
 - [ ] Use variants sparingly
 
 ### DON'T
+
 - [ ] Don't nest too many variants
 - [ ] Don't override component internals
 - [ ] Don't mix design systems (pick one)
@@ -276,6 +299,7 @@ src/
 ---
 
 ## Resources
+
 - [shadcn/ui Docs](https://ui.shadcn.com)
 - [Radix UI Primitives](https://www.radix-ui.com)
 - [Tailwind CSS](https://tailwindcss.com)

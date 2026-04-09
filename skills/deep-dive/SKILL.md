@@ -25,6 +25,7 @@ Extended research. Multiple passes. Cross-referenced evidence. Synthesized concl
 ## Sources to consider
 
 In order of reliability for codebase questions:
+
 1. The code itself (path:line)
 2. Tests (they encode actual behavior)
 3. Git history / blame
@@ -43,7 +44,7 @@ In order of reliability for codebase questions:
 
 ## Output
 
-```
+```text
 ## Deep Dive: <question>
 
 ### TL;DR

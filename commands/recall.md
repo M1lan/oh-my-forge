@@ -8,6 +8,7 @@ Recall prior work on: {{parameters}}
 Load the `recall` skill and follow its workflow.
 
 Search the following in order:
+
 1. `docs/notes/` -- durable notes
 2. `plans/` -- historical plans
 3. `git log --grep` -- commit messages

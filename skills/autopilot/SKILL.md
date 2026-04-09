@@ -8,6 +8,7 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
 </Purpose>
 
 <Use_When>
+
 - User wants end-to-end autonomous execution from an idea to working code
 - User says "autopilot", "build me", "create me", "make me", "handle it all", "I want a..."
 - Task requires multiple phases: planning, coding, testing, and validation
@@ -15,12 +16,14 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
 </Use_When>
 
 <Do_Not_Use_When>
+
 - User wants to explore options or brainstorm — use `plan` skill instead
 - Task is a quick fix or small bug — use direct executor delegation
 - User wants to review or critique an existing plan
 </Do_Not_Use_When>
 
 <Execution_Policy>
+
 - Each phase must complete before the next begins
 - **CONFIRMATION REQUIRED**: After Phase 0 (Clarification) and Phase 1 (Spec)
 - **WORKING DIRECTORY**: Always work in the directory where Forge was invoked
@@ -38,15 +41,16 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
 </Execution_Policy>
 
 <Steps>
+
 1. **Phase 0 - Clarification**: Understand the requirements
    - **ALWAYS ask these questions - do NOT skip even if input seems clear**
    - ❯ What tech stack? (React, Vue, Svelte, plain HTML, Next.js, Nuxt, etc.)
    - ❯ What design system? (shadcn/ui, Tailwind + Radix, custom CSS, or none)
    - ❯ Any design reference? (URL, screenshot, or "surprise me")
    - ❯ Project location? **CRITICAL**: Ask "Where should I create this?"
-     - If empty dir: use current directory
-     - If existing project: use that project directory
-     - NEVER default to ~/forge/ or any fixed path
+   - If empty dir: use current directory
+   - If existing project: use that project directory
+   - NEVER default to ~/forge/ or any fixed path
    - Wait for each answer before asking the next question
    - **CONFIRMATION REQUIRED before proceeding**
    - **DO NOT invoke any other skill during this phase**
@@ -88,6 +92,7 @@ Autopilot takes a brief product idea and autonomously handles the full lifecycle
 </Steps>
 
 <Tool_Usage>
+
 - Use @architect for Phase 0-1 architecture decisions
 - Use @executor for Phase 2 implementation
 - Use @code-reviewer for Phase 4 quality review
@@ -112,6 +117,7 @@ Why bad: This is a single focused fix, not a multi-phase project
 </Examples>
 
 <Final_Checklist>
+
 - [ ] All 5 phases completed
 - [ ] Tests pass (verified)
 - [ ] Build succeeds (verified)

@@ -25,6 +25,7 @@ Write documentation that a reader can use to accomplish a task, not documentatio
 </Purpose>
 
 <When_To_Use>
+
 - README is missing, stale, or bloated.
 - A new feature needs user-facing documentation.
 - An ADR is needed for a non-obvious design decision.
@@ -33,6 +34,7 @@ Write documentation that a reader can use to accomplish a task, not documentatio
 </When_To_Use>
 
 <Method>
+
 1. **Identify the reader and their task.** "The reader is a new contributor who wants to build the project locally" is specific. "The reader wants to know about the system" is not.
 2. **Read the current code and current docs.** Note discrepancies.
 3. **Draft the minimum doc that accomplishes the task.** Favor:
@@ -46,6 +48,7 @@ Write documentation that a reader can use to accomplish a task, not documentatio
 </Method>
 
 <Rules>
+
 - NEVER create documentation files that were not asked for.
 - ALWAYS prefer editing existing docs over creating new ones.
 - Keep docs close to the code they describe when possible.

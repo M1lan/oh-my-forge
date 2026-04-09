@@ -22,31 +22,63 @@ FORCE=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --global)    MODE="global"; shift ;;
-    --project)   MODE="project"; PROJECT_DIR="${2:-}"; shift 2 ;;
-    --dry-run)   DRY_RUN=true; shift ;;
-    --force)     FORCE=true; shift ;;
-    -h|--help)   sed -n '2,12p' "$0"; exit 0 ;;
-    *)           printf 'unknown arg: %s\n' "$1" >&2; exit 2 ;;
+    --global)
+      MODE="global"
+      shift
+      ;;
+    --project)
+      MODE="project"
+      PROJECT_DIR="${2:-}"
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --force)
+      FORCE=true
+      shift
+      ;;
+    -h | --help)
+      sed -n '2,12p' "$0"
+      exit 0
+      ;;
+    *)
+      printf 'unknown arg: %s\n' "$1" >&2
+      exit 2
+      ;;
   esac
 done
 
 if [[ -t 1 ]]; then
-  R='\033[0m'; B='\033[1m'; G='\033[32m'; Y='\033[33m'; E='\033[31m'
+  R='\033[0m'
+  B='\033[1m'
+  G='\033[32m'
+  Y='\033[33m'
+  E='\033[31m'
 else
-  R=''; B=''; G=''; Y=''; E=''
+  R=''
+  B=''
+  G=''
+  Y=''
+  E=''
 fi
 
 info() { printf '%bINFO%b %s\n' "$B" "$R" "$*"; }
-ok()   { printf '%bOK%b   %s\n' "$G$B" "$R" "$*"; }
+ok() { printf '%bOK%b   %s\n' "$G$B" "$R" "$*"; }
 warn() { printf '%bWARN%b %s\n' "$Y$B" "$R" "$*" >&2; }
-err()  { printf '%bERR%b  %s\n' "$E$B" "$R" "$*" >&2; }
-die()  { err "$*"; exit 1; }
+err() { printf '%bERR%b  %s\n' "$E$B" "$R" "$*" >&2; }
+die() {
+  err "$*"
+  exit 1
+}
 
 case "$MODE" in
-  global)   TARGET_ROOT="${HOME}/forge" ;;
-  project)  [[ -d "${PROJECT_DIR:-}" ]] || die "project dir missing: $PROJECT_DIR"
-            TARGET_ROOT="$(cd -- "$PROJECT_DIR" && pwd)/.forge" ;;
+  global) TARGET_ROOT="${HOME}/forge" ;;
+  project)
+    [[ -d "${PROJECT_DIR:-}" ]] || die "project dir missing: $PROJECT_DIR"
+    TARGET_ROOT="$(cd -- "$PROJECT_DIR" && pwd)/.forge"
+    ;;
 esac
 
 [[ -d "$TARGET_ROOT" ]] || die "target does not exist: $TARGET_ROOT"
@@ -86,7 +118,7 @@ remove_item() {
 }
 
 MANIFEST="$OMF_DIR/catalog-manifest.json"
-if [[ -f "$MANIFEST" ]] && command -v python3 >/dev/null 2>&1; then
+if [[ -f "$MANIFEST" ]] && command -v python3 > /dev/null 2>&1; then
   info "Using catalog manifest: $MANIFEST"
   # Read relative paths from the manifest; each path is relative to the repo root.
   # When installed, the file name (basename) is what lives under $TARGET_ROOT.
@@ -96,13 +128,15 @@ if [[ -f "$MANIFEST" ]] && command -v python3 >/dev/null 2>&1; then
     path="${line##*|}"
     base="$(basename "$path")"
     case "$kind" in
-      agent)   remove_item "$TARGET_ROOT/agents/$base" ;;
-      skill)   # For skills, path is like "skills/plan/SKILL.md" — remove the whole dir
-               sdir="$(basename "$(dirname "$path")")"
-               remove_item "$TARGET_ROOT/skills/$sdir" ;;
+      agent) remove_item "$TARGET_ROOT/agents/$base" ;;
+      skill) # For skills, path is like "skills/plan/SKILL.md" — remove the whole dir
+        sdir="$(basename "$(dirname "$path")")"
+        remove_item "$TARGET_ROOT/skills/$sdir"
+        ;;
       command) remove_item "$TARGET_ROOT/commands/$base" ;;
     esac
-  done < <(python3 - "$MANIFEST" <<'PY'
+  done < <(
+    python3 - "$MANIFEST" << 'PY'
 import json, sys
 m = json.load(open(sys.argv[1]))
 for kind in ("agents","skills","commands"):

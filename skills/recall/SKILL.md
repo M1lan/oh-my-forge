@@ -42,7 +42,7 @@ In order of preference:
 
 ## Output
 
-```
+```text
 ## Recall Result: <topic>
 
 ### Found
@@ -59,7 +59,7 @@ Based on the notes, <answer>. See path:line for the original rationale.
 
 If nothing is found:
 
-```
+```text
 ## Recall Result: <topic>
 
 No prior notes, ADRs, plans, or commits found for <keywords>.

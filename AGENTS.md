@@ -48,7 +48,7 @@ agent; the active agent may delegate work to other agents via the `task` tool.
 
 ### Tool catalog (snake_case, case-insensitive in the loader)
 
-```
+```text
 task            sem_search      fs_search       read
 write           undo            remove          patch
 multi_patch     shell           fetch           skill
@@ -159,7 +159,7 @@ are the atomic unit of institutional knowledge.
 
 ### Format
 
-```
+```text
 <intent line: why the change was made, not what changed>
 
 <body: narrative context — constraints, approach rationale>
@@ -201,7 +201,7 @@ Co-Authored-By: ForgeCode <noreply@forgecode.dev>
 
 ### Example
 
-```
+```text
 Prevent silent session drops during long-running operations
 
 The auth service returns inconsistent status codes on token
@@ -276,7 +276,7 @@ edit the agent's frontmatter directly. There is no `[agent.<id>]` section in
 | Skill doesn't load | Check `~/forge/skills/<name>/SKILL.md` exists and has `name` + `description` in frontmatter. |
 | Command doesn't show in `/` menu | Check `~/forge/commands/<name>.md` (flat, not nested) and that the body uses `{{parameters}}` not `{{args}}`. |
 | `forge.yaml` present | Delete it — v1 artifact, ignored by forgecode. Run `scripts/migrate-from-v1.sh`. |
-| `.forge.toml` fails to parse | Check `[updates] frequency` is one of `daily|weekly|always`. |
-| `forge list agent` shows nothing custom | Project-local agents live at `./.forge/agents/*.md`, not `./agents/*.md`. Check the path. |
+| `.forge.toml` fails to parse | Check `[updates] frequency` is one of `daily |
+|`forge list agent` shows nothing custom | Project-local agents live at `./.forge/agents/*.md`, not`./agents/*.md`. Check the path. |
 
 Run `scripts/doctor.sh` for a full health check.

@@ -1,0 +1,34 @@
+# =============================================================================
+# .taplo.toml — TOML formatter/linter config for oh-my-forge
+# =============================================================================
+# Taplo is a TOML toolkit (formatter + linter + language server).
+# Docs: https://taplo.tamasfe.dev/configuration/file.html
+#
+# Design notes:
+#   - .forge.toml uses deliberately column-aligned keys for readability.
+#     align_entries = true preserves (and normalizes) that style.
+#   - align_comments = true lines up trailing comments for the same reason.
+# =============================================================================
+
+include = ["**/*.toml"]
+exclude = [".git/**", ".rumdl_cache/**", "node_modules/**", "target/**"]
+
+[formatting]
+# Align `key = value` pairs within a table so they form a clean column.
+align_entries = true
+# Align trailing comments too.
+align_comments = true
+# Maximum column width (used by reflow, not a hard ceiling for aligned keys).
+column_width = 100
+# Preserve blank lines between groups (max 2 consecutive blank lines).
+allowed_blank_lines = 2
+# Use LF line endings (matches .gitattributes).
+crlf = false
+# Two-space indent (matches .editorconfig).
+indent_string = "  "
+# Do not reorder keys; .forge.toml has a curated order with section comments.
+reorder_keys = false
+# Do not reorder array elements.
+reorder_arrays = false
+# Trim trailing whitespace.
+trailing_newline = true

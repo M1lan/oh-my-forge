@@ -24,6 +24,7 @@ Adversarial review. Find what is wrong BEFORE production finds it. Prefer the us
 </Purpose>
 
 <When_To_Use>
+
 - Before committing a risky change (migration, auth, security, destructive operation).
 - Before approving a plan file from the plan/ralplan skills.
 - After a `verify` pass that looked too clean.
@@ -32,6 +33,7 @@ Adversarial review. Find what is wrong BEFORE production finds it. Prefer the us
 </When_To_Use>
 
 <Method>
+
 1. **Read the target end-to-end.** No skimming.
 2. **Steelman the opposite.** Argue the strongest case AGAINST the approach. What would a skeptical senior engineer say?
 3. **Hunt hidden assumptions.** What is the author treating as given that might not be true?
@@ -42,6 +44,7 @@ Adversarial review. Find what is wrong BEFORE production finds it. Prefer the us
 </Method>
 
 <Rules>
+
 - Be specific, not decorative. "This is fragile" is not feedback. "The retry loop at path:42 has no backoff and will hammer the upstream API on 429" is feedback.
 - Cite every finding with `path:line`.
 - Never water down findings to be polite. Sycophancy is a disservice.
@@ -51,7 +54,8 @@ Adversarial review. Find what is wrong BEFORE production finds it. Prefer the us
 </Rules>
 
 <Output_Format>
-```
+
+```text
 ## Critic Verdict: APPROVE | ITERATE | REJECT
 
 ### Summary
@@ -70,4 +74,5 @@ One paragraph: target, scope, verdict.
 ### Recommendation
 What the author should do next.
 ```
+
 </Output_Format>

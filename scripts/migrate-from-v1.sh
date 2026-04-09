@@ -15,19 +15,30 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 OMF_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
 DIR="${1:-.}"
-[[ -d "$DIR" ]] || { printf 'dir missing: %s\n' "$DIR" >&2; exit 1; }
+[[ -d "$DIR" ]] || {
+  printf 'dir missing: %s\n' "$DIR" >&2
+  exit 1
+}
 DIR="$(cd -- "$DIR" && pwd)"
 
 if [[ -t 1 ]]; then
-  R='\033[0m'; B='\033[1m'; G='\033[32m'; Y='\033[33m'; E='\033[31m'
+  R='\033[0m'
+  B='\033[1m'
+  G='\033[32m'
+  Y='\033[33m'
+  E='\033[31m'
 else
-  R=''; B=''; G=''; Y=''; E=''
+  R=''
+  B=''
+  G=''
+  Y=''
+  E=''
 fi
 
 info() { printf '%bINFO%b %s\n' "$B" "$R" "$*"; }
-ok()   { printf '%bOK%b   %s\n' "$G$B" "$R" "$*"; }
+ok() { printf '%bOK%b   %s\n' "$G$B" "$R" "$*"; }
 warn() { printf '%bWARN%b %s\n' "$Y$B" "$R" "$*" >&2; }
-err()  { printf '%bERR%b  %s\n' "$E$B" "$R" "$*" >&2; }
+err() { printf '%bERR%b  %s\n' "$E$B" "$R" "$*" >&2; }
 
 info "Checking $DIR for v1 oh-my-forge artefacts"
 
@@ -48,7 +59,7 @@ if [[ -d "$DIR/.forge/agents" ]]; then
   nested=0
   while IFS= read -r -d '' _sub; do
     nested=$((nested + 1))
-  done < <(find "$DIR/.forge/agents" -mindepth 1 -type d -print0 2>/dev/null)
+  done < <(find "$DIR/.forge/agents" -mindepth 1 -type d -print0 2> /dev/null)
   if [[ $nested -gt 0 ]]; then
     warn "found $nested subdirectories under .forge/agents/ — v1 layout is obsolete"
     warn "forgecode does NOT recurse into subdirectories for agents"

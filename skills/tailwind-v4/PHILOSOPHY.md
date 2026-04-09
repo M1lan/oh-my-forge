@@ -21,6 +21,7 @@ Tailwind CSS v4 introduces a **CSS-native configuration** approach. Instead of a
 ## Migration from v3
 
 ### Old (v3)
+
 ```js
 // tailwind.config.js
 module.exports = {
@@ -38,6 +39,7 @@ module.exports = {
 ```
 
 ### New (v4)
+
 ```css
 /* main.css */
 @import "tailwindcss";
@@ -59,23 +61,23 @@ The `@theme` block defines your design tokens:
   /* Colors */
   --color-primary: #3b82f6;
   --color-primary-hover: #2563eb;
-  
+
   /* Typography */
   --font-family-display: 'Playfair Display', serif;
   --font-size-display: 4rem;
   --line-height-display: 1.1;
-  
+
   /* Spacing */
   --spacing-128: 32rem;
   --spacing-144: 36rem;
-  
+
   /* Border radius */
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
-  
+
   /* Shadows */
   --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  
+
   /* Animations */
   --animate-fade-in: fade-in 0.5s ease-out;
 }
@@ -99,7 +101,8 @@ In v4, **CSS variables are automatically generated** from your theme values:
 ```
 
 ### Naming Convention
-```
+
+```text
 --color-{name}        → bg-{name}, text-{name}, border-{name}
 --font-family-{name}  → font-{name}
 --font-size-{name}    → text-{name}
@@ -112,11 +115,13 @@ In v4, **CSS variables are automatically generated** from your theme values:
 ## Arbitrary Values
 
 ### v3 Syntax
+
 ```html
 <div class="bg-[#ff5733] p-[20px] text-[2.5rem]">
 ```
 
 ### v4 Syntax (unchanged)
+
 ```html
 <div class="bg-[#ff5733] p-[20px] text-[2.5rem]">
 ```
@@ -140,6 +145,7 @@ In v4, **CSS variables are automatically generated** from your theme values:
 ```
 
 ### Usage
+
 ```html
 <!-- Toggle dark mode -->
 <div class="dark">
@@ -152,11 +158,13 @@ In v4, **CSS variables are automatically generated** from your theme values:
 ## Vite Integration
 
 ### Installation
+
 ```bash
 npm install @tailwindcss/vite
 ```
 
 ### vite.config.js
+
 ```js
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
@@ -167,6 +175,7 @@ export default defineConfig({
 ```
 
 ### Without Vite (PostCSS)
+
 ```bash
 npm install -D tailwindcss @tailwindcss/postcss
 ```
@@ -218,6 +227,7 @@ Create custom utilities in CSS:
 ## DO's & DON'Ts
 
 ### DO
+
 - [ ] Use `@theme` for design tokens
 - [ ] Use `@utility` for custom utilities
 - [ ] Leverage the Vite plugin for speed
@@ -226,6 +236,7 @@ Create custom utilities in CSS:
 - [ ] **DELETE old config files** when upgrading from v3 or scaffold
 
 ### DON'T
+
 - [ ] Don't use `tailwind.config.js` (unless legacy project)
 - [ ] Don't use `@tailwind base/components/utilities` imports
 - [ ] Don't manually define CSS variables for theme values
@@ -263,6 +274,7 @@ module.exports = {
 ---
 
 ## Resources
+
 - [Tailwind CSS v4 Docs](https://tailwindcss.com/docs/upgrade-guide)
 - [V4 announcement](https://tailwindcss.com/blog/tailwindcss-v4-0)
 - [Theme documentation](https://tailwindcss.com/docs/theme)

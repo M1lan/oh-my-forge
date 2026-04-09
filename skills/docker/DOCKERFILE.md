@@ -5,6 +5,7 @@
 ## When to Use
 
 Use when explicitly requested:
+
 - User says "docker", "add docker", "dockerize", "containerize"
 - User wants a Dockerfile or docker-compose.yml
 - User wants to optimize an existing Docker setup
@@ -30,6 +31,7 @@ FROM node:20
 ```
 
 **Minimal images** (by size):
+
 | Image | Size | Use Case |
 |-------|------|----------|
 | `scratch` | 0 | Static binaries only |

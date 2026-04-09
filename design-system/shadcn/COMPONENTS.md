@@ -3,6 +3,7 @@
 ## Core Components
 
 ### Button
+
 **Variants:** `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`
 **Sizes:** `default`, `sm`, `lg`, `icon`
 
@@ -26,6 +27,7 @@ import { Button } from "@/components/ui/button"
 ```
 
 ### Card
+
 ```tsx
 <Card>
   <CardHeader>
@@ -43,6 +45,7 @@ import { Button } from "@/components/ui/button"
 ```
 
 ### Input
+
 ```tsx
 <Input placeholder="Enter text..." />
 <Input disabled placeholder="Disabled" />
@@ -50,6 +53,7 @@ import { Button } from "@/components/ui/button"
 ```
 
 ### Dialog
+
 ```tsx
 <Dialog>
   <DialogTrigger asChild>
@@ -70,6 +74,7 @@ import { Button } from "@/components/ui/button"
 ```
 
 ### Dropdown Menu
+
 ```tsx
 <DropdownMenu>
   <DropdownMenuTrigger asChild>
@@ -85,6 +90,7 @@ import { Button } from "@/components/ui/button"
 ```
 
 ### Form
+
 ```tsx
 const form = useForm()
 
@@ -109,6 +115,7 @@ const form = useForm()
 ```
 
 ### Sheet (Slide-over)
+
 ```tsx
 <Sheet>
   <SheetTrigger asChild>
@@ -127,6 +134,7 @@ const form = useForm()
 ```
 
 ### Tabs
+
 ```tsx
 <Tabs defaultValue="account">
   <TabsList>
@@ -139,6 +147,7 @@ const form = useForm()
 ```
 
 ### Table
+
 ```tsx
 <Table>
   <TableHeader>
@@ -159,6 +168,7 @@ const form = useForm()
 ```
 
 ### Badge
+
 ```tsx
 <Badge>Default</Badge>
 <Badge variant="secondary">Secondary</Badge>
@@ -167,6 +177,7 @@ const form = useForm()
 ```
 
 ### Toast
+
 ```tsx
 import { useToast } from "@/hooks/use-toast"
 

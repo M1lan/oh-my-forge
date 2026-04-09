@@ -26,6 +26,7 @@ Reduce accidental complexity while preserving behavior. Make the next reader's j
 </Purpose>
 
 <When_To_Use>
+
 - Code works correctly but is hard to read or maintain.
 - User says "simplify this", "clean this up", "this is overcomplicated".
 - Post-feature cleanup pass after an executor run.
@@ -33,6 +34,7 @@ Reduce accidental complexity while preserving behavior. Make the next reader's j
 </When_To_Use>
 
 <Method>
+
 1. **Baseline tests.** Run existing tests. They must pass before any change. If the suite is broken, stop and report.
 2. **Identify smells.**
    - Dead code (commented-out, unused imports, unreachable branches, unused variables).
@@ -48,6 +50,7 @@ Reduce accidental complexity while preserving behavior. Make the next reader's j
 </Method>
 
 <Rules>
+
 - NEVER change behavior. If refactoring reveals a bug, document it separately -- do not silently "fix" it.
 - Tests must stay green between edits. If they break, `undo` and try a smaller change.
 - Do NOT introduce new abstractions "just in case".

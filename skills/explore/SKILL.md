@@ -40,7 +40,7 @@ Read-only, structured codebase exploration. Produces an orientation report, not 
 
 ## Output
 
-```
+```text
 ## Explorer Report: <scope>
 
 ### TL;DR

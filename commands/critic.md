@@ -8,6 +8,7 @@ Critique the following: {{parameters}}
 Load the `critic` skill and follow its workflow exactly.
 
 Output a critique report with:
+
 1. **Summary** -- one paragraph
 2. **Ranked risks** -- each with severity (critical/high/medium/low) and specific evidence
 3. **Blind spots** -- what the proposal is missing

@@ -16,6 +16,7 @@ Removes the distinctive verbal tics of unedited LLM output.
 ## Slop categories to strip
 
 ### 1. Metatalk
+
 - "As an AI..."
 - "I'd be happy to help..."
 - "Certainly! Here is..."
@@ -24,6 +25,7 @@ Removes the distinctive verbal tics of unedited LLM output.
 - "Feel free to ask..."
 
 ### 2. Empty hedges
+
 - "It is important to note that..."
 - "It's worth mentioning..."
 - "Please be aware that..."
@@ -31,6 +33,7 @@ Removes the distinctive verbal tics of unedited LLM output.
 - "One thing to consider..."
 
 ### 3. Dictionary-expansion verbs
+
 - "delve into" -> "explore" or just remove
 - "navigate the complexities of" -> remove
 - "embark on a journey" -> remove
@@ -43,6 +46,7 @@ Removes the distinctive verbal tics of unedited LLM output.
 - "in conclusion" -> remove (let the conclusion speak for itself)
 
 ### 4. Fake enthusiasm
+
 - "Absolutely!"
 - "Great question!"
 - "What a fantastic idea!"
@@ -50,6 +54,7 @@ Removes the distinctive verbal tics of unedited LLM output.
 - Exclamation marks on declarative statements
 
 ### 5. Filler structure
+
 - "First and foremost" -> "First"
 - "Last but not least" -> "Finally" or remove
 - "In today's fast-paced world..."
@@ -58,9 +63,11 @@ Removes the distinctive verbal tics of unedited LLM output.
 - Three-point frameworks that repeat the same idea
 
 ### 6. Em-dash spam
+
 - LLMs overuse em-dashes for emphasis. Prefer commas, periods, or parentheses. Keep em-dashes only where they genuinely mark a break in thought.
 
 ### 7. Symmetric hedging
+
 - "while X, it is also true that Y" when the author should just pick one.
 - "on the one hand... on the other hand..." with no actual conclusion.
 
@@ -83,7 +90,7 @@ Removes the distinctive verbal tics of unedited LLM output.
 
 ## Output
 
-```
+```text
 ## Slop Clean Report
 Before: NNN words
 After:  MMM words (-XX%)

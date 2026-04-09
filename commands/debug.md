@@ -6,6 +6,7 @@ description: Interactive debugging session for a failing test or broken behavior
 Debug: {{parameters}}
 
 Run as the `debugger` agent. Workflow:
+
 1. **Reproduce** the failure locally. Capture exact command and output.
 2. **Isolate** -- minimize the failing case until it's the smallest repro possible
 3. **Hypothesize** -- state 2-3 candidate root causes

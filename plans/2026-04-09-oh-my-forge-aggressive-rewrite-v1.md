@@ -14,6 +14,7 @@ No npm, no Node.js, no TypeScript, no wrapper CLI. Pure configuration files and 
 ## Scope
 
 **In scope (Aggressive — all phases):**
+
 - Phase A — Foundation fixes (delete `forge.yaml`, ship `.forge.toml`, fix tool names, mcp, templates, install script, AGENTS.md)
 - Phase B — Port high-value skills (rewritten for forge's `skill` tool invocation model)
 - Phase C — Rewrite / add agents with correct frontmatter and XML-tagged prompt bodies
@@ -21,6 +22,7 @@ No npm, no Node.js, no TypeScript, no wrapper CLI. Pure configuration files and 
 - Phase E — Injection seams, keyword routing table, stage-gated team pipeline, commit trailers, custom commands
 
 **Out of scope (explicit non-goals):**
+
 - No Rust crates, no Cargo workspace
 - No Node.js / npm / TypeScript / JavaScript hook scripts
 - No wrapper CLI (no `omf` binary — forgecode IS the CLI)
@@ -52,6 +54,7 @@ Verified against `crates/forge_domain/src/env.rs:73-151` and `crates/forge_repo/
 | Permissions | `~/forge/permissions.yaml` | n/a | Tool allow/deny lists |
 
 **THREE skill paths** (not two) per `crates/forge_repo/src/skill.rs:14-32`:
+
 1. Global: `~/forge/skills/<name>/SKILL.md`
 2. Agents: `~/.agents/skills/<name>/SKILL.md` (NOTE: `~/.agents/`, a hidden home dir — distinct from `~/forge/`)
 3. Project-local: `./.forge/skills/<name>/SKILL.md`
@@ -62,7 +65,7 @@ Precedence order (highest first): **project > agents > global > built-in**. All 
 
 Use these exact names in every agent's `tools:` frontmatter. Tool name matching is case-insensitive + whitespace-trimmed (`catalog.rs:1827-1843`) but we ship snake_case lowercase for consistency.
 
-```
+```text
 task            sem_search      fs_search       read
 write           undo            remove          patch
 multi_patch     shell           fetch           skill
@@ -71,6 +74,7 @@ mcp_*           <agent_id>      (e.g. sage, forge, muse as tools)
 ```
 
 Notes:
+
 - `skill` — NOT `skill_fetch`. Invokes the on-demand skill loader. `create-skill/SKILL.md` and `forge-partial-skill-instructions.md` both reference it as the `skill` tool.
 - `fetch` — NOT `net_fetch`. `ToolCatalog::Fetch` at `catalog.rs:810`.
 - `fs_search` — canonical name. The alias `search` IS registered in `crates/forge_app/src/tool_resolver.rs:15` as `("search", ToolName::new("fs_search"))`, so the built-in `sage.md` using `search` is NOT broken. But **we use `fs_search` everywhere in oh-my-forge for forward compatibility and clarity**.
@@ -192,7 +196,7 @@ user_prompt: |-
   <system_date>{{current_date}}</system_date>
 ---
 
-# Body (Handlebars-enabled Markdown)
+## Body (Handlebars-enabled Markdown)
 
 The body becomes the agent's `system_prompt` automatically — `crates/forge_repo/src/agent.rs:151-154`
 shows `parse_agent_file` auto-populating `.system_prompt(Template::new(result.content))`. The
@@ -201,6 +205,7 @@ scaffold, which adds: system_information, tool_usage_instructions, project_guide
 (if custom_rules), and non_negotiable_rules. You don't have to add those sections yourself.
 
 Available Handlebars context in the body:
+
 - {{agent.title}}, {{agent.description}}
 - {{tool_names.task}}, {{tool_names.fs_search}}, etc. (the actual exposed tool names)
 - {{#if tool_supported}} ... {{else}} ... {{/if}} (whether the model supports structured tool calls)
@@ -235,6 +240,7 @@ Available Handlebars context in the body:
 | `max_requests_per_turn` | int | Request cap per turn. Useful for heavy agents (ralph/autopilot). |
 
 **Fields we will NOT use** (because they don't exist in `AgentDefinition`):
+
 - `tier` — oh-my-claudecode convention, not in forgecode
 - `max_walker_depth` — does NOT exist in the agent struct. This was an error in the research report. It exists as a top-level `.forge.toml` schema field in some schema versions but is absent from the active agent deserializer. Do not use.
 - `disallowedTools` — claudecode convention, not supported
@@ -252,14 +258,15 @@ description: Primary triggering mechanism. Include BOTH what it does AND when to
 
 Markdown body. Under 500 lines preferred. Progressive disclosure via references/:
 
-- scripts/         executable code (bash, python) — deterministic and token-free
-- references/      docs to load when needed (e.g. references/aws.md)
-- assets/          files used in output (templates, logos, boilerplate)
+- scripts/ executable code (bash, python) — deterministic and token-free
+- references/ docs to load when needed (e.g. references/aws.md)
+- assets/ files used in output (templates, logos, boilerplate)
 ```
 
 **Only `name` and `description` in frontmatter.** The built-in `create-skill/SKILL.md:370` is explicit: "Do not include any other fields in YAML frontmatter." This is an **authoring guideline**, not a parser rejection — the `SkillMetadata` struct at `crates/forge_repo/src/skill.rs:250-281` uses plain `#[derive(Deserialize)]` with `Option<String>` fields, so gray_matter silently drops unknown frontmatter keys. Existing skills with `argument-hint`, `level`, `aliases`, `triggers`, `user-invocable` load without error — the extras are ignored. We **remove them for consistency** (not because they cause failures). We keep the `<Purpose>`/`<Steps>`/etc. XML-tagged body structure because it's a prompting-style choice not a schema constraint, and it's proven in both claudecode and codex.
 
 **Skill body token substitution** (not Handlebars, literal `.replace()` per `crates/forge_repo/src/skill.rs:239-243`):
+
 - `{{global_skills_path}}` → absolute path to `~/forge/skills/`
 - `{{agents_skills_path}}` → absolute path to `~/.agents/skills/` (or empty string if HOME unavailable)
 - `{{local_skills_path}}` → absolute path to `./.forge/skills/`
@@ -280,6 +287,7 @@ User arguments are referenced as {{parameters}}
 ```
 
 **Command frontmatter — CORRECTED from v1 draft**. The real `Command` struct has exactly three fields:
+
 ```rust
 pub struct Command {
     pub name: String,       // filename fallback if omitted
@@ -303,7 +311,7 @@ Commands are invoked with `/name` in the REPL. They live in `~/forge/commands/*.
 
 From the upstream forgecode `templates/` directory:
 
-```
+```text
 forge-custom-agent-template.md         # Main body scaffold wrapping every agent
 forge-partial-system-info.md           # Injects OS/shell/cwd/git info
 forge-partial-skill-instructions.md    # Teaches agents how to use `skill` tool
@@ -461,6 +469,7 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
 (Note: some v1-draft doc files have been consolidated after critical review.)
 
 - [x] D1. **Create `catalog-manifest.json`** at repo root. Schema based on `oh-my-codex/templates/catalog-manifest.json` but simpler:
+
   ```json
   {
     "$schema": "./catalog-manifest.schema.json",
@@ -482,6 +491,7 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
     ]
   }
   ```
+
   Include EVERY file shipped by oh-my-forge. This is the single source of truth for the install/doctor/uninstall scripts.
 - [x] D2. **Create `catalog-manifest.schema.json`** — JSON Schema validating the manifest shape. Keep it simple; used only for editor autocomplete and CI validation.
 - [x] D3. **Rewrite `README.md`** from scratch. Target information architecture:
@@ -522,14 +532,17 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
 
 - [x] E1. **Add keyword-routing table** to `AGENTS.md`. Format: a markdown table mapping natural-language triggers → skill name → behavior. Rows: "ralph / don't stop / must complete" → `ralph` skill. "autopilot / build me / handle it all" → `autopilot` skill. "plan / strategy / design" → `plan` skill. "debug / trace / root cause" → `tracer` skill. Etc. ~15 rows. This is pure prose read by the LLM at each turn; no code needed.
 - [x] E2. **Add marker-bounded injection seams** to the top 5 agents (forge/executor, architect, critic, verifier, code-reviewer). Use format:
-  ```
+
+  ```text
   <!-- OMF:GUIDANCE:<AGENT>:<SECTION>:START -->
   ...customizable content...
   <!-- OMF:GUIDANCE:<AGENT>:<SECTION>:END -->
   ```
+
   Sections: CONSTRAINTS, TOOLS, OUTPUT_FORMAT. Users can patch the content between markers without editing the agent file structure, and an `omf-update` script (Phase E7) can re-sync updates while preserving user customizations.
 - [x] E3. **Add lore commit trailer protocol** to `AGENTS.md`. Structured git trailers:
-  ```
+
+  ```text
   Constraint: <what constrained this decision>
   Rejected: <alternative> | <why rejected>
   Confidence: high|medium|low
@@ -539,6 +552,7 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
   Not-tested: <what wasn't>
   Co-Authored-By: ForgeCode <noreply@forgecode.dev>
   ```
+
   Reference: `oh-my-claudecode/CLAUDE.md:67-95`, `oh-my-codex/templates/AGENTS.md:58-125`.
 - [x] E4. **Create `commands/` directory** with slash-command files. Port the `[[commands]]` from the existing `forge.yaml` into individual files under `commands/`:
   - `commands/scaffold.md`
@@ -576,7 +590,8 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
 - [-] E9. **Add ONE `examples/` starter**. Keep the existing `examples/laravel-vue/README.md` as-is (it's untouched legacy). Do NOT add multiple new starters (reviewer cut: `examples/nextjs/`, `examples/rust/`, `examples/python/` are scope creep). If a single fresh example is valuable, add just `examples/nextjs/` — 5-10 files max, showing `.forge/` project overrides, `.mcp.json` example, and a minimal `AGENTS.md`. Defer rust/python starters to v2.
 - [x] E10. **Add `.editorconfig` and `.gitattributes`**. Inline the target values so the executor doesn't need to cross-reference another repo. Minimum contents:
   - `.editorconfig`:
-    ```
+
+    ```text
     root = true
     [*]
     end_of_line = lf
@@ -591,12 +606,15 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
     [Makefile]
     indent_style = tab
     ```
+
   - `.gitattributes`:
-    ```
+
+    ```text
     * text=auto eol=lf
     *.sh text eol=lf
     *.md text eol=lf
     ```
+
 - [-] E11. **CUT. Deferred to v2.** Originally GitHub workflows (doctor, shellcheck, validate-manifest) and issue templates. Repo hygiene, but not "aggressive rewrite" work — will be added in a follow-up plan after the core v2 content is stable. The doctor script and shellcheck can still be run manually.
 
 ### Phase F — Verification (the plan executor runs these before claiming done)
@@ -719,6 +737,7 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
 ## Post-Execution Checkpoint
 
 After this plan finishes, the user will likely want to:
+
 1. Review the diff before committing (`git diff`)
 2. Run `scripts/doctor.sh` to confirm health
 3. Run `scripts/install.sh --global --yes` to install into `~/forge/`

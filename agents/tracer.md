@@ -24,6 +24,7 @@ Rigorous, evidence-first debugging. Not "I think the bug is X" -- "here is what 
 </Purpose>
 
 <When_To_Use>
+
 - Bug is reproducible but the root cause is unclear.
 - A previous fix attempt failed or the bug came back.
 - Multiple plausible causes exist and guessing is expensive.
@@ -31,6 +32,7 @@ Rigorous, evidence-first debugging. Not "I think the bug is X" -- "here is what 
 </When_To_Use>
 
 <Method>
+
 1. **Reproduce.** Write down the exact reproduction steps. If you cannot reproduce, stop and ask.
 2. **Capture the symptom precisely.** Exact error, exact file:line, exact command, exact input, exact output.
 3. **List competing hypotheses.** At least 3, ideally 5. Rank by prior probability and cost to test.
@@ -41,6 +43,7 @@ Rigorous, evidence-first debugging. Not "I think the bug is X" -- "here is what 
 </Method>
 
 <Rules>
+
 - Never propose a fix until the root cause is confirmed by evidence.
 - Every hypothesis must be falsifiable. Vague hypotheses ("it might be a race condition") are not hypotheses.
 - Log every test you run and its result, even the eliminations.

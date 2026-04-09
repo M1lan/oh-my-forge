@@ -8,6 +8,7 @@ Scaffold generates a complete project structure from a brief description. It cre
 </Purpose>
 
 <Use_When>
+
 - User says "scaffold", "generate project", "boilerplate"
 - Starting a new project from scratch
 - Need a reference implementation
@@ -15,12 +16,14 @@ Scaffold generates a complete project structure from a brief description. It cre
 </Use_When>
 
 <Do_Not_Use_When>
+
 - Extending existing project (use feature or migrate instead)
 - User wants specific file structure
 - Complex project needing deep planning first
 </Do_Not_Use_When>
 
 <Steps>
+
 1. **Analyze**: Understand the project type and tech stack
 2. **Propose**: Show the file tree structure
 3. **Generate**: Create all boilerplate files
@@ -29,11 +32,16 @@ Scaffold generates a complete project structure from a brief description. It cre
 </Steps>
 
 <Output>
-```
+
+```text
+
 ## Scaffold: [Project Name]
 
 ### File Tree
+
 ```
+
+```text
 src/
 ├── main.ts
 ├── components/
@@ -49,14 +57,17 @@ src/
 ```
 
 ### Tech Stack
+
 - Runtime: [Node.js/Bun/Deno]
 - Language: [TypeScript/Python/etc]
 - Framework: [Express/FastAPI/etc]
 - Testing: [Vitest/Pytest/etc]
 
 ### Generated Files
+
 - [List of generated files with descriptions]
-```
+
+```text
 
 <Best_Practices>
 - Include .gitignore with sensible defaults
@@ -82,3 +93,4 @@ User: "scaffold: something modern and fast"
 Why bad: Too vague to scaffold effectively
 </Bad>
 </Examples>
+```

@@ -1,0 +1,25 @@
+# =============================================================================
+# .prettierignore
+# =============================================================================
+# Prettier is scoped to JSON only. Markdown/TOML/Shell are handled by their
+# dedicated linters (rumdl / taplo / shellcheck + shfmt). Keep prettier out
+# of their lanes.
+# =============================================================================
+
+# Tool-owned territory
+*.md
+*.toml
+*.sh
+*.yaml
+*.yml
+
+# Generated / vendored
+.git/
+.rumdl_cache/
+node_modules/
+plans/
+target/
+
+# Schemas are hand-edited with comments and intentional key order; prettier
+# would re-sort and strip whitespace we care about.
+catalog-manifest.schema.json

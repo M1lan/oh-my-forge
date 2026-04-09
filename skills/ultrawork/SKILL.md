@@ -8,6 +8,7 @@ Ultrawork maximizes parallel execution by decomposing tasks into independent sub
 </Purpose>
 
 <Use_When>
+
 - User says "ultrawork", "ulw", "parallel", "run in parallel"
 - Task has multiple independent subtasks
 - User wants maximum throughput
@@ -15,12 +16,14 @@ Ultrawork maximizes parallel execution by decomposing tasks into independent sub
 </Use_When>
 
 <Do_Not_Use_When>
+
 - Tasks have strict sequential dependencies
 - Single focused task with no parallelization opportunity
 - Tasks requiring shared state between steps
 </Do_Not_Use_When>
 
 <Execution_Policy>
+
 - Decompose into truly independent subtasks
 - Execute independent tasks in parallel
 - Each subtask gets its own implementation cycle
@@ -28,6 +31,7 @@ Ultrawork maximizes parallel execution by decomposing tasks into independent sub
 </Execution_Policy>
 
 <Steps>
+
 1. **Decompose**: Break the task into N independent subtasks
 2. **Show Subtasks**: List the subtasks to the user
    - Ask: "I'll run these N tasks in parallel. Any dependencies I missed?"
@@ -39,10 +43,12 @@ Ultrawork maximizes parallel execution by decomposing tasks into independent sub
 <Parallel_Tasks_Example>
 Task: "Fix all ESLint errors across the codebase"
 Subtasks:
+
 - Fix ESLint errors in src/components/
 - Fix ESLint errors in src/utils/
 - Fix ESLint errors in src/hooks/
 These run in parallel.
+
 </Parallel_Tasks_Example>
 
 <Examples>

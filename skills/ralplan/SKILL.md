@@ -18,17 +18,19 @@ Forge-native consensus planning. Takes a fuzzy request and produces a concrete, 
 ## Pre-execution gate (auto-trigger)
 
 Gate FIRES (route through ralplan first) when all of:
+
 - User requested an execution mode (autopilot/ralph/team/turbo/ultrawork).
 - Request has no concrete anchor (no `path/to/file`, no `functionName`, no `#42`, no error text, no code block, no numbered steps).
 
 Gate PASSES (execute directly) when ANY of:
+
 - File path present
 - Function / class / symbol name present
 - Issue / PR number present (`#42`)
 - Error reference ("TypeError: ...")
 - Numbered acceptance criteria
 - Code block with the intended change
-- Escape prefix: `force:` or `! ` at start of request
+- Escape prefix: `force:` or `!` at start of request
 
 ## Workflow
 
@@ -56,7 +58,7 @@ A ralplan output MUST include all of the plan skill's required sections (Ground 
 
 ## Output
 
-```
+```text
 ## Ralplan Result: APPROVED (after N iterations)
 
 ### Plan file

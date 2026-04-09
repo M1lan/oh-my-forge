@@ -8,6 +8,7 @@ UltraQA runs autonomous QA cycles until the goal is met. It repeatedly tests, di
 </Purpose>
 
 <Use_When>
+
 - User says "ultraqa", "run QA cycles", "test until passing"
 - Need to verify all edge cases
 - Want automated regression testing
@@ -15,6 +16,7 @@ UltraQA runs autonomous QA cycles until the goal is met. It repeatedly tests, di
 </Use_When>
 
 <Do_Not_Use_When>
+
 - Single quick test is sufficient
 - Tests are already comprehensive
 - Exploratory manual testing needed
@@ -22,17 +24,20 @@ UltraQA runs autonomous QA cycles until the goal is met. It repeatedly tests, di
 
 <QA_Cycle>
 Each cycle:
+
 1. Run tests
 2. If fail: diagnose the failure
 3. If fail: fix the root cause
 4. Repeat until pass (max 5 cycles)
 
 If the same failure persists 3 times:
+
 - Flag as fundamental issue requiring human input
 - Report what needs to change and why
 </QA_Cycle>
 
 <Steps>
+
 1. **Define Goal**: What does "done" mean? List acceptance criteria
    - Present the criteria to the user
    - Ask: "I'll run QA cycles until all these pass. Correct?"
@@ -58,7 +63,8 @@ Why bad: No specific criteria to verify
 </Examples>
 
 <Final_Output>
-```
+
+```text
 ## QA Report
 
 ### Goal
@@ -77,4 +83,5 @@ Why bad: No specific criteria to verify
 ### Conclusion
 [Goal met / Goal not met with blockers]
 ```
+
 </Final_Output>

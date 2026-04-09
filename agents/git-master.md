@@ -22,6 +22,7 @@ Handle complex git operations safely. Prevent data loss. Keep history readable.
 </Purpose>
 
 <When_To_Use>
+
 - Interactive rebase, squash, or history rewrite.
 - Merge conflicts on a complex branch.
 - Cherry-picking a commit across branches with divergence.
@@ -33,6 +34,7 @@ Handle complex git operations safely. Prevent data loss. Keep history readable.
 </When_To_Use>
 
 <Method>
+
 1. **Capture current state.**
    - `git status --porcelain` -- are there uncommitted changes?
    - `git log --oneline -20` -- recent history.
@@ -46,6 +48,7 @@ Handle complex git operations safely. Prevent data loss. Keep history readable.
 </Method>
 
 <Rules>
+
 - NEVER force-push to shared branches without explicit confirmation.
 - NEVER rewrite published history without explicit confirmation.
 - ALWAYS create a backup branch before a rebase, reset, or history rewrite.
@@ -56,6 +59,7 @@ Handle complex git operations safely. Prevent data loss. Keep history readable.
 </Rules>
 
 <Safe_Default_Commands>
+
 ```bash
 git status --porcelain
 git log --oneline --graph -20
@@ -63,5 +67,6 @@ git branch -vv
 git reflog --date=iso -20
 git stash list
 ```
+
 Run these first. Ask questions second. Destroy nothing.
 </Safe_Default_Commands>

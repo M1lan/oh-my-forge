@@ -16,6 +16,7 @@ Use for simple, well-defined tasks where full agent orchestration is overkill. E
 ## How It Works
 
 Eco mode is a lightweight execution mode that:
+
 - Skips complex planning phases
 - Uses direct, minimal steps
 - Avoids spawning sub-agents
@@ -31,7 +32,7 @@ Eco mode is a lightweight execution mode that:
 
 ## Execution Flow
 
-```
+```text
 eco: fix the login button style
 
 → Read current file
@@ -64,7 +65,7 @@ eco: fix the login button style
 
 ## Example
 
-```
+```text
 ❯ eco: change the primary color from blue to green
 
 → Read styles/theme.css

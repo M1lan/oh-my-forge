@@ -3,6 +3,7 @@
 ## Utility Classes
 
 ### cn() Helper
+
 ```tsx
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -20,6 +21,7 @@ export function cn(...inputs: ClassValue[]) {
 ```
 
 ### Tailwind Configuration
+
 ```js
 // tailwind.config.js
 /** @type {import('tailwindcss').Config} */
@@ -72,6 +74,7 @@ module.exports = {
 ## CSS Variables
 
 ### Global Styles
+
 ```css
 @tailwind base;
 @tailwind components;
@@ -123,6 +126,7 @@ module.exports = {
 ## Responsive Patterns
 
 ### Mobile-First
+
 ```tsx
 // Mobile first, expand to desktop
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -137,6 +141,7 @@ module.exports = {
 ```
 
 ### Breakpoints
+
 | Name | Min-width | Usage |
 |------|-----------|-------|
 | `sm` | 640px | Large phones |
@@ -150,6 +155,7 @@ module.exports = {
 ## Animation Classes
 
 ### Tailwind + Animate
+
 ```tsx
 <div className="animate-in fade-in slide-in-from-bottom-4 duration-200">
   Content
@@ -164,6 +170,7 @@ module.exports = {
 ```
 
 ### Common Animations
+
 | Class | Effect |
 |-------|--------|
 | `animate-in` | Fade in |
@@ -179,6 +186,7 @@ module.exports = {
 ## Layout Patterns
 
 ### Container
+
 ```tsx
 <div className="container mx-auto px-4">
   {/* Page content */}
@@ -186,6 +194,7 @@ module.exports = {
 ```
 
 ### Centered Content
+
 ```tsx
 <div className="flex min-h-screen items-center justify-center">
   <Card>Content</Card>
@@ -193,6 +202,7 @@ module.exports = {
 ```
 
 ### Sidebar Layout
+
 ```tsx
 <div className="flex h-screen">
   <aside className="w-64 hidden md:block">
@@ -208,6 +218,7 @@ module.exports = {
 ```
 
 ### Grid Auto-fit
+
 ```tsx
 // Auto-responsive grid
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -220,6 +231,7 @@ module.exports = {
 ## Common Patterns
 
 ### Hover States
+
 ```tsx
 <Button className="hover:bg-primary/90 transition-colors">
   Hover me
@@ -227,6 +239,7 @@ module.exports = {
 ```
 
 ### Focus Rings
+
 ```tsx
 // Always visible focus for accessibility
 <Button className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -235,6 +248,7 @@ module.exports = {
 ```
 
 ### Disabled States
+
 ```tsx
 <Button disabled className="opacity-50 cursor-not-allowed">
   Disabled
@@ -242,6 +256,7 @@ module.exports = {
 ```
 
 ### Loading States
+
 ```tsx
 <div className="flex items-center gap-2">
   <Loader2 className="h-4 w-4 animate-spin" />
@@ -254,6 +269,7 @@ module.exports = {
 ## Typography Styles
 
 ### Heading
+
 ```tsx
 <h1 className="text-3xl font-bold tracking-tight">
   Title
@@ -267,6 +283,7 @@ module.exports = {
 ```
 
 ### Body
+
 ```tsx
 <p className="leading-7">
   Body text with good line height for readability.
@@ -277,6 +294,7 @@ module.exports = {
 ```
 
 ### Code
+
 ```tsx
 <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
   code

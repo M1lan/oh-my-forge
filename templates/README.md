@@ -7,6 +7,7 @@ This directory is reserved for future template overrides.
 As of forge v2.8.0, built-in templates are baked into the forge binary at compile time via Rust `include_str!` macros. There is no runtime lookup path from any of the oh-my-forge install locations to these templates, so files you drop here are **not** picked up by the forge runtime.
 
 Evidence:
+
 - `crates/forge_domain/src/tools/result.rs` and similar files use `include_str!("../../../../templates/forge-partial-tool-error-reflection.md")` to bake templates into the binary.
 - `ForgeTemplateService::register_template` at `crates/forge_services/src/template.rs:80` exists but is not invoked from a user-configurable location in the CLI path.
 
@@ -19,6 +20,7 @@ Evidence:
 ## What to do if you need a template override today
 
 Three real options:
+
 1. **Fork forgecode** and rebuild — only for people shipping forge binaries.
 2. **Replace the behavior in a skill** — skills are the right layer for most customization.
 3. **File an issue upstream** requesting user-template-override support.

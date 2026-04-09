@@ -56,7 +56,7 @@ Disciplined visual QA for UI work.
 
 ## Output
 
-```
+```text
 ## Visual Verdict: APPROVE | ITERATE | REJECT
 
 ### Scope

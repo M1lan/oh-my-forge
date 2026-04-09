@@ -1,0 +1,373 @@
+# =============================================================================
+# .rumdl.toml — Markdown linter config for oh-my-forge
+# =============================================================================
+# rumdl is a fast Rust-based Markdown linter compatible with markdownlint rules.
+# Docs: https://github.com/rumdl/rumdl  •  Schema: `rumdl schema print`
+#
+# OPTIMIZATION TARGET: LLM / AI agents reading this corpus.
+# -----------------------------------------------------------------------------
+# This repo is 110+ markdown files that get *fed into LLM context windows* —
+# agents (`agents/*.md`), skills (`skills/<name>/SKILL.md`), commands, and
+# documentation. The audience for these files is overwhelmingly an LLM, not
+# a human in a browser. The lint rules below are tuned around that.
+#
+# Design principles (in order of importance):
+#
+#   1. STRUCTURE OVER PRETTINESS.
+#      LLMs parse the markdown AST. Headings are retrieval anchors, lists are
+#      enumerable, fenced code blocks with language tags carry strong priors.
+#      We enforce structural rules (MD001, MD040, MD025, MD036) hard.
+#
+#   2. NO HARD WRAPS IN PROSE.
+#      MD013 is disabled. Wrapping a paragraph at column 80 turns it into 5
+#      "lines" that some chunkers split on, fragmenting semantic units. Long
+#      logical lines are easier for the model to consume.
+#
+#   3. LANGUAGE TAGS ARE NON-NEGOTIABLE.
+#      MD040 is enforced. ` ```bash ` gives the tokenizer a strong prior;
+#      bare ` ``` ` forces the model to guess.
+#
+#   4. JSX/XML STRUCTURAL TAGS ARE FIRST-CLASS.
+#      `agents/*.md` and `skills/*/SKILL.md` use Anthropic-style XML tags
+#      (`<Purpose>`, `<Workflow>`, `<Output_Format>`, `<When_To_Use>`, ...) as
+#      *prompt scaffolding*. We use the `mdx` flavor so rumdl treats these as
+#      JSX components rather than illegal HTML, and we do not need to maintain
+#      a hand-curated `allowed_elements` list of 50+ tag names.
+#
+#   5. LINK TEXT MUST BE DESCRIPTIVE (MD059) AND TARGETS MUST EXIST
+#      (MD051, MD057). LLMs use anchor text for retrieval; "click here" is
+#      worse than useless.
+#
+#   6. NO FAKE STRUCTURE.
+#      MD036 (emphasis as heading) is enforced — `**Things to do**` looks like
+#      a heading to a human but is invisible to header-based extraction.
+#      MD025 (single H1) is enforced — multiple H1s confuse title extraction.
+#
+#   7. NO AI SLOP (MD061).
+#      Forbidden-terms list catches the LLM-prose tells: "delve into",
+#      "navigate the complexities", "in today's fast-paced world", etc.
+#      The `ai-slop-cleaner` skill teaches the model to remove these; this
+#      lint rule keeps them out in the first place.
+#
+#   8. TOKEN ECONOMY.
+#      MD009 (trailing space), MD010 (no tabs), MD012 (no consecutive blanks),
+#      MD047 (single trailing newline) — every byte of context window matters.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Global behavior
+# -----------------------------------------------------------------------------
+[global]
+
+# MDX flavor: tolerates JSX/XML-style tags as components rather than HTML.
+# This is the single most important setting in this file. Without it, the
+# `<Purpose>`, `<Workflow>`, `<Steps>`, `<Output_Format>`, `<When_To_Use>`,
+# and ~50 other structural tags used across agents/skills/commands all fire
+# MD033 violations. The agent prompt convention is XML-tagged because LLMs
+# (Claude in particular) anchor on these delimiters more reliably than on
+# markdown headings alone — see Anthropic's prompt-engineering docs.
+flavor = "mdx"
+
+# Respect .gitignore when walking directories. Keeps caches and vendored
+# content out of the lint pass.
+respect_gitignore = true
+
+# Rules we deliberately do NOT enforce, with rationale for each:
+disable = [
+  "MD013", # line-length — hard wraps fragment semantic units in LLM context
+  "MD041", # first-line-h1 — agents/skills/commands lead with YAML frontmatter
+]
+
+# Paths to skip entirely. plans/ is scratch-pad history (drafts of design
+# decisions, often intentionally messy); not part of the shipped product.
+exclude = [
+  ".rumdl_cache/**",
+  ".git/**",
+  "node_modules/**",
+  "plans/**",
+  "examples/**",     # third-party / illustrative content
+]
+
+# -----------------------------------------------------------------------------
+# Per-file overrides
+# -----------------------------------------------------------------------------
+# rumdl supports glob → rules-to-ignore mapping. We use this for files that
+# legitimately violate a rule because they are *teaching* it.
+[per-file-ignores]
+
+# The slop-cleaner skill quotes example slop phrases inside its instructions —
+# those quotes are meta-content, not actual slop. Same for CONTRIBUTING.md
+# which lists banned phrases as examples for human contributors.
+"skills/ai-slop-cleaner/**" = ["MD061"]
+"docs/CONTRIBUTING.md"      = ["MD061"]
+
+# AGENTS.md cheat-sheet table has very long table rows that benefit from
+# staying on one line for LLM table extraction.
+"AGENTS.md" = ["MD013"]
+
+# seo-expert.md is *about* HTML — it documents HTML tags (`<title>`,
+# `<meta description>`) inside code spans. rumdl's MD033 still flags them
+# even inside backticks. This is the only legit MD033 ignore in the repo.
+"agents/seo-expert.md" = ["MD033"]
+
+# design-system/** is shadcn component reference documentation. The files
+# contain lowercase JSX tags (`<p>`, `<div>`, `<span>`, `<input>`, ...)
+# inside ```tsx fenced code blocks. rumdl's MDX flavor handles PascalCase
+# JSX components (`<Card>`, `<Button>`) correctly in all versions, but
+# lowercase tag handling inside fenced code blocks varies across rumdl
+# versions — some builds flag them as raw inline HTML even though they
+# are clearly inside a fence. Since these files are *reference docs about
+# HTML/JSX*, excluding MD033 for the whole tree is the correct, version-
+# stable fix. It also future-proofs against any new component file.
+"design-system/**" = ["MD033"]
+
+# =============================================================================
+# Per-rule tuning
+# =============================================================================
+# Rules grouped by purpose. Every rule below has either a configuration knob
+# or an explicit comment about why we enable/disable it.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Heading hygiene (LLM retrieval depends on this)
+# -----------------------------------------------------------------------------
+
+[MD001]
+# Heading levels increment by one. H1 → H2 → H3, never H1 → H3.
+# WHY: hierarchical chunkers and TOC builders use heading depth as the tree
+# structure. Skipping levels creates an invalid tree and breaks retrieval.
+
+[MD003]
+# Heading style: ATX (`# Heading`), not Setext (`Heading\n=======`).
+# WHY: ATX is unambiguous in LLM tokenization; Setext requires two-line
+# lookahead and confuses some chunkers.
+style = "atx"
+
+[MD022]
+# Headings surrounded by blank lines.
+# WHY: blank lines are the structural separator for paragraph-level chunking.
+lines_above = 1
+lines_below = 1
+
+[MD024]
+# Multiple headings with the same content are FINE if they're siblings under
+# different parents (e.g. "## Example" under "### Rust" and "### Python").
+# Same heading text under the SAME parent is a duplicate and a real bug.
+siblings_only = true
+
+[MD025]
+# Exactly one top-level H1 per document.
+# WHY: title extractors take the first H1 as document title; multiple H1s
+# poison this and break "what is this file about?" queries.
+
+[MD026]
+# Trailing punctuation in headings is allowed for `?` and `!` (questions
+# and emphatic section titles read as natural to both humans and LLMs).
+punctuation = ".,;:"
+
+# -----------------------------------------------------------------------------
+# Lists (enumeration is a key LLM primitive)
+# -----------------------------------------------------------------------------
+
+[MD004]
+# Unordered list marker style: dash. Consistent across the corpus.
+# WHY: mixed `-` and `*` markers fragment list detection in some parsers.
+style = "dash"
+
+[MD007]
+# Unordered list indent: 2 spaces.
+# WHY: 2-space indent packs more tokens per line than 4-space.
+indent = 2
+
+[MD029]
+# Ordered list numbering: "1. 2. 3." (natural counting).
+# WHY: an LLM reading "1. 1. 1." may think items are duplicates.
+style = "ordered"
+
+[MD032]
+# Lists must be surrounded by blank lines.
+# WHY: blank-line boundaries help chunkers identify list-as-unit.
+
+# -----------------------------------------------------------------------------
+# Code blocks (language tags are LLM context priors)
+# -----------------------------------------------------------------------------
+
+[MD040]
+# Code blocks MUST have a language specified.
+# WHY: ` ```bash ` tells the model the language with zero ambiguity. Bare
+# ` ``` ` forces the model to guess from content, wasting reasoning budget.
+# This is the single most LLM-impactful style rule we enforce.
+
+[MD046]
+# Fenced code blocks only — no indented-4-space code.
+# WHY: indented code wastes 4 bytes × N lines of context window vs. fenced.
+style = "fenced"
+
+[MD048]
+# Backtick fences (```), not tilde fences (~~~).
+# WHY: backticks are the dominant convention in LLM training data.
+style = "backtick"
+
+[MD031]
+# Fenced code blocks surrounded by blank lines.
+# WHY: prevents prose from bleeding into code-block tokenization.
+
+# -----------------------------------------------------------------------------
+# Emphasis & inline (visual ≠ structural)
+# -----------------------------------------------------------------------------
+
+[MD036]
+# Emphasis used instead of a heading is a real bug. `**Things to do**` looks
+# like a heading visually but is invisible to header-based retrieval.
+# WHY: this is the #1 source of "the LLM can't find the section about X" bugs.
+
+[MD037]
+# No spaces inside emphasis markers (` * foo * ` is wrong).
+
+[MD038]
+# No spaces inside code spans (`` ` foo ` `` is wrong).
+
+[MD049]
+# Italic emphasis style: asterisk (`*italic*`).
+# Matches the dominant convention in this repo (verified empirically).
+style = "asterisk"
+
+[MD050]
+# Bold emphasis style: asterisk (`**bold**`).
+# Matches the dominant convention in this repo.
+style = "asterisk"
+
+# -----------------------------------------------------------------------------
+# Links & images (retrieval signal)
+# -----------------------------------------------------------------------------
+
+[MD034]
+# No bare URLs — wrap in angle brackets `<https://...>` or use `[text](url)`.
+# WHY: bare URLs are heuristically detected by some parsers and missed by
+# others. Angle-bracket form is unambiguous to both.
+
+[MD042]
+# No empty links `[text]()`. Broken signal.
+
+[MD045]
+# Images MUST have alt text.
+# WHY: alt text is the ONLY signal an LLM gets from an image in markdown.
+# An image with no alt text is invisible to context.
+
+[MD051]
+# Link fragments must reference valid headings within the same document.
+# WHY: broken `#section` anchors mislead chunkers about cross-references.
+
+[MD052]
+# Reference links must use a reference that exists.
+
+[MD053]
+# Unused reference link definitions are dead weight.
+
+[MD057]
+# Relative links must point to existing files.
+# WHY: dead links waste context-window bytes and mislead the model.
+
+[MD059]
+# Link text should be descriptive — ban "click here", "here", "link".
+# WHY: LLMs use anchor text as the primary retrieval signal for the linked
+# document. "Click here" gives zero signal; "the rumdl rule reference" gives
+# the model a strong prior.
+
+# -----------------------------------------------------------------------------
+# Whitespace & file hygiene (token economy)
+# -----------------------------------------------------------------------------
+
+[MD009]
+# No trailing whitespace.
+# WHY: trailing space tokens are noise that wastes context.
+
+[MD010]
+# No tabs.
+# WHY: tab tokenization varies across models; spaces are deterministic.
+
+[MD012]
+# No multiple consecutive blank lines.
+# WHY: every extra blank line is a wasted token in the context window.
+maximum = 1
+
+[MD047]
+# File ends with a single newline character.
+# WHY: stable file boundaries prevent the last line from being merged into
+# the next chunk by some splitters.
+
+# -----------------------------------------------------------------------------
+# Tables (structured data extraction)
+# -----------------------------------------------------------------------------
+
+[MD055]
+# Table pipe style: leading-and-trailing pipes (` | a | b | `).
+# WHY: enclosed tables are unambiguous to table extractors.
+style = "leading_and_trailing"
+
+[MD056]
+# Table column count must be consistent.
+# WHY: ragged tables are parser bugs in disguise — pandas-style extractors
+# choke and the model has to guess column boundaries.
+
+[MD058]
+# Tables surrounded by blank lines.
+
+# -----------------------------------------------------------------------------
+# Anti-slop (the LLM-specific rule)
+# -----------------------------------------------------------------------------
+
+[MD061]
+# Forbidden terms — block AI-prose tells. The `ai-slop-cleaner` skill removes
+# these post-hoc; MD061 prevents them from being committed in the first place.
+# Add new terms here as new slop patterns emerge from LLM updates.
+terms = [
+  # Core "AI sounds like an AI" tells
+  "delve into",
+  "delves into",
+  "delving into",
+  "as an ai",
+  "as a language model",
+  "i'm just an ai",
+
+  # Hedging / filler that adds zero signal
+  "it is important to note",
+  "it's important to note",
+  "it should be noted",
+  "needless to say",
+  "in conclusion",
+  "in summary,",
+
+  # Empty marketing prose
+  "navigate the complexities",
+  "navigating the complexities",
+  "embark on a journey",
+  "embark on this journey",
+  "seamlessly integrate",
+  "seamlessly integrates",
+  "leverage the power",
+  "leveraging the power",
+  "wealth of information",
+  "treasure trove",
+  "rich tapestry",
+  "vibrant tapestry",
+
+  # Time-bound clichés
+  "in today's fast-paced",
+  "in today's digital",
+  "ever-evolving landscape",
+  "ever-changing landscape",
+
+  # Idiom slop
+  "in the realm of",
+  "at the end of the day",
+  "the bottom line is",
+]
+
+# -----------------------------------------------------------------------------
+# Inline HTML — superseded by `flavor = "mdx"` above.
+# -----------------------------------------------------------------------------
+# We do NOT need an `allowed_elements` list. The mdx flavor treats JSX/XML
+# tags as components, which covers all 50+ structural tags used in agent
+# prompts (`<Purpose>`, `<Workflow>`, `<Steps>`, `<Output_Format>`, etc.)
+# without us having to maintain a list.

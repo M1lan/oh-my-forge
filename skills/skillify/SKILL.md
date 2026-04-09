@@ -47,15 +47,19 @@ description: <one to three sentences, <=500 chars. Describe what the skill does 
 
 ```markdown
 ## When to invoke
+
 Bullet list of triggers -- what user phrasing, what conditions.
 
 ## Workflow
+
 Numbered steps.
 
 ## Rules
+
 Hard constraints. "Never do X", "Always cite path:line".
 
 ## Output
+
 What the skill should produce (format, example, what to hand back to the user).
 ```
 
@@ -82,7 +86,7 @@ After writing, verify:
 
 ## Output
 
-```
+```text
 Created skill: <name>
 Location: <path/to/SKILL.md>
 Scope: user-global | project-local

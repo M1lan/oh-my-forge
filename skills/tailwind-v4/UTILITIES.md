@@ -3,6 +3,7 @@
 ## Installation
 
 ### Vite (Recommended)
+
 ```bash
 npm install @tailwindcss/vite
 ```
@@ -17,6 +18,7 @@ export default {
 ```
 
 ### PostCSS
+
 ```bash
 npm install @tailwindcss/postcss
 ```
@@ -42,6 +44,7 @@ npm install @tailwindcss/postcss
 ## Color System
 
 ### Semantic Colors
+
 ```css
 @theme {
   --color-background: #ffffff;
@@ -62,6 +65,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Usage
+
 ```html
 <div class="bg-background text-foreground">
   <button class="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -71,6 +75,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Dark Mode
+
 ```css
 .dark {
   --color-background: #09090b;
@@ -87,6 +92,7 @@ npm install @tailwindcss/postcss
 ## Typography
 
 ### Font Families
+
 ```css
 @theme {
   --font-family-sans: 'Inter', system-ui, sans-serif;
@@ -96,6 +102,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Type Scale
+
 ```css
 @theme {
   --text-xs: 0.75rem;      /* 12px */
@@ -110,6 +117,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Usage
+
 ```html
 <h1 class="font-sans text-4xl font-bold tracking-tight">
   Heading
@@ -127,6 +135,7 @@ npm install @tailwindcss/postcss
 ## Spacing
 
 ### Custom Spacing
+
 ```css
 @theme {
   --spacing-18: 4.5rem;    /* 72px */
@@ -135,6 +144,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Common Patterns
+
 ```html
 <!-- Card padding -->
 <div class="p-6">
@@ -154,6 +164,7 @@ npm install @tailwindcss/postcss
 ## Layout
 
 ### Container
+
 ```css
 .container {
   width: 100%;
@@ -176,6 +187,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Grid
+
 ```html
 <!-- Auto-responsive grid -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -190,6 +202,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Flexbox
+
 ```html
 <!-- Center content -->
 <div class="flex items-center justify-center">
@@ -206,6 +219,7 @@ npm install @tailwindcss/postcss
 ## Components
 
 ### Button
+
 ```css
 @utility btn-base {
   display: inline-flex;
@@ -229,6 +243,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Card
+
 ```html
 <div class="rounded-lg border bg-background shadow-sm">
   <div class="p-6">
@@ -239,6 +254,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Form Input
+
 ```html
 <input
   type="text"
@@ -251,6 +267,7 @@ npm install @tailwindcss/postcss
 ## Animation
 
 ### Transitions
+
 ```html
 <!-- Hover transitions -->
 <button class="transition-colors hover:bg-primary/90">
@@ -259,6 +276,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Keyframes
+
 ```css
 @theme {
   --animate-fade-in: fade-in 0.3s ease-out;
@@ -277,6 +295,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### Usage
+
 ```html
 <div class="animate-fade-in">
   Content fades in
@@ -288,6 +307,7 @@ npm install @tailwindcss/postcss
 ## Responsive Design
 
 ### Breakpoints
+
 | Name | Min-width | Use |
 |------|-----------|-----|
 | `sm` | 640px | Large phones |
@@ -297,6 +317,7 @@ npm install @tailwindcss/postcss
 | `2xl` | 1536px | Large screens |
 
 ### Mobile-First
+
 ```html
 <!-- Mobile first, enhance on larger -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
@@ -310,16 +331,19 @@ npm install @tailwindcss/postcss
 ## Arbitrary Values
 
 ### Colors
+
 ```html
 <div class="bg-[#ff5733] text-[#fffafa]">
 ```
 
 ### Sizes
+
 ```html
 <div class="w-[calc(100%-1rem)] p-[20px] text-[2.5rem]">
 ```
 
 ### Custom Properties
+
 ```html
 <div class="[--my-color:#ff5733] bg-[--my-color]">
 ```
@@ -329,6 +353,7 @@ npm install @tailwindcss/postcss
 ## Best Practices
 
 ### DO
+
 ```html
 <!-- Use semantic tokens -->
 <div class="bg-primary text-primary-foreground">
@@ -344,6 +369,7 @@ npm install @tailwindcss/postcss
 ```
 
 ### DON'T
+
 ```html
 <!-- Avoid hardcoded colors -->
 <div class="bg-red-500 text-white">

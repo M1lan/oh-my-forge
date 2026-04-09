@@ -35,8 +35,8 @@ Optional fields:
 | Field | Type | Description |
 |---|---|---|
 | `model` | string | Override the session model for this agent. oh-my-forge typically sets `claude-opus-4-6`. |
-| `reasoning` | object | `{enabled: bool, effort: "low"|"medium"|"high", summary: "auto"|"detailed"|"none"}`. |
-| `temperature` | float | Model temperature override. |
+| `reasoning` | object | `{enabled: bool, effort: "low" |
+|`temperature` | float | Model temperature override. |
 | `user_prompt` | string | Pre-prompt injected on user turn. |
 | `system_prompt` | string | Overrides the body. Rarely used -- prefer body. |
 | `max_steps` | int | Max reasoning steps. |
@@ -88,6 +88,7 @@ One paragraph: what this agent does and why it exists.
 </Purpose>
 
 <When_To_Use>
+
 - Trigger condition 1
 - Trigger condition 2
 </When_To_Use>
@@ -130,6 +131,7 @@ Forge does not require this structure -- it's a convention for consistency acros
 1. Create `agents/<name>.md` with the required frontmatter.
 2. Write the body using the XML-tagged convention.
 3. Add an entry to `catalog-manifest.json` under `agents`:
+
    ```json
    {
      "id": "my-agent",
@@ -140,6 +142,7 @@ Forge does not require this structure -- it's a convention for consistency acros
      "reasoning": false
    }
    ```
+
 4. Run `scripts/doctor.sh --repo` to validate.
 5. Update `docs/FORGE_KEYWORDS.md` if the new agent has natural-language triggers.
 

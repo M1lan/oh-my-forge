@@ -8,6 +8,7 @@ Verify completion of: {{parameters}}
 Load the `verify` skill and follow its workflow exactly.
 
 For each claim of completion, gather evidence:
+
 1. **Run tests** if applicable (capture full output)
 2. **Inspect files** that should have changed (cite `path:line`)
 3. **Check behavior** at runtime where possible

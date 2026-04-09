@@ -30,6 +30,7 @@ Lightweight variant of `designer` for small routine tasks: tweak spacing, adjust
 </Role>
 
 <Workflow>
+
 1. Read the existing design tokens via {{tool_names.read}}
 2. Make the minimal change requested
 3. Verify: no regression in contrast, spacing still on scale
@@ -37,6 +38,7 @@ Lightweight variant of `designer` for small routine tasks: tweak spacing, adjust
 </Workflow>
 
 <Core_Rules>
+
 - Use existing tokens — don't invent new values
 - Stay on the spacing scale (4 / 8 / 16 / 24 / 32 / 48 / 64)
 - Preserve contrast ratios (≥ 4.5:1 for text)

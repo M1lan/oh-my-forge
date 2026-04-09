@@ -125,7 +125,7 @@ If multiple triggers match, use this priority:
 | Prefix | Meaning |
 |---|---|
 | `force:` | Skip the ralplan pre-execution gate and execute directly |
-| `! ` | Same as `force:` |
+| `!` | Same as `force:` |
 | `eco:` | Force lightweight mode even if the request looks complex |
 | `turbo:` | Force parallel mode even if the default would be interactive |
 

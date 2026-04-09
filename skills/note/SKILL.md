@@ -19,6 +19,7 @@ Capture durable context so it survives the end of the current session.
 Default: `docs/notes/YYYY-MM-DD-<slug>.md`
 
 Alternate targets (pick based on the note type):
+
 - Architectural decision -> `docs/adr/YYYY-MM-DD-<slug>.md`
 - Followup task -> append to `TODO.md` at repo root
 - Gotcha for future sessions -> `docs/gotchas.md`
@@ -61,6 +62,7 @@ What did we learn, or what will a future reader need?
 ## Output
 
 Tell the user:
+
 1. Where the note was written (exact path).
 2. What was captured (one-line summary).
 3. Whether a new directory was created.

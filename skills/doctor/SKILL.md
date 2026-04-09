@@ -20,11 +20,13 @@ Diagnose why forge is not behaving the way oh-my-forge says it should.
 This skill is the documentation counterpart to `scripts/doctor.sh`. When invoked, first check whether the script is present in the repo being diagnosed:
 
 1. **If `scripts/doctor.sh` exists**, run it:
+
    ```bash
    scripts/doctor.sh --user
    scripts/doctor.sh --project .
    scripts/doctor.sh --repo    # if diagnosing the oh-my-forge source repo itself
    ```
+
    The script performs all checks automatically and reports a concrete PASS/FAIL table plus a non-zero exit code if any check fails.
 
 2. **If `scripts/doctor.sh` does NOT exist** (user is running forge against a non-oh-my-forge project), fall back to manual checks below.
@@ -91,7 +93,7 @@ forge list skill | head -20       # expect: all skills loaded
 
 ## Output format
 
-```
+```text
 ## Doctor Report
 
 ### Binary

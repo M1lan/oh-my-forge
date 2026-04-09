@@ -8,6 +8,7 @@ Trace the root cause of: {{parameters}}
 Load the `tracer` skill and follow its workflow exactly.
 
 Output:
+
 1. **Symptom restated** precisely
 2. **Reproduction steps** -- verified working repro
 3. **Trace** -- stack/call-chain from symptom to root cause, each step cited with `path:line`

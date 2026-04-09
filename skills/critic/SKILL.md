@@ -41,7 +41,7 @@ Ruthless review. The goal is not to be nice -- the goal is to find what is wrong
 
 ## Output format
 
-```
+```text
 ## Critic Verdict: APPROVE | ITERATE | REJECT
 
 ### Summary

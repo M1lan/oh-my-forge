@@ -39,7 +39,7 @@ Rigorous, evidence-first debugging. Not "I think the bug is X" -- "here is what 
 
 ## Output
 
-```
+```text
 ## Tracer Report
 
 ### Symptom

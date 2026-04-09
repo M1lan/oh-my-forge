@@ -104,12 +104,12 @@ auto_update = false
 # [compact] — automatic context compaction
 # ------------------------------------------------------------------------------
 [compact]
-retention_window = 6
-eviction_window  = 0.2
-max_tokens       = 2000
-token_threshold  = 100000
+retention_window  = 6
+eviction_window   = 0.2
+max_tokens        = 2000
+token_threshold   = 100000
 message_threshold = 200
-on_turn_end      = false
+on_turn_end       = false
 # Optional extras:
 # turn_threshold = 10
 # model = { provider_id = "anthropic", model_id = "claude-haiku-4" }

@@ -8,6 +8,7 @@ Deep Interview uses Socratic questioning to clarify requirements before any code
 </Purpose>
 
 <Use_When>
+
 - User has a vague idea or open-ended request
 - User says "deep-interview", "clarify", "not sure what I want"
 - Requirements are unclear or ambiguous
@@ -15,6 +16,7 @@ Deep Interview uses Socratic questioning to clarify requirements before any code
 </Use_When>
 
 <Do_Not_Use_When>
+
 - Requirements are already clear and specific
 - User explicitly says "just build it"
 - Quick task with no ambiguity
@@ -28,7 +30,7 @@ Deep Interview uses Socratic questioning to clarify requirements before any code
 
 Do NOT dump all questions at once. Each question must be followed by a response prompt:
 
-```
+```text
 ❯ [question]
 
 > _
@@ -39,36 +41,42 @@ After the user responds, analyze their answer, then ask the next relevant questi
 ## Question Sequence
 
 ### Step 1: Core Purpose
+
 Ask ONE question:
 > "What is the primary goal of this [feature]? What problem does it solve?"
 
 Wait for response.
 
 ### Step 2: Users
+
 Ask ONE question:
 > "Who will be using this? (developers, end users, admins, etc.)"
 
 Wait for response.
 
 ### Step 3: Scope
+
 Based on answers, ask ONE focused question about scope:
 > "What features are essential vs nice-to-have?"
 
 Wait for response.
 
 ### Step 4: Technical Context
+
 Based on answers, ask ONE question about tech:
 > "Do you have existing preferences for [language/framework/database]?"
 
 Wait for response.
 
 ### Step 5: Constraints
+
 Ask ONE question about constraints:
 > "Any specific requirements around [security/scale/compliance]?"
 
 Wait for response.
 
 ### Step 6: Edge Cases
+
 Ask ONE question about edge cases:
 > "What should happen if [edge case]?"
 
@@ -87,7 +95,8 @@ After all questions, if you have enough information (>80% clarity):
    - Constraints
 
 2. Then inform the user:
-```
+
+```text
 ❯ SPEC.md generated. Here's what I understood:
 
 ## Summary
@@ -116,6 +125,7 @@ Ask remaining questions one by one.
 ## IMPORTANT: Do NOT Execute
 
 After generating SPEC.md:
+
 - Do NOT spawn frontend-design, autopilot, or any execution skill
 - Do NOT write any code
 - Wait for user confirmation to proceed with planning
@@ -124,6 +134,7 @@ After generating SPEC.md:
 
 <Output>
 After the interview, produce a SPEC.md with:
+
 - Problem statement
 - Target users
 - Core features (with priorities)
@@ -164,7 +175,7 @@ Why bad: Requirements are already specific - no interview needed
 
 ❌ DO NOT output all questions at once:
 
-```
+```text
 Round 1: Scope
 1. What is the primary goal?
 2. Who are the end users?
@@ -182,7 +193,7 @@ This overwhelms the user and prevents clarification.
 
 ✅ Ask one, wait, ask next:
 
-```
+```text
 ❯ What is the primary goal of this feature?
 
 > user responds

@@ -1,0 +1,43 @@
+# =============================================================================
+# .shellcheckrc — ShellCheck config for oh-my-forge bash scripts
+# =============================================================================
+# ShellCheck is a static analysis tool for shell scripts.
+# Docs: https://www.shellcheck.net/wiki/
+#
+# Default severity is "style". We opt in to aggressive checks by enabling
+# optional rule groups below.
+# =============================================================================
+
+# Treat scripts as bash unless they say otherwise (matches the project's
+# #!/usr/bin/env bash convention).
+shell=bash
+
+# Fail on anything stricter than "style" by default; leave the user to opt
+# into pedantry with `-S error`.
+severity=style
+
+# Enable high-signal optional checks individually (NOT `enable=all`, which
+# turns on SC2250 brace-style noise that fights the existing `$var` convention
+# used throughout scripts/).
+#
+#   add-default-case            — warn on case statements without a default
+#   avoid-nullary-conditions    — prefer `[[ -n $x ]]` over bare `[[ $x ]]`
+#   check-extra-masked-returns  — catches pipefail gotchas
+#   check-set-e-suppressed      — warns on set -e bypassed by `&&`/`||`
+#   check-unassigned-uppercase  — flags uppercase vars that may be env-typed
+#   deprecate-which             — prefer `command -v` over `which`
+#   quote-safe-variables        — enforce quote-by-default discipline
+enable=add-default-case,avoid-nullary-conditions,check-extra-masked-returns,check-set-e-suppressed,check-unassigned-uppercase,deprecate-which,quote-safe-variables
+
+# Explicitly silence known false-positives / stylistic preferences:
+#
+# SC2310: "This function is invoked in an 'if' condition so set -e will be
+#          disabled" — intentional; we handle failures explicitly.
+# SC2311: "Bash implicitly disabled set -e for this function invocation" — same.
+# SC2312: "Consider invoking this command separately to avoid masking its
+#          return value" — info-level noise against the `done < <(find …)`
+#          pattern used throughout scripts/doctor.sh.
+# SC2249: "Consider adding a default *) case" — some case blocks intentionally
+#          fall through.
+# SC1091: "Not following sourced file" — sourced files are resolved at runtime.
+disable=SC2310,SC2311,SC2312,SC2249,SC1091

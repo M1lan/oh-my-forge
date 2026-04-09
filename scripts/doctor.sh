@@ -17,34 +17,66 @@ IFS=$'\n\t'
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 OMF_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
-MODE="repo"   # repo | global | project
+MODE="repo" # repo | global | project
 PROJECT_DIR=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --global)   MODE="global"; shift ;;
-    --project)  MODE="project"; PROJECT_DIR="${2:-}"; shift 2 ;;
-    --repo)     MODE="repo"; shift ;;
-    -h|--help)
-      sed -n '2,14p' "$0"; exit 0 ;;
-    *) printf 'unknown arg: %s\n' "$1" >&2; exit 2 ;;
+    --global)
+      MODE="global"
+      shift
+      ;;
+    --project)
+      MODE="project"
+      PROJECT_DIR="${2:-}"
+      shift 2
+      ;;
+    --repo)
+      MODE="repo"
+      shift
+      ;;
+    -h | --help)
+      sed -n '2,14p' "$0"
+      exit 0
+      ;;
+    *)
+      printf 'unknown arg: %s\n' "$1" >&2
+      exit 2
+      ;;
   esac
 done
 
 # ---------- tty colours ----------
 if [[ -t 1 ]]; then
-  R='\033[0m'; B='\033[1m'; G='\033[32m'; Y='\033[33m'; E='\033[31m'
+  R='\033[0m'
+  B='\033[1m'
+  G='\033[32m'
+  Y='\033[33m'
+  E='\033[31m'
 else
-  R=''; B=''; G=''; Y=''; E=''
+  R=''
+  B=''
+  G=''
+  Y=''
+  E=''
 fi
 
 pass=0
 warn=0
 fail=0
 
-check_pass() { printf '%bPASS%b %s\n' "$G$B" "$R" "$*";          pass=$((pass + 1)); }
-check_warn() { printf '%bWARN%b %s\n' "$Y$B" "$R" "$*" >&2;       warn=$((warn + 1)); }
-check_fail() { printf '%bFAIL%b %s\n' "$E$B" "$R" "$*" >&2;       fail=$((fail + 1)); }
+check_pass() {
+  printf '%bPASS%b %s\n' "$G$B" "$R" "$*"
+  pass=$((pass + 1))
+}
+check_warn() {
+  printf '%bWARN%b %s\n' "$Y$B" "$R" "$*" >&2
+  warn=$((warn + 1))
+}
+check_fail() {
+  printf '%bFAIL%b %s\n' "$E$B" "$R" "$*" >&2
+  fail=$((fail + 1))
+}
 
 section() { printf '\n%b== %s ==%b\n' "$B" "$*" "$R"; }
 
@@ -57,7 +89,10 @@ case "$MODE" in
     TARGET_ROOT="${HOME}/forge"
     ;;
   project)
-    [[ -n "$PROJECT_DIR" && -d "$PROJECT_DIR" ]] || { check_fail "project dir missing: $PROJECT_DIR"; exit 1; }
+    [[ -n "$PROJECT_DIR" && -d "$PROJECT_DIR" ]] || {
+      check_fail "project dir missing: $PROJECT_DIR"
+      exit 1
+    }
     TARGET_ROOT="$(cd -- "$PROJECT_DIR" && pwd)/.forge"
     ;;
 esac
@@ -67,7 +102,7 @@ printf '%bdoctor%b: checking %b%s%b (%s mode)\n' "$B" "$R" "$B" "$TARGET_ROOT" "
 # ---------- Tools ----------
 section "Tools"
 
-if command -v forge >/dev/null 2>&1; then
+if command -v forge > /dev/null 2>&1; then
   ver="$(forge --version 2>&1 | head -1 || true)"
   check_pass "forge binary: $ver"
 else
@@ -75,7 +110,7 @@ else
 fi
 
 for t in rsync find python3; do
-  if command -v "$t" >/dev/null 2>&1; then
+  if command -v "$t" > /dev/null 2>&1; then
     check_pass "$t found"
   else
     check_fail "$t not found"
@@ -120,8 +155,8 @@ if [[ -d "$AGENTS_DIR" ]]; then
   check_pass "agents: $md_count *.md files at top level"
 
   # Frontmatter validation
-  if command -v python3 >/dev/null 2>&1; then
-    if python3 - "$AGENTS_DIR" <<'PY' >/tmp/.omf-doctor-agents.log 2>&1
+  if command -v python3 > /dev/null 2>&1; then
+    if python3 - "$AGENTS_DIR" << 'PY' > /tmp/.omf-doctor-agents.log 2>&1; then
 import os, re, sys
 try:
     import yaml
@@ -150,7 +185,6 @@ if bad:
     print(f"{bad} agent(s) failed validation"); sys.exit(1)
 print("all agents validated")
 PY
-    then
       check_pass "$(head -1 /tmp/.omf-doctor-agents.log)"
     else
       check_fail "agent frontmatter validation failed:"
@@ -213,8 +247,8 @@ if [[ "$MODE" == "repo" ]]; then
   if [[ -f "$TARGET_ROOT/AGENTS.md" ]]; then check_pass "AGENTS.md present"; else check_warn "AGENTS.md absent"; fi
 
   if [[ -f "$TARGET_ROOT/.forge.toml" ]]; then
-    if command -v python3 >/dev/null 2>&1; then
-      if python3 -c "import tomllib; tomllib.load(open('$TARGET_ROOT/.forge.toml','rb'))" 2>/dev/null; then
+    if command -v python3 > /dev/null 2>&1; then
+      if python3 -c "import tomllib; tomllib.load(open('$TARGET_ROOT/.forge.toml','rb'))" 2> /dev/null; then
         check_pass ".forge.toml parses as TOML"
       else
         check_fail ".forge.toml fails to parse as TOML"
@@ -223,8 +257,8 @@ if [[ "$MODE" == "repo" ]]; then
   fi
 
   if [[ -f "$TARGET_ROOT/.mcp.json.example" ]]; then
-    if command -v python3 >/dev/null 2>&1; then
-      if python3 -c "import json; json.load(open('$TARGET_ROOT/.mcp.json.example'))" 2>/dev/null; then
+    if command -v python3 > /dev/null 2>&1; then
+      if python3 -c "import json; json.load(open('$TARGET_ROOT/.mcp.json.example'))" 2> /dev/null; then
         check_pass ".mcp.json.example parses as JSON"
       else
         check_fail ".mcp.json.example fails to parse as JSON"
@@ -255,7 +289,7 @@ if [[ "$MODE" == "repo" ]]; then
   hits=0
   for token in "${forbidden[@]}"; do
     if grep -Rqs --include='*.md' --include='*.yaml' --include='*.yml' -F -- "$token" \
-         "$TARGET_ROOT/agents" "$TARGET_ROOT/skills" "$TARGET_ROOT/commands" 2>/dev/null; then
+      "$TARGET_ROOT/agents" "$TARGET_ROOT/skills" "$TARGET_ROOT/commands" 2> /dev/null; then
       check_fail "forbidden string found: '$token'"
       hits=$((hits + 1))
     fi

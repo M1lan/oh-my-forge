@@ -6,6 +6,7 @@ description: Comprehensive code review of a diff, file, or PR. Covers correctnes
 Code review: {{parameters}}
 
 Run as the `code-reviewer` agent's workflow. Cover:
+
 1. **Correctness** -- logic errors, edge cases, off-by-ones
 2. **Security** -- injection, auth, input validation, secrets
 3. **Performance** -- obvious inefficiencies, N+1 patterns, unbounded loops

@@ -6,7 +6,7 @@ This directory holds plan files produced by the `plan` and `ralplan` skills. Eac
 
 ## Naming convention
 
-```
+```text
 plans/YYYY-MM-DD-<slug>-v<N>.md
 ```
 
@@ -16,7 +16,7 @@ plans/YYYY-MM-DD-<slug>-v<N>.md
 
 Examples:
 
-```
+```text
 plans/2026-04-09-add-refresh-token-flow-v1.md
 plans/2026-04-09-add-refresh-token-flow-v2.md
 plans/2026-03-20-migrate-database-v1.md
@@ -29,6 +29,7 @@ plans/2026-03-20-migrate-database-v1.md
 Every plan file MUST have:
 
 1. **Frontmatter** (optional but recommended):
+
    ```yaml
    ---
    title: Add refresh token flow
@@ -36,6 +37,7 @@ Every plan file MUST have:
    owner: <name>
    ---
    ```
+
 2. **Ground Truth** section -- canonical facts the plan relies on. If anything here is contradicted during execution, STOP and ask.
 3. **Objectives** -- what we are building and why.
 4. **Context** -- current state, relevant files, dependencies.

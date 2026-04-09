@@ -8,6 +8,7 @@ Autopilot: {{parameters}}
 Load the `autopilot` skill and follow its workflow.
 
 Full pipeline:
+
 1. **Clarify** the request (if ambiguous, ask 1-2 quick questions -- otherwise proceed)
 2. **Plan** with the `plan` skill (or `ralplan` for high-risk work)
 3. **Execute** the plan phase by phase
@@ -15,6 +16,7 @@ Full pipeline:
 5. **Report** when done with evidence of completion
 
 Rules:
+
 - Stop and ask the user if you hit a Ground Truth contradiction
 - Stop and ask if a destructive irreversible action is needed (drop table, force push, rm -rf outside workspace)
 - Otherwise keep going until done

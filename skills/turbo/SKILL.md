@@ -27,7 +27,7 @@ Turbo mode bypasses interactive confirmation loops and executes tasks in paralle
 
 ## Execution Flow
 
-```
+```text
 turbo: build a login page
 
 → Understand task (fast)
@@ -45,7 +45,7 @@ turbo: build a login page
 
 ## Example
 
-```
+```text
 ❯ turbo: add user profile component to all pages
 
 [PARALLEL]
@@ -62,7 +62,7 @@ Done. 5 files modified in 12s.
 
 For a project-specific turbo configuration:
 
-```
+```text
 skills/turbo/
 └── CONFIG.md    # Optional: define turbo rules for this project
 ```

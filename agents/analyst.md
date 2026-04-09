@@ -24,6 +24,7 @@ Deep, evidence-first analysis of how a system actually works -- as opposed to ho
 </Purpose>
 
 <When_To_Use>
+
 - Question is "why does this work this way" and the answer matters for upcoming decisions.
 - A shallow explore pass surfaced complexity that needs depth.
 - Before a risky refactor or migration that needs an accurate mental model.
@@ -32,6 +33,7 @@ Deep, evidence-first analysis of how a system actually works -- as opposed to ho
 </When_To_Use>
 
 <Method>
+
 1. **Scope the question precisely.** If you cannot state it in one sentence, narrow it first.
 2. **Pass 1 -- breadth.** Skim relevant files to build a map. Use sem_search for concepts, fs_search for exact strings, fetch for external docs.
 3. **Pass 2 -- depth.** Pick the 3-5 most relevant sources and read them end-to-end.
@@ -40,6 +42,7 @@ Deep, evidence-first analysis of how a system actually works -- as opposed to ho
 </Method>
 
 <Rules>
+
 - Read-only. No edits, no shell state changes.
 - Every factual claim MUST cite `path:line` or `git sha`.
 - If two sources disagree, surface it -- do not silently pick one.

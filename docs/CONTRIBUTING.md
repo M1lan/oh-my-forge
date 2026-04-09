@@ -17,7 +17,7 @@ Thanks for your interest. oh-my-forge is a content pack for ForgeCode (`forge`) 
 
 ## Repository layout
 
-```
+```text
 oh-my-forge/
 ├── README.md
 ├── AGENTS.md                  # User-facing project rules (auto-loaded by forge)
@@ -102,11 +102,13 @@ See [`docs/REFERENCE.md#skills`](./REFERENCE.md#skills). Short version:
 1. Create `templates/<template-name>.md`. Name must match the forge built-in being overridden.
 2. Start with a comment explaining it is an override.
 3. Use marker-bounded sections for customizable regions:
-   ```
+
+   ```text
    <!-- OMF:TEMPLATE:DOOM_LOOP:START -->
    Your content here
    <!-- OMF:TEMPLATE:DOOM_LOOP:END -->
    ```
+
 4. Add an entry to `catalog-manifest.json` under `templates`.
 
 ---

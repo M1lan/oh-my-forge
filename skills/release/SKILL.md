@@ -33,17 +33,27 @@ Stop and refuse to proceed if any of these fail:
    - Ask the user to confirm.
 2. **Generate release notes.** `git log <last-tag>..HEAD --oneline --no-merges` -- group into Features / Fixes / Chore / Breaking. Clean up commit messages for the changelog.
 3. **Update `CHANGELOG.md`.** Prepend a new section:
+
    ```markdown
    ## [v1.2.3] -- YYYY-MM-DD
+
    ### Breaking changes
+
    - ...
+
    ### Features
+
    - ...
+
    ### Fixes
+
    - ...
+
    ### Chore
+
    - ...
    ```
+
 4. **Bump the version** in the project manifest (`package.json`, `Cargo.toml`, `pyproject.toml`, `VERSION`, etc.). Do it in every place the version appears -- grep to find them all.
 5. **Commit.** `git commit -am "chore(release): v1.2.3"` -- do not use vague messages.
 6. **Tag.** `git tag -s v1.2.3 -m "v1.2.3"` (signed, with annotated message). If no GPG key is configured, use `-a` instead and warn the user.
@@ -62,7 +72,7 @@ Stop and refuse to proceed if any of these fail:
 
 ## Output
 
-```
+```text
 ## Release: v1.2.3
 
 ### Pre-flight

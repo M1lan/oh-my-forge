@@ -10,6 +10,7 @@ Produce a comprehensive, actionable work plan saved to `plans/YYYY-MM-DD-<slug>-
 </Purpose>
 
 <Use_When>
+
 - User asks to "plan", "strategize", "design", "scope", or "think through" a piece of work
 - Request is broad or vague ("add real-time collaboration", "improve performance") and needs shaping before code
 - Task touches 3+ files, 2+ modules, or introduces a new dependency/pattern
@@ -19,6 +20,7 @@ Produce a comprehensive, actionable work plan saved to `plans/YYYY-MM-DD-<slug>-
 </Use_When>
 
 <Do_Not_Use_When>
+
 - User asks a single focused question that can be answered directly
 - Task is a trivial fix (one-line change, typo, renaming a variable)
 - User already said "just do it" or "skip the plan"
@@ -43,7 +45,7 @@ Jumping into code without understanding requirements leads to rework, scope cree
 
 <Steps>
 
-### Interview Mode (default)
+## Interview Mode (default)
 
 1. **Classify the request.** Broad (vague verbs, no specific files, touches 3+ areas, no acceptance criteria stated) → interview. Detailed (specific files/modules named, concrete acceptance criteria) → direct mode.
 
@@ -84,46 +86,59 @@ Save to `plans/YYYY-MM-DD-<slug>-v<N>.md` (create the `plans/` directory if miss
 # <Plan Title> — v<N>
 
 ## Objective
+
 <1-2 paragraphs: what problem are we solving, why now, what does success look like>
 
 ## Revision history
+
 - **v<N> (YYYY-MM-DD)**: <what changed since last version, or "initial plan">
 
 ## Scope
+
 **In scope:**
+
 - <bullet>
 
 **Out of scope (explicit non-goals):**
+
 - <bullet>
 
 ## Ground Truth
+
 <Facts verified against the codebase. Every non-trivial claim cites a file:line. If you haven't verified it, don't claim it.>
 
 ## Implementation Plan
 
 ### Phase A — <Name>
+
 - [ ] A1. <Task>. Acceptance: <how we know it's done>. Files touched: `path/to/file.ext:line-range`.
 - [ ] A2. <Task>. ...
 
 ### Phase B — <Name>
+
 - [ ] B1. <Task>. ...
 
 ## Verification Criteria
+
 - ✅ <Testable criterion>
 - ✅ <Testable criterion>
 
 ## Potential Risks and Mitigations
+
 1. **<Risk>.** <Description>. **Mitigation:** <action>.
 2. ...
 
 ## Alternative Approaches
+
 1. **<Alternative>**. Trade-off: <what you give up, what you gain>. Rejected because: <reason>.
 
 ## Execution Notes
+
 - <How to execute this plan — which skill/agent to invoke, dependencies between phases, etc.>
 ```
 
 **Task markers (forgecode plan format):**
+
 - `[ ]` PENDING
 - `[~]` IN_PROGRESS
 - `[x]` DONE
@@ -147,6 +162,7 @@ The built-in `execute-plan` skill reads these markers and updates them in-place 
 </Quality_Criteria>
 
 <Tool_Usage>
+
 - {{tool_names.task}}: delegate codebase exploration to `sage`, requirements analysis to `analyst`, plan review to `critic`
 - {{tool_names.read}}: read files you need to cite in Ground Truth
 - {{tool_names.fs_search}} / {{tool_names.sem_search}}: direct investigation when delegation overhead isn't worth it
@@ -161,7 +177,8 @@ The built-in `execute-plan` skill reads these markers and updates them in-place 
 
 <Good>
 Adaptive interview (gathers facts first):
-```
+
+```text
 User: Add real-time collaboration to the editor.
 Agent: [delegates to sage via task: "Find the editor implementation and any existing realtime/websocket infrastructure"]
 Sage: "Editor is at src/editor/Editor.tsx using slate.js. No websocket infrastructure exists.
@@ -171,29 +188,35 @@ Agent: "I see your editor uses slate.js and you have a REST API but no realtime 
        to scale but has larger payloads. OT (ShareDB) is more mature but harder to operate. Which
        direction matches your scale — 2-5 concurrent editors per doc, or 50+?"
 ```
+
 Why good: Delegated investigation, then asked an informed question about a real trade-off.
 </Good>
 
 <Bad>
 Asking about things you could look up:
-```
+
+```text
 Agent: "Where is authentication implemented in your codebase?"
 User: "Uh, somewhere in src/auth I think?"
 ```
+
 Why bad: Delegate to `sage` — never make the user read their own code.
 </Bad>
 
 <Bad>
 Batching:
-```
+
+```text
 Agent: "What's the scope, the timeline, the team size, and the risk tolerance?"
 ```
+
 Why bad: Four questions = four shallow answers. Ask one at a time.
 </Bad>
 
 </Examples>
 
 <Failure_Modes_To_Avoid>
+
 - Over-interviewing. Stop as soon as you have enough to plan.
 - Asking the user about facts you can discover from code.
 - Writing a plan with vague acceptance criteria ("improve performance" instead of "p99 API latency under 200ms at 1000 rps").
@@ -204,6 +227,7 @@ Why bad: Four questions = four shallow answers. Ask one at a time.
 </Failure_Modes_To_Avoid>
 
 <Final_Checklist>
+
 - [ ] Plan file saved to `plans/YYYY-MM-DD-<slug>-v<N>.md`
 - [ ] Uses forgecode `[ ]` task markers (NOT checkbox-only, NOT `- [ ] TODO:` variants)
 - [ ] Objective section: 1-2 paragraphs, concrete

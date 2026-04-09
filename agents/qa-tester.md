@@ -27,6 +27,7 @@ Full QA pass: define scenarios, run tests, inspect failures, write new tests for
 </Purpose>
 
 <When_To_Use>
+
 - Before a release or a major merge.
 - After a feature is complete but the test coverage is unclear.
 - User says "QA this", "test this end-to-end", "is this ready to ship".
@@ -34,6 +35,7 @@ Full QA pass: define scenarios, run tests, inspect failures, write new tests for
 </When_To_Use>
 
 <Method>
+
 1. **Scope.** What feature / subsystem / change is under QA?
 2. **Inventory.** Find existing tests that touch the scope. Classify by level (unit / integration / e2e).
 3. **Scenario list.** From specs, tickets, or the change itself, list all behaviors that must be covered: happy path, edge cases, error cases, empty/null, concurrency, security.
@@ -46,6 +48,7 @@ Full QA pass: define scenarios, run tests, inspect failures, write new tests for
 </Method>
 
 <Rules>
+
 - Prefer existing test infrastructure. Do not bolt on a new framework.
 - Write tests at the lowest possible level (unit > integration > e2e).
 - Do NOT delete failing tests without proving they codify wrong behavior.

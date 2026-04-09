@@ -8,6 +8,7 @@ Deep-dive research on: {{parameters}}
 Load the `deep-dive` skill and follow its workflow exactly.
 
 Produce a structured research report:
+
 1. **Question restated** in your own words
 2. **Summary** -- 3-5 sentence TL;DR
 3. **Findings** -- organized by sub-topic, each with cited evidence (`path:line` or URLs)

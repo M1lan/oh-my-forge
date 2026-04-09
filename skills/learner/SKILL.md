@@ -8,6 +8,7 @@ Learner extracts reusable patterns from successful debugging or implementation s
 </Purpose>
 
 <Use_When>
+
 - User says "learner", "extract pattern", "remember this solution"
 - You solved a tricky bug that might recur
 - You discovered an elegant solution to a common problem
@@ -15,6 +16,7 @@ Learner extracts reusable patterns from successful debugging or implementation s
 </Use_When>
 
 <Do_Not_Use_When>
+
 - The pattern is too specific to be reusable
 - The solution might have unintended side effects if blindly reused
 - Quick fixes that don't teach anything lasting
@@ -22,12 +24,14 @@ Learner extracts reusable patterns from successful debugging or implementation s
 
 <Pattern_Quality_Gates>
 A good pattern to extract:
+
 - Solves a specific, recurring problem
 - Is generalizable without losing effectiveness
 - Has clear trigger conditions
 - Includes the solution and explanation
 
 A BAD pattern to extract:
+
 - Context-specific workarounds
 - Hacks that mask symptoms rather than fix root causes
 - Solutions tied to specific project state
@@ -45,25 +49,32 @@ source: extracted
 ---
 
 ## Problem
+
 [What this pattern solves]
 
 ## Solution
+
 [How to solve it]
 
 ## Example
+
 [Concrete example from the session]
 ```
+
 </Output>
 
 <Storage_Locations>
+
 | Scope | Path | Use For |
 |-------|------|---------|
 | Project | `.forge/skills/` | Project-specific patterns |
 | Global | `~/.forge/skills/` | Universal patterns |
+
 </Storage_Locations>
 
 <Auto_Ingestion>
 Patterns are matched against:
+
 - User prompts
 - Error messages
 - File content being read

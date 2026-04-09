@@ -12,6 +12,7 @@ Append (or update) the rule in the project's `AGENTS.md` under an appropriate se
 Show the user the exact diff before writing.
 
 Rule should be:
+
 - **Imperative** ("Always do X", "Never do Y", "Prefer Z over W")
 - **Specific** -- no vague guidance
 - **Testable** -- you should be able to verify compliance after the fact

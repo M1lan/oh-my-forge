@@ -8,6 +8,7 @@ Trace systematically debugs issues using evidence-driven hypothesis testing. Ins
 </Purpose>
 
 <Use_When>
+
 - User says "trace", "debug", "hunt this bug"
 - Complex bug with unclear root cause
 - Intermittent issues
@@ -15,13 +16,16 @@ Trace systematically debugs issues using evidence-driven hypothesis testing. Ins
 </Use_When>
 
 <Do_Not_Use_When>
+
 - Obvious bugs with clear error messages
 - Simple typos or syntax errors
 - Issues already diagnosed
 </Do_Not_Use_When>
 
 <Debugging_Protocol>
+
 ### Step 1: Gather Evidence
+
 - Error messages (exact text)
 - Stack traces
 - Logs
@@ -29,29 +33,36 @@ Trace systematically debugs issues using evidence-driven hypothesis testing. Ins
 - Environment context
 
 ### Step 2: Form Hypotheses
+
 List all possible explanations for the bug.
 Example: "Login fails"
+
 - Hypothesis A: Database connection issue
 - Hypothesis B: Wrong password hash algorithm
 - Hypothesis C: Session middleware misconfigured
 - Hypothesis D: CSRF token validation failing
 
 ### Step 3: Test Hypotheses
+
 For each hypothesis, determine what evidence would confirm or refute it.
 Then gather that evidence by reading the relevant code.
 
 ### Step 4: Isolate Root Cause
+
 The hypothesis with the most supporting evidence and no refutation is the root cause.
 
 ### Step 5: Fix
+
 Implement the minimal fix that addresses the root cause.
 
 ### Step 6: Verify
+
 Confirm the original symptom is resolved.
 </Debugging_Protocol>
 
 <Output_Format>
-```
+
+```text
 ## Bug Trace Report
 
 ### Evidence
@@ -72,6 +83,7 @@ Confirm the original symptom is resolved.
 ### Verification
 [Test showing fix works]
 ```
+
 </Output_Format>
 
 <Examples>
