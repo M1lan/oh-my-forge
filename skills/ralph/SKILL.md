@@ -1,8 +1,6 @@
 ---
 name: ralph
 description: Persistence mode — doesn't stop until the task is verified complete
-argument-hint: "<task to complete>"
-level: 3
 ---
 
 <Purpose>

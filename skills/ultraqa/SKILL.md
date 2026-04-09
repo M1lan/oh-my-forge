@@ -1,8 +1,6 @@
 ---
 name: ultraqa
-description: Autonomous QA cycling until all tests pass
-argument-hint: "<goal or acceptance criteria>"
-level: 3
+description: Autonomous QA loop that runs the project test suite, diagnoses failures, fixes them, and re-runs until the suite is green or the iteration limit is hit. Use after an implementation pass when tests are failing and you want continuous iteration until pass, when the user says "make the tests pass", or as a followup to the autopilot/ralph skills.
 ---
 
 <Purpose>

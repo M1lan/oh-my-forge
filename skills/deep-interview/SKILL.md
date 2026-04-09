@@ -1,8 +1,6 @@
 ---
 name: deep-interview
 description: Socratic requirements clarification before any code is written
-argument-hint: "<vague idea or concept>"
-level: 4
 ---
 
 <Purpose>

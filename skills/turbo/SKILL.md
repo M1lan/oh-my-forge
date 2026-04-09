@@ -1,3 +1,8 @@
+---
+name: turbo
+description: Maximum-throughput parallel execution mode. Bypasses interactive confirmation loops, groups related operations, executes independent work in parallel, and favors speed over narration. Use when the user says "turbo", "just do it", "no confirmations", or otherwise signals they want the full change made now without stopping.
+---
+
 # Turbo Mode
 
 > "Everything at maximum speed. I'll write all the code now."

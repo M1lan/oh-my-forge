@@ -346,17 +346,17 @@ All tasks use the `[ ] PENDING` format. An executing agent should update markers
 
 The current oh-my-forge does not work at all as a forge config because of these issues. Fix them first.
 
-- [ ] A1. **Delete `forge.yaml`**. The file is a dead YAML that forgecode cannot load. Use `remove` tool.
-- [ ] A2. **Create `.forge.toml`** at oh-my-forge repo root using the verified flat schema shown in Ground Truth. Populate with sensible defaults: `[session]` using `claude_code`/`claude-opus-4-6`, `[reasoning] enabled=true effort=high`, `[updates] frequency=daily auto_update=false` (safer default than the live install), `[compact]` matching the live install, `[retry]` matching the live install. Add a commented-out `[[commands]]` section STUB ONLY (2 lines showing structure) for users who prefer inline commands — we ship file-based commands in Phase E4 as the primary surface. Add a top-of-file comment block explaining that this is the oh-my-forge baseline and users can copy to `~/forge/.forge.toml`. **Never use `frequency = "never"` or `frequency = "monthly"` — those are not in the enum.**
-- [ ] A3. **Create `.mcp.json.example`** at oh-my-forge repo root with 3-4 representative MCP servers (emacs, github, filesystem, fetch). All servers commented out by default with `// TODO: uncomment and configure`. Use the live `~/forge/.mcp.json` emacs entry as the first example. Include a comment explaining this is an example and should be copied to `~/forge/.mcp.json` and customized. Also document the `forge mcp import` subcommand as an alternative ingress path.
-- [ ] A4. **Create `AGENTS.md`** at oh-my-forge repo root (user-facing project rules file that forgecode auto-loads). Adapt from the existing `docs/AGENTS.md` content but:
+- [x] A1. **Delete `forge.yaml`**. The file is a dead YAML that forgecode cannot load. Use `remove` tool.
+- [x] A2. **Create `.forge.toml`** at oh-my-forge repo root using the verified flat schema shown in Ground Truth. Populate with sensible defaults: `[session]` using `claude_code`/`claude-opus-4-6`, `[reasoning] enabled=true effort=high`, `[updates] frequency=daily auto_update=false` (safer default than the live install), `[compact]` matching the live install, `[retry]` matching the live install. Add a commented-out `[[commands]]` section STUB ONLY (2 lines showing structure) for users who prefer inline commands — we ship file-based commands in Phase E4 as the primary surface. Add a top-of-file comment block explaining that this is the oh-my-forge baseline and users can copy to `~/forge/.forge.toml`. **Never use `frequency = "never"` or `frequency = "monthly"` — those are not in the enum.**
+- [x] A3. **Create `.mcp.json.example`** at oh-my-forge repo root with 3-4 representative MCP servers (emacs, github, filesystem, fetch). All servers commented out by default with `// TODO: uncomment and configure`. Use the live `~/forge/.mcp.json` emacs entry as the first example. Include a comment explaining this is an example and should be copied to `~/forge/.mcp.json` and customized. Also document the `forge mcp import` subcommand as an alternative ingress path.
+- [x] A4. **Create `AGENTS.md`** at oh-my-forge repo root (user-facing project rules file that forgecode auto-loads). Adapt from the existing `docs/AGENTS.md` content but:
   - Document the ACTUAL forgecode architecture (no tier system, no `max_walker_depth` field)
   - List the three built-in agents (forge/sage/muse) + any oh-my-forge custom agents
   - Explain skill invocation via the `skill` tool
   - Include a keyword-routing section (from Phase E1)
   - Include the commit trailer protocol (from Phase E3)
   - Reference the execution modes as SKILLS (not prefix-triggered modes)
-- [ ] A5. **Fix every agent's `tools:` frontmatter**. For each file under `agents/**/*.md`:
+- [x] A5. **Fix every agent's `tools:` frontmatter**. For each file under `agents/**/*.md`:
   - Replace `read, write, patch, shell` boilerplate with a considered tool subset for that agent's role — this is a **deliberate expansion** of the tool surface, not a bugfix alone
   - Read-only agents (architect, code-reviewer, security-reviewer, analyst, critic, verifier, explorer, tracer, scientist, data-modeler, dep-auditor, ux-analyst, doc-writer-read): `read`, `fs_search`, `sem_search`, `fetch`, `skill`, `todo_write`, `todo_read`, `task`, `mcp_*`
   - Implementation agents (executor, executor-low, executor-high, refactorer, ui-engineer, db-engineer, migrator, test-writer): add `write`, `patch`, `multi_patch`, `undo`, `remove`, `shell` on top of the read set
@@ -367,7 +367,7 @@ The current oh-my-forge does not work at all as a forge config because of these 
   - Explicitly exclude `architect-low` and `executor-low` from reasoning (these are the intentionally-lightweight variants; the `-low` suffix is meaningful, not a typo for `architect`/`executor`)
   - Quote the `id` value (matches built-in style: `id: "architect"` not `id: architect`)
   - Add `user_prompt` frontmatter block matching the built-in agents' pattern (for event + date injection)
-- [ ] A6. **Delete the two existing install scripts** (`scripts/install.sh` and `scripts/install-global.sh`) **and write ONE** `scripts/install.sh`:
+- [x] A6. **Delete the two existing install scripts** (`scripts/install.sh` and `scripts/install-global.sh`) **and write ONE** `scripts/install.sh`:
   - Target `~/forge/` (NOT `~/.forge/`) for global installs
   - Support `--project <path>` (installs to `<path>/.forge/`) and `--global` (installs to `~/forge/`, default)
   - Uses `rsync -a` to copy: `agents/`, `skills/`, `commands/`, `templates/`
@@ -377,7 +377,7 @@ The current oh-my-forge does not work at all as a forge config because of these 
   - Prints a warning if it detects a stray `~/forge/forge.yaml` from the old v1 install (file is ignored by forgecode, but should be deleted)
   - Bash 5.3+ style per `write-bash` skill: `set -euo pipefail`, `shopt -s failglob`, functions, `main "$@"`, log helpers
   - Ends by printing a "what was installed" summary and a "next steps" hint (`./scripts/doctor.sh`)
-- [ ] A7. **Write `scripts/doctor.sh`**:
+- [x] A7. **Write `scripts/doctor.sh`**:
   - Checks `~/forge/` exists
   - Checks `~/forge/.forge.toml` is valid TOML. Validation order: prefer `toml-cli` (if installed), fall back to `python3 -c 'import tomllib; tomllib.load(open("PATH","rb"))'` (Python 3.11+; tomllib is in the stdlib), fall back to a basic grep-syntax check if neither is available
   - Checks `~/forge/.mcp.json` is valid JSON via `jq . < FILE >/dev/null` or `python3 -m json.tool < FILE >/dev/null`
@@ -391,13 +391,13 @@ The current oh-my-forge does not work at all as a forge config because of these 
   - Flags `[updates] frequency` values outside `daily|weekly|always`
   - Prints a green `OK` or red `FAIL` banner with a summary
   - Bash 5.3+ style, `set -euo pipefail`, exit 0 on OK, exit 1 on any FAIL
-- [ ] A8. **Write `scripts/uninstall.sh`**:
+- [x] A8. **Write `scripts/uninstall.sh`**:
   - Removes only the oh-my-forge-provided files (never user's own files)
   - Uses catalog-manifest.json to enumerate what to remove (requires Phase D1 to be done first; A8 depends on D1)
   - Dry-run mode via `--dry-run` flag (shows what would be removed)
   - Asks confirmation unless `--yes` is passed
   - Bash 5.3+ style
-- [ ] A9. **Write `scripts/migrate-from-v1.sh`** (new task, replaces the vague "install script prints a warning" from the v1 draft):
+- [x] A9. **Write `scripts/migrate-from-v1.sh`** (new task, replaces the vague "install script prints a warning" from the v1 draft):
   - Detects a v1 install: looks for `~/forge/forge.yaml`, `~/forge/.forge/forge.yaml`, `./forge.yaml` in CWD
   - For each detected v1 file: backs it up to `<file>.v1-backup`, prints a diff summary against the new `.forge.toml`, and deletes the v1 file ONLY with `--yes`
   - Detects v1 agents (those with `tier:` frontmatter field) in `~/forge/agents/` and offers to migrate them to the new frontmatter format
@@ -408,36 +408,36 @@ The current oh-my-forge does not work at all as a forge config because of these 
 
 Port the top skills from the reference codebases, rewritten for forgecode's skill model (2-field frontmatter, discoverability via description, XML-tagged body). Each task creates one skill directory with a `SKILL.md` plus optional `scripts/`, `references/`, `assets/`.
 
-- [ ] B1. **Rewrite existing skills to conform to forgecode format**. For each of the 13 existing skills in `skills/`:
+- [x] B1. **Rewrite existing skills to conform to forgecode format**. For each of the 13 existing skills in `skills/`:
   - Strip all non-standard frontmatter fields (`argument-hint`, `level`, `aliases`, `triggers`, `user-invocable`) — keep only `name` and `description`
   - Rewrite `description` to be the PRIMARY triggering mechanism: include both WHAT it does and WHEN to use it (follow the `docx` skill example from `create-skill/SKILL.md:368`)
   - Keep the `<Purpose>/<Use_When>/<Steps>` body structure — it's good prompting
   - Ensure no body text assumes a skill-prefix triggering model (e.g. remove "User says 'ralph:'..." phrasing). Instead say "When the user asks for a task that must complete without giving up, use this skill."
   - Fix any references to Claude-specific tool names (`TodoWrite` → `todo_write`, etc.)
   - Skills to update: `autopilot`, `ralph`, `ultrawork`, `turbo`, `eco`, `team`, `trace`, `deep-interview`, `learner`, `scaffold`, `ultraqa`, `tailwind-v4`, `docker`
-- [ ] B2. **Port skill: `critic`**. Final-gate multi-perspective review skill. Source: `oh-my-claudecode/skills/` (implicit — implemented as an agent there) + `oh-my-codex/prompts/critic.md`. This is the heavyweight "pre-commit quality gate" skill. Includes: pre-commitment predictions, verification, multi-perspective review (security/ops/maintainer), gap analysis, self-audit, realist check, adaptive adversarial escalation, evidence requirements. Reference the `critic` agent created in Phase C.
-- [ ] B3. **Port skill: `verify`**. Evidence-based completion check skill. Source: `oh-my-claudecode/skills/verify/SKILL.md` and `oh-my-codex/prompts/verifier.md`. Skill that asks "is this actually done?" with an explicit evidence checklist.
-- [ ] B4. **Port skill: `plan`** (standard planning). Source: `oh-my-claudecode/skills/plan/SKILL.md`. Standard planning workflow. Writes to `plans/YYYY-MM-DD-<slug>-v<N>.md`. Uses the forgecode plan format with `[ ]/[~]/[x]/[!]` markers. Delegates to `muse` agent via the `task` tool (since muse has the `plan` tool).
-- [ ] B5. **Port skill: `ralplan`** (consensus planning with deliberation). Source: `oh-my-claudecode/skills/ralplan/SKILL.md`. Planner+architect+critic iterative deliberation with optional `--deliberate` flag for high-risk work. Requires antithesis/tradeoff/synthesis sections.
-- [ ] B6. **Port skill: `ai-slop-cleaner`**. Source: `oh-my-claudecode/skills/ai-slop-cleaner/SKILL.md`. Regression-safe deletion-first cleanup pass. Optional post-ralph/post-autopilot step.
-- [ ] B7. **Port skill: `cancel`**. Source: `oh-my-claudecode/skills/cancel/SKILL.md`. Clean mode exit with dependency-ordered cleanup. Writes `.forge/state/cancel-signal.json`.
-- [ ] B8. **Port skill: `explore`**. Source: `oh-my-claudecode/skills/` (implicit — agent-based there) + codex `explore.md`. Read-only codebase exploration skill that delegates heavy search to the `sage` agent via the `task` tool.
-- [ ] B9. **Port skill: `tracer`** (evidence-driven debugging). Source: `oh-my-claudecode/skills/trace/SKILL.md`. Replace the existing `trace` skill with this richer version.
-- [ ] B10. **Port skill: `note`**. Source: `oh-my-codex/skills/note/SKILL.md`. Compaction-resilient notepad at `.forge/state/notepad.md`. Three sections: Priority (500-char limit), Working (auto-prune), MANUAL (user-protected).
-- [ ] B11. **Port skill: `recall`**. Source: `oh-my-gemini-cli/commands/omg/recall.toml`. State-first search before transcript fallback. Reads `.forge/state/*.json` and `.forge/state/notepad.md` first.
-- [ ] B12. **Port skill: `visual-verdict`**. Source: `oh-my-claudecode/skills/visual-verdict/SKILL.md`. Structured JSON visual diff scoring with score threshold (90+). Writes `.forge/state/visual-progress.json`.
-- [ ] B13. **Port skill: `deep-dive`**. Source: `oh-my-claudecode/skills/deep-dive/SKILL.md`. Two-stage pipeline: trace → deep-interview with 3-point injection.
-- [ ] B14. **Port skill: `wiki`**. Source: `oh-my-claudecode/skills/wiki/SKILL.md`. Persistent markdown knowledge base at `.forge/wiki/*.md` that compounds across sessions.
-- [ ] B15. **Port skill: `remember`**. Source: `oh-my-claudecode/skills/remember/SKILL.md`. Review reusable project knowledge; routes to note/wiki/docs.
-- [ ] B16. **Port skill: `skillify`**. Source: `oh-my-claudecode/skills/skillify/SKILL.md`. Auto-extract a reusable skill from the current conversation. Produces a draft SKILL.md compatible with forgecode's 2-field frontmatter.
-- [ ] B17. **CUT. Merged into B9 (`tracer` skill).** The v1 draft proposed a separate `debug` skill but it substantially duplicates `tracer`. Merge any unique debugging-specific content (log inspection, snapshot navigation) into the body of the `tracer` skill instead.
-- [ ] B18. **Port skill: `release`** (oh-my-forge release flow). Source: `oh-my-claudecode/skills/release/SKILL.md`. Adapted for oh-my-forge's own release: bump version in catalog-manifest, update CHANGELOG, tag, push.
-- [ ] B19. **New skill: `doctor`**. Thin wrapper that invokes `scripts/doctor.sh` and interprets the result with guided fixes for common failures. Kept because it's usable via the `skill` tool from any agent, which is genuinely more ergonomic than shelling out.
-- [ ] B20. **CUT. Dropped `omf-setup` skill.** User said no launcher wrappers. The `scripts/install.sh` script is sufficient; no guided skill wrapper.
+- [x] B2. **Port skill: `critic`**. Final-gate multi-perspective review skill. Source: `oh-my-claudecode/skills/` (implicit — implemented as an agent there) + `oh-my-codex/prompts/critic.md`. This is the heavyweight "pre-commit quality gate" skill. Includes: pre-commitment predictions, verification, multi-perspective review (security/ops/maintainer), gap analysis, self-audit, realist check, adaptive adversarial escalation, evidence requirements. Reference the `critic` agent created in Phase C.
+- [x] B3. **Port skill: `verify`**. Evidence-based completion check skill. Source: `oh-my-claudecode/skills/verify/SKILL.md` and `oh-my-codex/prompts/verifier.md`. Skill that asks "is this actually done?" with an explicit evidence checklist.
+- [x] B4. **Port skill: `plan`** (standard planning). Source: `oh-my-claudecode/skills/plan/SKILL.md`. Standard planning workflow. Writes to `plans/YYYY-MM-DD-<slug>-v<N>.md`. Uses the forgecode plan format with `[ ]/[~]/[x]/[!]` markers. Delegates to `muse` agent via the `task` tool (since muse has the `plan` tool).
+- [x] B5. **Port skill: `ralplan`** (consensus planning with deliberation). Source: `oh-my-claudecode/skills/ralplan/SKILL.md`. Planner+architect+critic iterative deliberation with optional `--deliberate` flag for high-risk work. Requires antithesis/tradeoff/synthesis sections.
+- [x] B6. **Port skill: `ai-slop-cleaner`**. Source: `oh-my-claudecode/skills/ai-slop-cleaner/SKILL.md`. Regression-safe deletion-first cleanup pass. Optional post-ralph/post-autopilot step.
+- [x] B7. **Port skill: `cancel`**. Source: `oh-my-claudecode/skills/cancel/SKILL.md`. Clean mode exit with dependency-ordered cleanup. Writes `.forge/state/cancel-signal.json`.
+- [x] B8. **Port skill: `explore`**. Source: `oh-my-claudecode/skills/` (implicit — agent-based there) + codex `explore.md`. Read-only codebase exploration skill that delegates heavy search to the `sage` agent via the `task` tool.
+- [x] B9. **Port skill: `tracer`** (evidence-driven debugging). Source: `oh-my-claudecode/skills/trace/SKILL.md`. Replace the existing `trace` skill with this richer version.
+- [x] B10. **Port skill: `note`**. Source: `oh-my-codex/skills/note/SKILL.md`. Compaction-resilient notepad at `.forge/state/notepad.md`. Three sections: Priority (500-char limit), Working (auto-prune), MANUAL (user-protected).
+- [x] B11. **Port skill: `recall`**. Source: `oh-my-gemini-cli/commands/omg/recall.toml`. State-first search before transcript fallback. Reads `.forge/state/*.json` and `.forge/state/notepad.md` first.
+- [x] B12. **Port skill: `visual-verdict`**. Source: `oh-my-claudecode/skills/visual-verdict/SKILL.md`. Structured JSON visual diff scoring with score threshold (90+). Writes `.forge/state/visual-progress.json`.
+- [x] B13. **Port skill: `deep-dive`**. Source: `oh-my-claudecode/skills/deep-dive/SKILL.md`. Two-stage pipeline: trace → deep-interview with 3-point injection.
+- [x] B14. **Port skill: `wiki`**. Source: `oh-my-claudecode/skills/wiki/SKILL.md`. Persistent markdown knowledge base at `.forge/wiki/*.md` that compounds across sessions.
+- [x] B15. **Port skill: `remember`**. Source: `oh-my-claudecode/skills/remember/SKILL.md`. Review reusable project knowledge; routes to note/wiki/docs.
+- [x] B16. **Port skill: `skillify`**. Source: `oh-my-claudecode/skills/skillify/SKILL.md`. Auto-extract a reusable skill from the current conversation. Produces a draft SKILL.md compatible with forgecode's 2-field frontmatter.
+- [x] B17. **CUT. Merged into B9 (`tracer` skill).** The v1 draft proposed a separate `debug` skill but it substantially duplicates `tracer`. Merge any unique debugging-specific content (log inspection, snapshot navigation) into the body of the `tracer` skill instead.
+- [x] B18. **Port skill: `release`** (oh-my-forge release flow). Source: `oh-my-claudecode/skills/release/SKILL.md`. Adapted for oh-my-forge's own release: bump version in catalog-manifest, update CHANGELOG, tag, push.
+- [x] B19. **New skill: `doctor`**. Thin wrapper that invokes `scripts/doctor.sh` and interprets the result with guided fixes for common failures. Kept because it's usable via the `skill` tool from any agent, which is genuinely more ergonomic than shelling out.
+- [x] B20. **CUT. Dropped `omf-setup` skill.** User said no launcher wrappers. The `scripts/install.sh` script is sufficient; no guided skill wrapper.
 
 ### Phase C — Agents
 
-- [ ] C1. **Rewrite ALL 31 existing agents** with the verified frontmatter schema (Ground Truth section). For each agent:
+- [x] C1. **Rewrite ALL 31 existing agents** with the verified frontmatter schema (Ground Truth section). For each agent:
   - Quote `id` value
   - Drop `tier` field entirely
   - Add explicit `reasoning.enabled` where appropriate
@@ -446,21 +446,21 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
   - Rewrite body using XML-tagged sections: `<Role>`, `<Success_Criteria>`, `<Investigation_Protocol>`, `<Tool_Usage>`, `<Output_Format>`, `<Failure_Modes_To_Avoid>`, `<Examples>`, `<Final_Checklist>` (when appropriate for the agent — short agents don't need all sections)
   - Remove any Claude-specific mentions
   - Ensure the description is thorough — it's the primary trigger mechanism for delegation
-- [ ] C2. **Add agent: `critic`**. Source: `oh-my-claudecode/agents/critic.md` (273 lines, heavyweight). Multi-perspective plan/code reviewer with pre-commitment predictions, verification, adversarial escalation. Read-only tools.
-- [ ] C3. **Add agent: `analyst`**. Source: `oh-my-claudecode/agents/analyst.md`. Pre-planning consultant for requirements analysis. Complements `muse` (which plans) by gathering requirements first.
-- [ ] C4. **Add agent: `verifier`**. Source: `oh-my-claudecode/agents/verifier.md` + `oh-my-codex/prompts/verifier.md`. Evidence-based completion checker. Read+shell tools (can run tests).
-- [ ] C5. **Add agent: `explorer`**. Source: `oh-my-claudecode/agents/explore.md` + `oh-my-codex/prompts/explore.md`. Codebase search specialist — complements `sage` by being more tactical (sage is broad research, explorer is targeted file-finding).
-- [ ] C6. **Add agent: `tracer`**. Source: `oh-my-claudecode/agents/tracer.md`. Evidence-driven causal tracing with competing hypotheses + uncertainty tracking.
-- [ ] C7. **Add agent: `qa-tester`**. Source: `oh-my-claudecode/agents/qa-tester.md`. Interactive CLI testing specialist. Uses `shell` + `task` tools.
-- [ ] C8. **Add agent: `code-simplifier`**. Source: `oh-my-claudecode/agents/code-simplifier.md`. Simplifies recently modified code for clarity/consistency without changing behavior.
-- [ ] C9. **Add agent: `document-specialist`**. Source: `oh-my-claudecode/agents/document-specialist.md`. External documentation & reference specialist. Read-only.
-- [ ] C10. **Add agent: `git-master`**. Source: `oh-my-claudecode/agents/git-master.md`. Atomic commits, rebasing, history management, commit trailer protocol enforcement.
+- [x] C2. **Add agent: `critic`**. Source: `oh-my-claudecode/agents/critic.md` (273 lines, heavyweight). Multi-perspective plan/code reviewer with pre-commitment predictions, verification, adversarial escalation. Read-only tools.
+- [x] C3. **Add agent: `analyst`**. Source: `oh-my-claudecode/agents/analyst.md`. Pre-planning consultant for requirements analysis. Complements `muse` (which plans) by gathering requirements first.
+- [x] C4. **Add agent: `verifier`**. Source: `oh-my-claudecode/agents/verifier.md` + `oh-my-codex/prompts/verifier.md`. Evidence-based completion checker. Read+shell tools (can run tests).
+- [x] C5. **Add agent: `explorer`**. Source: `oh-my-claudecode/agents/explore.md` + `oh-my-codex/prompts/explore.md`. Codebase search specialist — complements `sage` by being more tactical (sage is broad research, explorer is targeted file-finding).
+- [x] C6. **Add agent: `tracer`**. Source: `oh-my-claudecode/agents/tracer.md`. Evidence-driven causal tracing with competing hypotheses + uncertainty tracking.
+- [x] C7. **Add agent: `qa-tester`**. Source: `oh-my-claudecode/agents/qa-tester.md`. Interactive CLI testing specialist. Uses `shell` + `task` tools.
+- [x] C8. **Add agent: `code-simplifier`**. Source: `oh-my-claudecode/agents/code-simplifier.md`. Simplifies recently modified code for clarity/consistency without changing behavior.
+- [x] C9. **Add agent: `document-specialist`**. Source: `oh-my-claudecode/agents/document-specialist.md`. External documentation & reference specialist. Read-only.
+- [x] C10. **Add agent: `git-master`**. Source: `oh-my-claudecode/agents/git-master.md`. Atomic commits, rebasing, history management, commit trailer protocol enforcement.
 
 ### Phase D — Catalog, Docs, Doctor
 
 (Note: some v1-draft doc files have been consolidated after critical review.)
 
-- [ ] D1. **Create `catalog-manifest.json`** at repo root. Schema based on `oh-my-codex/templates/catalog-manifest.json` but simpler:
+- [x] D1. **Create `catalog-manifest.json`** at repo root. Schema based on `oh-my-codex/templates/catalog-manifest.json` but simpler:
   ```json
   {
     "$schema": "./catalog-manifest.schema.json",
@@ -483,8 +483,8 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
   }
   ```
   Include EVERY file shipped by oh-my-forge. This is the single source of truth for the install/doctor/uninstall scripts.
-- [ ] D2. **Create `catalog-manifest.schema.json`** — JSON Schema validating the manifest shape. Keep it simple; used only for editor autocomplete and CI validation.
-- [ ] D3. **Rewrite `README.md`** from scratch. Target information architecture:
+- [x] D2. **Create `catalog-manifest.schema.json`** — JSON Schema validating the manifest shape. Keep it simple; used only for editor autocomplete and CI validation.
+- [x] D3. **Rewrite `README.md`** from scratch. Target information architecture:
   - Title + tagline + warning banner about v2 rewrite + migration note
   - TL;DR code block
   - Quick Start (install + first-session)
@@ -503,32 +503,32 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
   - Relationship to other oh-my-* projects
   - License
   - Credits
-- [ ] D4. **Rewrite `docs/AGENTS.md`** to reflect forgecode's actual agent model (no fake tiers, real tool names, correct delegation patterns). Include ADR-style explanation of why oh-my-forge does NOT use `tier` field. This is the **internal documentation for contributors**, distinct from the repo-root `AGENTS.md` which is the **user-facing forgecode auto-loaded rules file**.
-- [ ] D5. **Create `docs/REFERENCE.md`** — CONSOLIDATED reference that covers skills, commands, and templates in one file. Sections:
+- [x] D4. **Rewrite `docs/AGENTS.md`** to reflect forgecode's actual agent model (no fake tiers, real tool names, correct delegation patterns). Include ADR-style explanation of why oh-my-forge does NOT use `tier` field. This is the **internal documentation for contributors**, distinct from the repo-root `AGENTS.md` which is the **user-facing forgecode auto-loaded rules file**.
+- [x] D5. **Create `docs/REFERENCE.md`** — CONSOLIDATED reference that covers skills, commands, and templates in one file. Sections:
   - `## Skills` — the 2-field frontmatter rule, `skill` tool invocation, description-as-trigger principle, bundled resources (`scripts/`, `references/`, `assets/`), XML-tagged body convention, authoring a new skill, progressive disclosure pattern
   - `## Commands` — command file format, `{{parameters}}` body variable, `/name` REPL invocation, authoring a new command
   - `## Templates` — every override-able Handlebars template from `~/forge/templates/`, example override, Handlebars context variables
   - `## Tools` — canonical tool name list with 1-line purpose each
-- [ ] D6. **CUT. Merged into D5.** Originally `docs/SKILLS.md`.
-- [ ] D7. **CUT. Merged into D5.** Originally `docs/TEMPLATES.md`.
-- [ ] D8. **Create `docs/CONFIGURATION.md`** — the full `.forge.toml` reference with every top-level key, every section, valid values, and recommended defaults. Derived from `forge.schema.json` but human-readable. Keep this as a separate file because it's the longest reference doc.
-- [ ] D9. **CUT. Merged into D5's `## Commands` and the README's Troubleshooting section.** Originally `docs/COMMANDS.md`.
-- [ ] D10. **Create `docs/MCP.md`** — how to set up MCP servers: `~/forge/.mcp.json` shape, `forge mcp import/list/show/remove/reload/login/logout` subcommands, common servers to configure (emacs, github, filesystem, fetch, puppeteer). Keep separate because MCP is its own ecosystem.
-- [ ] D11. **Rewrite `docs/CONTRIBUTING.md`** to explain: how to add a new agent (catalog-manifest + file), how to add a new skill (catalog-manifest + directory), how to add a new command, how to add a template override, how to run the doctor script, how to cut a release using the `release` skill.
-- [ ] D12. **Create `CHANGELOG.md`** with this v2 rewrite as the first entry. Document every breaking change (the `forge.yaml` → `.forge.toml` switch is the #1 breaking change). Reference `scripts/migrate-from-v1.sh`.
-- [ ] D13. **Create `plans/README.md`** explaining the `plans/` directory convention and the forgecode plan format.
+- [-] D6. **CUT. Merged into D5.** Originally `docs/SKILLS.md`.
+- [-] D7. **CUT. Merged into D5.** Originally `docs/TEMPLATES.md`.
+- [x] D8. **Create `docs/CONFIGURATION.md`** — the full `.forge.toml` reference with every top-level key, every section, valid values, and recommended defaults. Derived from `forge.schema.json` but human-readable. Keep this as a separate file because it's the longest reference doc.
+- [-] D9. **CUT. Merged into D5's `## Commands` and the README's Troubleshooting section.** Originally `docs/COMMANDS.md`.
+- [x] D10. **Create `docs/MCP.md`** — how to set up MCP servers: `~/forge/.mcp.json` shape, `forge mcp import/list/show/remove/reload/login/logout` subcommands, common servers to configure (emacs, github, filesystem, fetch, puppeteer). Keep separate because MCP is its own ecosystem.
+- [x] D11. **Rewrite `docs/CONTRIBUTING.md`** to explain: how to add a new agent (catalog-manifest + file), how to add a new skill (catalog-manifest + directory), how to add a new command, how to add a template override, how to run the doctor script, how to cut a release using the `release` skill.
+- [x] D12. **Create `CHANGELOG.md`** with this v2 rewrite as the first entry. Document every breaking change (the `forge.yaml` → `.forge.toml` switch is the #1 breaking change). Reference `scripts/migrate-from-v1.sh`.
+- [x] D13. **Create `plans/README.md`** explaining the `plans/` directory convention and the forgecode plan format.
 
 ### Phase E — Injection Seams, Commands, Routing
 
-- [ ] E1. **Add keyword-routing table** to `AGENTS.md`. Format: a markdown table mapping natural-language triggers → skill name → behavior. Rows: "ralph / don't stop / must complete" → `ralph` skill. "autopilot / build me / handle it all" → `autopilot` skill. "plan / strategy / design" → `plan` skill. "debug / trace / root cause" → `tracer` skill. Etc. ~15 rows. This is pure prose read by the LLM at each turn; no code needed.
-- [ ] E2. **Add marker-bounded injection seams** to the top 5 agents (forge/executor, architect, critic, verifier, code-reviewer). Use format:
+- [x] E1. **Add keyword-routing table** to `AGENTS.md`. Format: a markdown table mapping natural-language triggers → skill name → behavior. Rows: "ralph / don't stop / must complete" → `ralph` skill. "autopilot / build me / handle it all" → `autopilot` skill. "plan / strategy / design" → `plan` skill. "debug / trace / root cause" → `tracer` skill. Etc. ~15 rows. This is pure prose read by the LLM at each turn; no code needed.
+- [x] E2. **Add marker-bounded injection seams** to the top 5 agents (forge/executor, architect, critic, verifier, code-reviewer). Use format:
   ```
   <!-- OMF:GUIDANCE:<AGENT>:<SECTION>:START -->
   ...customizable content...
   <!-- OMF:GUIDANCE:<AGENT>:<SECTION>:END -->
   ```
   Sections: CONSTRAINTS, TOOLS, OUTPUT_FORMAT. Users can patch the content between markers without editing the agent file structure, and an `omf-update` script (Phase E7) can re-sync updates while preserving user customizations.
-- [ ] E3. **Add lore commit trailer protocol** to `AGENTS.md`. Structured git trailers:
+- [x] E3. **Add lore commit trailer protocol** to `AGENTS.md`. Structured git trailers:
   ```
   Constraint: <what constrained this decision>
   Rejected: <alternative> | <why rejected>
@@ -540,7 +540,7 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
   Co-Authored-By: ForgeCode <noreply@forgecode.dev>
   ```
   Reference: `oh-my-claudecode/CLAUDE.md:67-95`, `oh-my-codex/templates/AGENTS.md:58-125`.
-- [ ] E4. **Create `commands/` directory** with slash-command files. Port the `[[commands]]` from the existing `forge.yaml` into individual files under `commands/`:
+- [x] E4. **Create `commands/` directory** with slash-command files. Port the `[[commands]]` from the existing `forge.yaml` into individual files under `commands/`:
   - `commands/scaffold.md`
   - `commands/feature.md`
   - `commands/bugfix.md`
@@ -557,7 +557,7 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
   - `commands/cleanup.md`
   - `commands/estimate.md`
   Each uses the verified command frontmatter (`description`, optional `name`) and body uses Handlebars `{{parameters}}`. No `value:` field — that was a v1 plan error. Do NOT inline `[[commands]]` in `.forge.toml`; ship as files for discoverability.
-- [ ] E5. **Add stage-gated team pipeline commands**. Port from `oh-my-gemini-cli/commands/omg/team-*.toml`. Commands:
+- [x] E5. **Add stage-gated team pipeline commands**. Port from `oh-my-gemini-cli/commands/omg/team-*.toml`. Commands:
   - `commands/team-assemble.md` — select the team roster based on task shape
   - `commands/team-plan.md` — invoke `muse` agent to write the plan (pre-condition: must have interview state)
   - `commands/team-prd.md` — invoke `analyst` agent to write the PRD
@@ -566,15 +566,15 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
   - `commands/team-fix.md` — invoke `forge` to address verify issues; loops to team-verify
   - `commands/team-status.md` — show current stage and pending artifacts
   Each command has pre-condition checks (reads `.forge/state/team/*.json`) and writes a next-stage hint on completion.
-- [ ] E6. **Ship template overrides** in `templates/` directory. Create the following overrides that will be copied to `~/forge/templates/` by the install script:
+- [-] E6. **Ship template overrides** in `templates/` directory. Create the following overrides that will be copied to `~/forge/templates/` by the install script:
   - `forge-doom-loop-reminder.md` — stronger loop-breaking reminder with oh-my-forge's recommended tactics (switch to sage for re-investigation, re-decompose the task, swap strategies)
   - `forge-pending-todos-reminder.md` — smarter todo reminder that references the plan file if one is active
   - `forge-partial-skill-instructions.md` — enhanced skill catalog injection that lists oh-my-forge skills with clearer triggering guidance
   Each file has a leading comment explaining it's an override and linking to the built-in for comparison.
-- [ ] E7. **Write `scripts/omf-update.sh`** — script that updates oh-my-forge in place, preserving user customizations within the marker-bounded sections (Phase E2). Uses `perl -pe` (or `sed`) to surgically replace content outside `<!-- OMF:...:START -->`/`<!-- OMF:...:END -->` markers while preserving what's inside. Based on `oh-my-claudecode/scripts/setup-claude-md.sh:252-286` pattern. Bash 5.3+ style.
-- [ ] E8. **Add `FORGE_KEYWORDS.md`** in docs/ — comprehensive cheat sheet listing every keyword trigger, every skill, every command, every agent, with a one-line "use this when" hint for each. Single-page reference. Link from README.
-- [ ] E9. **Add ONE `examples/` starter**. Keep the existing `examples/laravel-vue/README.md` as-is (it's untouched legacy). Do NOT add multiple new starters (reviewer cut: `examples/nextjs/`, `examples/rust/`, `examples/python/` are scope creep). If a single fresh example is valuable, add just `examples/nextjs/` — 5-10 files max, showing `.forge/` project overrides, `.mcp.json` example, and a minimal `AGENTS.md`. Defer rust/python starters to v2.
-- [ ] E10. **Add `.editorconfig` and `.gitattributes`**. Inline the target values so the executor doesn't need to cross-reference another repo. Minimum contents:
+- [x] E7. **Write `scripts/omf-update.sh`** — script that updates oh-my-forge in place, preserving user customizations within the marker-bounded sections (Phase E2). Uses `perl -pe` (or `sed`) to surgically replace content outside `<!-- OMF:...:START -->`/`<!-- OMF:...:END -->` markers while preserving what's inside. Based on `oh-my-claudecode/scripts/setup-claude-md.sh:252-286` pattern. Bash 5.3+ style.
+- [x] E8. **Add `FORGE_KEYWORDS.md`** in docs/ — comprehensive cheat sheet listing every keyword trigger, every skill, every command, every agent, with a one-line "use this when" hint for each. Single-page reference. Link from README.
+- [-] E9. **Add ONE `examples/` starter**. Keep the existing `examples/laravel-vue/README.md` as-is (it's untouched legacy). Do NOT add multiple new starters (reviewer cut: `examples/nextjs/`, `examples/rust/`, `examples/python/` are scope creep). If a single fresh example is valuable, add just `examples/nextjs/` — 5-10 files max, showing `.forge/` project overrides, `.mcp.json` example, and a minimal `AGENTS.md`. Defer rust/python starters to v2.
+- [x] E10. **Add `.editorconfig` and `.gitattributes`**. Inline the target values so the executor doesn't need to cross-reference another repo. Minimum contents:
   - `.editorconfig`:
     ```
     root = true
@@ -597,21 +597,21 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
     *.sh text eol=lf
     *.md text eol=lf
     ```
-- [ ] E11. **CUT. Deferred to v2.** Originally GitHub workflows (doctor, shellcheck, validate-manifest) and issue templates. Repo hygiene, but not "aggressive rewrite" work — will be added in a follow-up plan after the core v2 content is stable. The doctor script and shellcheck can still be run manually.
+- [-] E11. **CUT. Deferred to v2.** Originally GitHub workflows (doctor, shellcheck, validate-manifest) and issue templates. Repo hygiene, but not "aggressive rewrite" work — will be added in a follow-up plan after the core v2 content is stable. The doctor script and shellcheck can still be run manually.
 
 ### Phase F — Verification (the plan executor runs these before claiming done)
 
-- [ ] F0. **PRE-FLIGHT SMOKE TEST**: Before mass-rewriting all 31 agents and 20 skills, do a single end-to-end smoke run. Pick ONE agent (`architect`) and ONE skill (`plan`) and fully rewrite them following the plan. Then install them into a temp project, run `forge list agent` and `forge list skill`, verify they appear. If this fails, STOP and re-read Ground Truth before continuing. Only after the smoke test succeeds should the bulk rewrite (A5, B1, C1) proceed.
-- [ ] F1. **Run `scripts/doctor.sh`**. Must exit 0. Fix any failures discovered.
-- [ ] F2. **Run `shellcheck` on every script in `scripts/`**. Zero warnings. If shellcheck is not installed, document the expectation and skip with a warning.
-- [ ] F3. **Validate `catalog-manifest.json`** against `catalog-manifest.schema.json` using `jq`. Must parse and every path must exist on disk.
-- [ ] F4. **Parse every agent file** using `yq` (or `python3 -c "import yaml,sys; ..."` as fallback). Every frontmatter must have `id`, `title`, `description`, and `tools`. No `tier` field should remain. No `max_walker_depth` field should remain. Every tool name in every `tools:` list must be in the canonical tool name set (`task`, `sem_search`, `fs_search`, `read`, `write`, `undo`, `remove`, `patch`, `multi_patch`, `shell`, `fetch`, `skill`, `todo_write`, `todo_read`, `plan`, `followup`, `mcp_*`) OR a valid agent id that is also shipped by oh-my-forge (dynamically checked — load all agent ids first, then cross-reference).
-- [ ] F5. **Parse every skill file** using `yq`. Frontmatter must have `name` and `description`. Extra fields are allowed but should be flagged as a soft warning (and not present in any file that oh-my-forge ships).
-- [ ] F6. **Parse every command file** using `yq`. Frontmatter must have `description`. `name` is optional but recommended. There should be NO `value` field (that was a v1 plan error). The body should use `{{parameters}}`, not `{{args}}`.
-- [ ] F7. **Validate `.forge.toml`** using `python3 -c "import tomllib; tomllib.load(open('.forge.toml','rb'))"` or `toml-cli`. Must parse. Then grep-check that `[updates] frequency` is one of `daily|weekly|always`.
-- [ ] F8. **Validate `.mcp.json.example`** using `jq . < .mcp.json.example`. Must parse as valid JSON.
-- [ ] F9. **Install in a temp dir test**: create `/tmp/omf-test-<timestamp>`, run `./scripts/install.sh --project /tmp/omf-test-<timestamp>`, verify `/tmp/omf-test-<timestamp>/.forge/agents/` exists with files, `/tmp/omf-test-<timestamp>/.forge/skills/` exists with files, `/tmp/omf-test-<timestamp>/.mcp.json` exists, BUT `/tmp/omf-test-<timestamp>/AGENTS.md` does NOT exist (since `--with-agents-md` was not passed). Clean up afterward.
-- [ ] F10. **Grep for forbidden strings** across the whole repo (excluding `plans/` historical files):
+- [x] F0. **PRE-FLIGHT SMOKE TEST**: Before mass-rewriting all 31 agents and 20 skills, do a single end-to-end smoke run. Pick ONE agent (`architect`) and ONE skill (`plan`) and fully rewrite them following the plan. Then install them into a temp project, run `forge list agent` and `forge list skill`, verify they appear. If this fails, STOP and re-read Ground Truth before continuing. Only after the smoke test succeeds should the bulk rewrite (A5, B1, C1) proceed.
+- [x] F1. **Run `scripts/doctor.sh`**. Must exit 0. Fix any failures discovered.
+- [x] F2. **Run `shellcheck` on every script in `scripts/`**. Zero warnings. If shellcheck is not installed, document the expectation and skip with a warning.
+- [x] F3. **Validate `catalog-manifest.json`** against `catalog-manifest.schema.json` using `jq`. Must parse and every path must exist on disk.
+- [x] F4. **Parse every agent file** using `yq` (or `python3 -c "import yaml,sys; ..."` as fallback). Every frontmatter must have `id`, `title`, `description`, and `tools`. No `tier` field should remain. No `max_walker_depth` field should remain. Every tool name in every `tools:` list must be in the canonical tool name set (`task`, `sem_search`, `fs_search`, `read`, `write`, `undo`, `remove`, `patch`, `multi_patch`, `shell`, `fetch`, `skill`, `todo_write`, `todo_read`, `plan`, `followup`, `mcp_*`) OR a valid agent id that is also shipped by oh-my-forge (dynamically checked — load all agent ids first, then cross-reference).
+- [x] F5. **Parse every skill file** using `yq`. Frontmatter must have `name` and `description`. Extra fields are allowed but should be flagged as a soft warning (and not present in any file that oh-my-forge ships).
+- [x] F6. **Parse every command file** using `yq`. Frontmatter must have `description`. `name` is optional but recommended. There should be NO `value` field (that was a v1 plan error). The body should use `{{parameters}}`, not `{{args}}`.
+- [x] F7. **Validate `.forge.toml`** using `python3 -c "import tomllib; tomllib.load(open('.forge.toml','rb'))"` or `toml-cli`. Must parse. Then grep-check that `[updates] frequency` is one of `daily|weekly|always`.
+- [x] F8. **Validate `.mcp.json.example`** using `jq . < .mcp.json.example`. Must parse as valid JSON.
+- [x] F9. **Install in a temp dir test**: create `/tmp/omf-test-<timestamp>`, run `./scripts/install.sh --project /tmp/omf-test-<timestamp>`, verify `/tmp/omf-test-<timestamp>/.forge/agents/` exists with files, `/tmp/omf-test-<timestamp>/.forge/skills/` exists with files, `/tmp/omf-test-<timestamp>/.mcp.json` exists, BUT `/tmp/omf-test-<timestamp>/AGENTS.md` does NOT exist (since `--with-agents-md` was not passed). Clean up afterward.
+- [x] F10. **Grep for forbidden strings** across the whole repo (excluding `plans/` historical files):
   - no `forge.yaml` references (except in CHANGELOG migration notes and migrate-from-v1.sh)
   - no `~/.forge/` (leading dot on global)
   - no `tier: fast|standard|complex` in any agent frontmatter
@@ -620,10 +620,10 @@ Port the top skills from the reference codebases, rewritten for forgecode's skil
   - no `value:` field in command frontmatter
   - no `max_walker_depth:` field in agent frontmatter
   - no `updates.frequency` values other than `daily|weekly|always` in `.forge.toml` or docs examples
-- [ ] F11. **Check README links**. All relative markdown links must resolve to real files in the repo. Use `grep -rn '](' README.md docs/` and verify each target exists.
-- [ ] F12. **Run `forge list agent`, `forge list skill`, `forge list cmd`** (if `forge` binary is available after installing oh-my-forge to `~/forge/` via the install script in a test user profile). Soft check — emits a warning if `forge` is not available but does not fail.
-- [ ] F13. **RUNTIME SMOKE TEST** (new, strongest check): If `forge` binary is available, invoke a minimal interaction with one oh-my-forge agent using the CLI: `forge --agent architect -p 'say hello, 10 words max'`. Success = non-zero output, no stderr errors about unknown tool names or malformed frontmatter. Soft check if `forge` unavailable.
-- [ ] F14. **Final summary**: print a table of (files_added, files_modified, files_deleted) and a diff count. Tell the user how many agents, skills, commands, templates, and docs are in the final pack. Compare against `catalog-manifest.json`.
+- [x] F11. **Check README links**. All relative markdown links must resolve to real files in the repo. Use `grep -rn '](' README.md docs/` and verify each target exists.
+- [x] F12. **Run `forge list agent`, `forge list skill`, `forge list cmd`** (if `forge` binary is available after installing oh-my-forge to `~/forge/` via the install script in a test user profile). Soft check — emits a warning if `forge` is not available but does not fail.
+- [x] F13. **RUNTIME SMOKE TEST** (new, strongest check): If `forge` binary is available, invoke a minimal interaction with one oh-my-forge agent using the CLI: `forge --agent architect -p 'say hello, 10 words max'`. Success = non-zero output, no stderr errors about unknown tool names or malformed frontmatter. Soft check if `forge` unavailable.
+- [x] F14. **Final summary**: print a table of (files_added, files_modified, files_deleted) and a diff count. Tell the user how many agents, skills, commands, templates, and docs are in the final pack. Compare against `catalog-manifest.json`.
 
 ## Verification Criteria
 

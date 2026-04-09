@@ -1,8 +1,6 @@
 ---
 name: docker
 description: Production-grade Docker configurations (Dockerfile, Compose, best practices)
-argument-hint: "<dockerization request>"
-level: 2
 ---
 
 # Docker Skill

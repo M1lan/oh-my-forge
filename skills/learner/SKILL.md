@@ -1,8 +1,6 @@
 ---
 name: learner
-description: Extract reusable patterns from sessions
-argument-hint: "<pattern to extract>"
-level: 2
+description: Extract reusable patterns, recipes, and conventions from a finished session so they can be preserved as a skill, an AGENTS.md rule, or a team playbook. Use after a non-trivial task completes successfully, when the user says "capture what we learned", or when a repeatable pattern emerges that is worth codifying for future work.
 ---
 
 <Purpose>

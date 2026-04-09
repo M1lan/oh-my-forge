@@ -1,0 +1,39 @@
+{
+  "mcpServers": {
+    "emacs": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "socat - UNIX-CONNECT:$HOME/.local/state/emacs/mcp.sock"
+      ],
+      "disable": true
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "REPLACE_WITH_YOUR_TOKEN"
+      },
+      "disable": true
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/ABSOLUTE/PATH/TO/ALLOWED/ROOT"
+      ],
+      "disable": true
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "disable": true
+    }
+  }
+}

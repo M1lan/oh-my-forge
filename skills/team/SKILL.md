@@ -1,8 +1,6 @@
 ---
 name: team
-description: Multi-agent coordinated execution
-argument-hint: "<N:agent> <task description>"
-level: 4
+description: Coordinate multiple forge agents to execute a plan in parallel streams with explicit handoffs. Picks the right agent per task (architect/executor/test-writer/reviewer), runs independent work concurrently, and sequences dependent work. Use when a plan has multiple independent workstreams, when the user says "team" or "in parallel", or when execution speed matters and the work is decomposable.
 ---
 
 <Purpose>

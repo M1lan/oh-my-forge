@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "oh-my-forge catalog manifest",
+  "description": "Schema for catalog-manifest.json at the oh-my-forge repo root. Validates the single source of truth for the install, doctor, and uninstall scripts.",
+  "type": "object",
+  "required": ["schemaVersion", "catalogVersion", "name", "description", "agents", "skills"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "catalogVersion": {
+      "type": "string",
+      "description": "CalVer YYYY.MM.DD of this catalog revision"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "category", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^agents/[a-z0-9-]+\\.md$"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["core", "backend", "frontend", "quality", "specialist", "devops"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "deprecated", "experimental"]
+          },
+          "core": {
+            "type": "boolean",
+            "description": "Whether this agent is installed in the minimal core install"
+          },
+          "reasoning": {
+            "type": "boolean",
+            "description": "Whether this agent has reasoning.enabled=true in its frontmatter"
+          }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "path", "category", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^skills/[a-z0-9-]+/SKILL\\.md$"
+          },
+          "category": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "deprecated", "experimental"]
+          },
+          "core": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "path"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^commands/[a-z0-9-]+\\.md$"
+          },
+          "category": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "path"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^templates/[a-z0-9-]+\\.md$"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,3 +1,8 @@
+---
+name: eco
+description: Lightweight execution mode for simple, well-defined tasks. Skips elaborate planning, avoids spawning sub-agents, keeps context lean, and makes direct precise edits. Use when the user asks for a small fix, a single-file change, a rename, or a quick tweak and explicitly wants minimal ceremony.
+---
+
 # Eco Mode
 
 > "Lightweight mode for simple tasks and constrained environments."

@@ -1,8 +1,6 @@
 ---
 name: ultrawork
 description: Maximum parallel throughput — execute independent tasks simultaneously
-argument-hint: "<task with multiple independent subtasks>"
-level: 3
 ---
 
 <Purpose>

@@ -1,8 +1,6 @@
 ---
 name: scaffold
-description: Generate project boilerplate from a description
-argument-hint: "<project description>"
-level: 2
+description: Generate project boilerplate from a one-paragraph description -- package.json/Cargo.toml, source tree, build config, README stub, CI starter, .gitignore. Use when starting a new project from scratch, when the user says "scaffold" or "bootstrap", or when a proof-of-concept needs the minimum viable skeleton before real work begins.
 ---
 
 <Purpose>

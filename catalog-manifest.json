@@ -1,0 +1,657 @@
+{
+  "$schema": "./catalog-manifest.schema.json",
+  "schemaVersion": 1,
+  "catalogVersion": "2026.04.09",
+  "name": "oh-my-forge",
+  "description": "A comprehensive v2 ForgeCode (forge) workbench: 40 specialist agents, 30 skills, and 15+ commands for multi-agent software engineering.",
+  "agents": [
+    {
+      "id": "analyst",
+      "path": "agents/analyst.md",
+      "category": "core",
+      "status": "active",
+      "core": false,
+      "reasoning": true
+    },
+    {
+      "id": "api-designer",
+      "path": "agents/api-designer.md",
+      "category": "backend",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "architect-low",
+      "path": "agents/architect-low.md",
+      "category": "core",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "architect",
+      "path": "agents/architect.md",
+      "category": "core",
+      "status": "active",
+      "core": true,
+      "reasoning": true
+    },
+    {
+      "id": "auth-specialist",
+      "path": "agents/auth-specialist.md",
+      "category": "backend",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "code-reviewer",
+      "path": "agents/code-reviewer.md",
+      "category": "core",
+      "status": "active",
+      "core": true,
+      "reasoning": true
+    },
+    {
+      "id": "code-simplifier",
+      "path": "agents/code-simplifier.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "critic",
+      "path": "agents/critic.md",
+      "category": "quality",
+      "status": "active",
+      "core": true,
+      "reasoning": true
+    },
+    {
+      "id": "data-modeler",
+      "path": "agents/data-modeler.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "db-engineer",
+      "path": "agents/db-engineer.md",
+      "category": "backend",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "debugger",
+      "path": "agents/debugger.md",
+      "category": "core",
+      "status": "active",
+      "core": true,
+      "reasoning": true
+    },
+    {
+      "id": "dep-auditor",
+      "path": "agents/dep-auditor.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "deploy-engineer",
+      "path": "agents/deploy-engineer.md",
+      "category": "backend",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "designer-low",
+      "path": "agents/designer-low.md",
+      "category": "frontend",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "designer",
+      "path": "agents/designer.md",
+      "category": "frontend",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "doc-writer",
+      "path": "agents/doc-writer.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "document-specialist",
+      "path": "agents/document-specialist.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "executor-high",
+      "path": "agents/executor-high.md",
+      "category": "core",
+      "status": "active",
+      "core": false,
+      "reasoning": true
+    },
+    {
+      "id": "executor-low",
+      "path": "agents/executor-low.md",
+      "category": "core",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "executor",
+      "path": "agents/executor.md",
+      "category": "core",
+      "status": "active",
+      "core": true,
+      "reasoning": false
+    },
+    {
+      "id": "explorer",
+      "path": "agents/explorer.md",
+      "category": "core",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "git-master",
+      "path": "agents/git-master.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "git-strategist",
+      "path": "agents/git-strategist.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "i18n-expert",
+      "path": "agents/i18n-expert.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "infra-planner",
+      "path": "agents/infra-planner.md",
+      "category": "backend",
+      "status": "active",
+      "core": false,
+      "reasoning": true
+    },
+    {
+      "id": "migrator",
+      "path": "agents/migrator.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "perf-optimizer",
+      "path": "agents/perf-optimizer.md",
+      "category": "quality",
+      "status": "active",
+      "core": false,
+      "reasoning": true
+    },
+    {
+      "id": "planner",
+      "path": "agents/planner.md",
+      "category": "core",
+      "status": "active",
+      "core": true,
+      "reasoning": true
+    },
+    {
+      "id": "qa-tester",
+      "path": "agents/qa-tester.md",
+      "category": "quality",
+      "status": "active",
+      "core": false,
+      "reasoning": true
+    },
+    {
+      "id": "refactorer",
+      "path": "agents/refactorer.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "scientist",
+      "path": "agents/scientist.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": true
+    },
+    {
+      "id": "security-reviewer",
+      "path": "agents/security-reviewer.md",
+      "category": "quality",
+      "status": "active",
+      "core": false,
+      "reasoning": true
+    },
+    {
+      "id": "seo-expert",
+      "path": "agents/seo-expert.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "style-expert",
+      "path": "agents/style-expert.md",
+      "category": "frontend",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "test-engineer",
+      "path": "agents/test-engineer.md",
+      "category": "quality",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "test-writer",
+      "path": "agents/test-writer.md",
+      "category": "quality",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "tracer",
+      "path": "agents/tracer.md",
+      "category": "quality",
+      "status": "active",
+      "core": false,
+      "reasoning": true
+    },
+    {
+      "id": "ui-engineer",
+      "path": "agents/ui-engineer.md",
+      "category": "frontend",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "ux-analyst",
+      "path": "agents/ux-analyst.md",
+      "category": "frontend",
+      "status": "active",
+      "core": false,
+      "reasoning": true
+    },
+    {
+      "id": "verifier",
+      "path": "agents/verifier.md",
+      "category": "quality",
+      "status": "active",
+      "core": true,
+      "reasoning": true
+    }
+  ],
+  "skills": [
+    {
+      "name": "ai-slop-cleaner",
+      "path": "skills/ai-slop-cleaner/SKILL.md",
+      "category": "quality",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "autopilot",
+      "path": "skills/autopilot/SKILL.md",
+      "category": "execution",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "cancel",
+      "path": "skills/cancel/SKILL.md",
+      "category": "control",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "critic",
+      "path": "skills/critic/SKILL.md",
+      "category": "quality",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "deep-dive",
+      "path": "skills/deep-dive/SKILL.md",
+      "category": "investigation",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "deep-interview",
+      "path": "skills/deep-interview/SKILL.md",
+      "category": "planning",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "docker",
+      "path": "skills/docker/SKILL.md",
+      "category": "devops",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "doctor",
+      "path": "skills/doctor/SKILL.md",
+      "category": "meta",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "eco",
+      "path": "skills/eco/SKILL.md",
+      "category": "execution",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "explore",
+      "path": "skills/explore/SKILL.md",
+      "category": "investigation",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "learner",
+      "path": "skills/learner/SKILL.md",
+      "category": "knowledge",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "note",
+      "path": "skills/note/SKILL.md",
+      "category": "knowledge",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "plan",
+      "path": "skills/plan/SKILL.md",
+      "category": "planning",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "ralph",
+      "path": "skills/ralph/SKILL.md",
+      "category": "execution",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "ralplan",
+      "path": "skills/ralplan/SKILL.md",
+      "category": "planning",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "recall",
+      "path": "skills/recall/SKILL.md",
+      "category": "knowledge",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "release",
+      "path": "skills/release/SKILL.md",
+      "category": "release",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "remember",
+      "path": "skills/remember/SKILL.md",
+      "category": "knowledge",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "scaffold",
+      "path": "skills/scaffold/SKILL.md",
+      "category": "creation",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "skillify",
+      "path": "skills/skillify/SKILL.md",
+      "category": "meta",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "tailwind-v4",
+      "path": "skills/tailwind-v4/SKILL.md",
+      "category": "frontend",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "team",
+      "path": "skills/team/SKILL.md",
+      "category": "execution",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "trace",
+      "path": "skills/trace/SKILL.md",
+      "category": "debugging",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "tracer",
+      "path": "skills/tracer/SKILL.md",
+      "category": "debugging",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "turbo",
+      "path": "skills/turbo/SKILL.md",
+      "category": "execution",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "ultraqa",
+      "path": "skills/ultraqa/SKILL.md",
+      "category": "quality",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "ultrawork",
+      "path": "skills/ultrawork/SKILL.md",
+      "category": "execution",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "verify",
+      "path": "skills/verify/SKILL.md",
+      "category": "quality",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "visual-verdict",
+      "path": "skills/visual-verdict/SKILL.md",
+      "category": "quality",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "wiki",
+      "path": "skills/wiki/SKILL.md",
+      "category": "knowledge",
+      "status": "active",
+      "core": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "autopilot",
+      "path": "commands/autopilot.md",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "critic",
+      "path": "commands/critic.md",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "debug",
+      "path": "commands/debug.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "deep-dive",
+      "path": "commands/deep-dive.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "doctor",
+      "path": "commands/doctor.md",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "execute",
+      "path": "commands/execute.md",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "explore",
+      "path": "commands/explore.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "note",
+      "path": "commands/note.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "plan",
+      "path": "commands/plan.md",
+      "status": "active",
+      "core": true
+    },
+    {
+      "name": "ralph",
+      "path": "commands/ralph.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "ralplan",
+      "path": "commands/ralplan.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "recall",
+      "path": "commands/recall.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "refactor",
+      "path": "commands/refactor.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "remember",
+      "path": "commands/remember.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "review",
+      "path": "commands/review.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "team",
+      "path": "commands/team.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "trace",
+      "path": "commands/trace.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "verify",
+      "path": "commands/verify.md",
+      "status": "active",
+      "core": true
+    }
+  ],
+  "templates": [
+    {
+      "path": "templates/README.md",
+      "status": "reserved"
+    }
+  ]
+}

@@ -1,177 +1,192 @@
-# oh-my-forge — Agent Reference
+# Agents (Contributor Documentation)
 
-## Architecture
+> This is the **internal** documentation for contributors. For the user-facing project rules that forge auto-loads, see [`AGENTS.md`](../AGENTS.md) at the repo root.
 
-```
-┌──────────────────────────────────────────────────┐
-│                   ForgeCode CLI                   │
-├──────────────────────────────────────────────────┤
-│               oh-my-forge (OMF)                   │
-│  ┌──────────┬──────────┬──────────┬────────────┐ │
-│  │  Agents  │ Commands │  Rules   │   Skills    │ │
-│  │  (32+)   │  (16+)   │ (routing)│   (9+)     │ │
-│  └──────────┴──────────┴──────────┴────────────┘ │
-│  ┌──────────────────────────────────────────────┐ │
-│  │            Execution Modes                    │ │
-│  │ autopilot | turbo | eco | plan | review      │ │
-│  │ ralph | ultrawork | team | trace | deep-interview │
-│  └──────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────┘
-```
+This file documents oh-my-forge's agent model, how it maps to forgecode's actual agent loading, and how to add or modify agents.
 
-## Agent Tiers
+---
 
-OMF uses tiered agents for cost optimization:
+## How forge loads agents
 
-| Tier | Description | Use For | Examples |
-|------|-------------|---------|----------|
-| **fast** | Fast, cost-efficient | Simple tasks | Quick fixes, boilerplate, style tweaks |
-| **standard** | Balanced | Normal tasks | Feature implementation, reviews, debugging |
-| **complex** | Deep reasoning | High-stakes | Architecture decisions, complex refactors |
+Forge loads agents from:
 
-## Agent Categories
+1. `~/forge/agents/*.md` (user-global)
+2. `<project>/.forge/agents/*.md` (project-local)
 
-### Core Agents
+Both locations are scanned **non-recursively**. Subdirectories are ignored. This is why oh-my-forge keeps all agents in a **flat layout** under `agents/*.md` -- the previous nested layout (`agents/core/`, `agents/backend/`, ...) did not work and was silently broken.
 
-| ID | File | Tier | Role | Reasoning |
-|----|------|------|------|-----------|
-| `architect` | `core/architect.md` | standard | System design, tech decisions | ✅ |
-| `architect-low` | `core/architect-low.md` | fast | Quick structure decisions | ❌ |
-| `executor` | `core/executor.md` | standard | Standard implementation | ❌ |
-| `executor-low` | `core/executor-low.md` | fast | Quick changes, boilerplate | ❌ |
-| `executor-high` | `core/executor-high.md` | complex | Complex refactors, architecture | ✅ |
-| `code-reviewer` | `core/code-reviewer.md` | standard | Comprehensive review | ✅ |
-| `planner` | `core/planner.md` | standard | Task decomposition, planning | ✅ |
-| `debugger` | `core/debugger.md` | standard | Bug hunting, root cause | ✅ |
+Categorization lives in `catalog-manifest.json`, not in directory names.
 
-### Frontend Agents
+---
 
-| ID | File | Tier | Role |
-|----|------|------|------|
-| `designer` | `frontend/designer.md` | standard | UI/UX implementation |
-| `designer-low` | `frontend/designer-low.md` | fast | Quick UI changes |
-| `ui-engineer` | `frontend/ui-engineer.md` | — | Components, responsive |
-| `style-expert` | `frontend/style-expert.md` | — | CSS, design systems |
-| `ux-analyst` | `frontend/ux-analyst.md` | — | User flows |
+## Frontmatter schema
 
-### Backend Agents
+Required fields:
 
-| ID | File | Tier | Role |
-|----|------|------|------|
-| `api-designer` | `backend/api-designer.md` | standard | REST/GraphQL design |
-| `db-engineer` | `backend/db-engineer.md` | — | Schema, migrations |
-| `auth-specialist` | `backend/auth-specialist.md` | — | Auth, security |
+| Field | Type | Description |
+|---|---|---|
+| `id` | string | Kebab-case unique id. Must match the filename: `architect.md` -> `id: architect`. |
+| `title` | string | Human-readable name. |
+| `description` | string | Triggering mechanism. Include both capability and use-case. |
+| `tools` | string[] | Non-empty list of tool names from the canonical tool catalog. |
 
-### DevOps Agents
+Optional fields:
 
-| ID | File | Role |
-|----|------|------|
-| `deploy-engineer` | `devops/deploy-engineer.md` | CI/CD, Docker, deployment |
-| `infra-planner` | `devops/infra-planner.md` | Cloud architecture, scaling |
+| Field | Type | Description |
+|---|---|---|
+| `model` | string | Override the session model for this agent. oh-my-forge typically sets `claude-opus-4-6`. |
+| `reasoning` | object | `{enabled: bool, effort: "low"|"medium"|"high", summary: "auto"|"detailed"|"none"}`. |
+| `temperature` | float | Model temperature override. |
+| `user_prompt` | string | Pre-prompt injected on user turn. |
+| `system_prompt` | string | Overrides the body. Rarely used -- prefer body. |
+| `max_steps` | int | Max reasoning steps. |
+| `max_turns` | int | Max turns in the sub-agent session. |
 
-### Quality Agents
+**Do NOT use** these fields -- they do not exist in the forge 2.8.0 schema and will cause agents to fail to load or be silently ignored:
 
-| ID | File | Tier | Role |
-|----|------|------|------|
-| `test-engineer` | `quality/test-engineer.md` | standard | TDD, QA strategy |
-| `security-reviewer` | `quality/security-reviewer.md` | standard | Vulnerability scanning |
+- `tier` (not a thing)
+- `level` (not a thing)
+- `category` (use `catalog-manifest.json` instead)
+- `max_walker_depth` (used to be a thing, now removed)
+- `disallowedTools` (not a thing)
 
-### Specialist Agents
+### Why no `tier` field
 
-| ID | File | Role |
-|----|------|------|
-| `scientist` | `specialist/scientist.md` | Data analysis, ML |
-| `doc-writer` | `specialist/doc-writer.md` | README, API docs |
-| `refactorer` | `specialist/refactorer.md` | Code cleanup |
-| `migrator` | `specialist/migrator.md` | Version upgrades |
-| `data-modeler` | `specialist/data-modeler.md` | ERD design |
-| `seo-expert` | `specialist/seo-expert.md` | Technical SEO |
-| `i18n-expert` | `specialist/i18n-expert.md` | Internationalization |
-| `git-strategist` | `specialist/git-strategist.md` | Git workflow |
-| `dep-auditor` | `specialist/dep-auditor.md` | Dependencies |
+Earlier drafts of this content pack used a `tier: fast|standard|complex` field to indicate agent complexity. **This field does not exist in forge**. Forge agents are loaded uniformly and the "tier" concept is expressed through the `reasoning.effort` setting, the choice of model, and the max_steps/max_turns limits.
 
-## Agent Selection Guide
+If an agent should be "heavier", give it `reasoning.enabled = true` and `reasoning.effort = "high"`. If it should be "lighter", leave reasoning disabled.
 
-| Task Type | Best Agent | Tier |
-|----------|------------|------|
-| Quick fix | `executor-low` | fast |
-| Standard feature | `executor` | standard |
-| Complex refactor | `executor-high` | complex |
-| Quick architecture | `architect-low` | fast |
-| Full architecture | `architect` | standard |
-| Simple code check | `executor-low` | fast |
-| Full code review | `code-reviewer` | standard |
-| Simple UI change | `designer-low` | fast |
-| Full UI build | `designer` | standard |
-| TDD workflow | `test-engineer` | standard |
-| Security audit | `security-reviewer` | standard |
-| Data analysis | `scientist` | standard |
+---
 
-## How Agent Routing Works
+## Tool catalog
 
-The `custom_rules` in `forge.yaml` instruct the LLM to adopt the right agent persona based on context:
+See [`REFERENCE.md#tools`](./REFERENCE.md#tools) for the authoritative list. Summary:
 
-1. **Explicit**: User references an agent with `@agent-id`
-2. **Mode-based**: `plan:` triggers planner, `review:` triggers code-reviewer
-3. **Context-inferred**: Keywords like "bug", "test", "deploy" route to the appropriate agent
-4. **Multi-agent**: Complex tasks may switch between agents mid-conversation
+- **Read-only set**: `read`, `fs_search`, `sem_search`, `fetch`, `skill`, `todo_write`, `todo_read`, `task`, `"mcp_*"`
+- **Write set**: add `write`, `patch`, `multi_patch`, `undo`, `remove`
+- **Shell**: add `shell`
+- **Planner**: add `plan`
 
-## Creating Custom Agents
+The `"mcp_*"` wildcard matches all MCP tools dynamically. It MUST be quoted in YAML because of the `*` character.
 
-Create a `.md` file in `.forge/agents/` (project) or `~/.forge/agents/` (global):
+---
+
+## Body convention
+
+oh-my-forge agents use XML-tagged sections in the body:
 
 ```markdown
 ---
-id: my-custom-agent
-title: "My Custom Agent"
-description: "What this agent does"
-tier: standard               # Optional: fast, standard, complex
-reasoning:
-  enabled: true             # Optional: enable extended thinking
-tools:
-  - read
-  - write
-  - patch
-  - shell
+id: architect
+title: Architect
+description: ...
+tools: [...]
 ---
 
-Your system prompt goes here as markdown.
-Define the agent's expertise, standards, and rules.
+<Purpose>
+One paragraph: what this agent does and why it exists.
+</Purpose>
+
+<When_To_Use>
+- Trigger condition 1
+- Trigger condition 2
+</When_To_Use>
+
+<Method>
+Numbered or bulleted workflow.
+</Method>
+
+<Rules>
+Hard constraints.
+</Rules>
+
+<Output_Format>
+What the agent produces.
+</Output_Format>
 ```
 
-### Available Tools
+Forge does not require this structure -- it's a convention for consistency across the pack. The XML tags are plain markdown text; forge does not parse them specially.
 
-| Tool | Description |
-|------|-------------|
-| `read` | Read files and directories |
-| `write` | Create new files |
-| `patch` | Modify existing files |
-| `shell` | Execute shell commands |
-
-## Agent Precedence
-
-Project-level agents override global agents:
-
-```
-./.forge/agents/  (project)  →  ~/.forge/agents/  (global)
-```
-
-## Overriding Built-in Agents
-
-To customize ForgeCode's built-in agents, create a file with matching `id`:
-
-```markdown
----
-id: "forge"
-title: "My Custom Forge"
-description: "Forge with my project's conventions"
-tier: standard
-tools:
-  - read
-  - write
-  - patch
-  - shell
 ---
 
-[Your customized system prompt]
-```
+## Agent tier by role
+
+| Agent type | Reasoning | Tool set |
+|---|---|---|
+| Planner (`planner`, `muse`) | enabled + high effort | read-only + `plan` |
+| Research / review (`architect`, `critic`, `analyst`, `verifier`, `explorer`, `tracer`) | enabled + high effort | read-only (+ `shell` for tracer/verifier) |
+| Implementation heavy (`executor-high`, `refactorer`) | enabled + high effort | full write set |
+| Implementation balanced (`executor`) | enabled + medium effort | full write set |
+| Implementation light (`executor-low`) | disabled | full write set |
+| Specialist writer (`ui-engineer`, `api-designer`, etc.) | disabled | full write set |
+| Specialist read-only (`dep-auditor`, `data-modeler`, `ux-analyst`) | disabled | read-only |
+| Debugger (`debugger`, `tracer`) | enabled | read-only + `shell` |
+| Git (`git-master`, `git-strategist`) | disabled | read-only + `shell` |
+
+---
+
+## Adding a new agent
+
+1. Create `agents/<name>.md` with the required frontmatter.
+2. Write the body using the XML-tagged convention.
+3. Add an entry to `catalog-manifest.json` under `agents`:
+   ```json
+   {
+     "id": "my-agent",
+     "path": "agents/my-agent.md",
+     "category": "specialist",
+     "status": "active",
+     "core": false,
+     "reasoning": false
+   }
+   ```
+4. Run `scripts/doctor.sh --repo` to validate.
+5. Update `docs/FORGE_KEYWORDS.md` if the new agent has natural-language triggers.
+
+---
+
+## Delegation via the `task` tool
+
+Agents can spawn sub-agents using the `task` tool. The sub-agent gets a fresh context with its own tool set and body. Use this when:
+
+- A large read-only investigation can run in parallel and return a summary (`sage`, `explorer`, `analyst`).
+- A focused specialist can do one piece of work better than the generalist (`security-reviewer` for an auth change, `perf-optimizer` for a benchmark).
+- The main agent is running low on context and needs to offload a subtask.
+
+The task tool takes an `agent_id` and a task description. It does NOT share memory -- the sub-agent must be told everything it needs in its task prompt.
+
+---
+
+## Agent ID uniqueness
+
+Every agent id must be unique. The filename must match the id (`architect.md` -> `id: architect`). The doctor script cross-checks this.
+
+If two agents try to claim the same id, forge's loader behavior is "last one wins" but the order is not specified -- do not rely on it.
+
+---
+
+## Model selection
+
+Every agent in oh-my-forge specifies `model: claude-opus-4-6` to pin behavior. Users can override this by editing the agent file in `~/forge/agents/` (the install script respects existing files unless `--overwrite` is passed).
+
+Agents that need different models (e.g. a vision task) should specify the model explicitly in the frontmatter rather than relying on session defaults.
+
+---
+
+## Reasoning configuration
+
+Only enable reasoning on agents that genuinely benefit from it:
+
+- **Good candidates**: planning, architecture, complex review, root-cause analysis, security review, performance analysis.
+- **Bad candidates**: simple edits, scaffolding, formatting, running tests, mechanical refactors.
+
+Reasoning costs tokens and latency. The `executor-low` agent exists specifically to be fast -- do NOT add reasoning to it.
+
+---
+
+## See also
+
+- [`REFERENCE.md`](./REFERENCE.md) -- skills, commands, templates, tools.
+- [`../AGENTS.md`](../AGENTS.md) -- user-facing project rules (auto-loaded by forge).
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md) -- how to contribute.
+- [`../catalog-manifest.json`](../catalog-manifest.json) -- full inventory.

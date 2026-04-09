@@ -1,8 +1,6 @@
 ---
 name: trace
 description: Evidence-driven debugging with parallel hypothesis testing
-argument-hint: "<bug or error description>"
-level: 3
 ---
 
 <Purpose>
