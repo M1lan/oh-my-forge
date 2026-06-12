@@ -50,7 +50,7 @@ Exact steps.
 
 ### Hypotheses and evidence
 
-1. **H1**: <hypothesis> 
+1. **H1**: <hypothesis>
    - Falsifying test: <cheap check>
    - Result: ELIMINATED ("evidence shows X")
 

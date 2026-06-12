@@ -7,8 +7,15 @@ charset = utf-8
 trim_trailing_whitespace = true
 indent_style = space
 
-[*.{md,toml,yaml,yml,json}]
+[*.{toml,yaml,yml,json}]
 indent_size = 2
+
+# Markdown indentation is structural (nested lists, fenced code blocks with
+# arbitrary inner indentation, tab-indented examples). Enforcing indent rules
+# produces false positives — rumdl owns Markdown style instead.
+[*.md]
+indent_style = unset
+indent_size = unset
 
 [*.sh]
 indent_size = 2

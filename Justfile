@@ -1,251 +1,210 @@
-# ==============================================================================
-# Justfile — oh-my-forge task runner
-# ==============================================================================
-# Run `just` (or `just help`) for the list of available recipes.
+# ── oh-my-forge Justfile — config-only pack: lint/fmt gates + dual TUI ───────
+# No build system, no test suite — the Justfile wires up one linter/formatter
+# per file type and a TUI layer in .just/helpers/ (GNU Bash >= 5.3 helpers).
 #
-# This repo is a configuration-only pack: no source code, no build step, no
-# test suite. The Justfile wires up linters and formatters for every file
-# type found in the tree:
+# Start here:  bare `just`  → info splash (⏎/m menu · f fzf · countdown)
+#              `just menu`  → guided command builder (gum, prompts for params)
+#              `just fzf`   → power launcher (fzf, tab multi-select + batch run)
 #
-#   Markdown  (110 files) → rumdl        (fast Rust markdownlint)
-#   TOML      (1 file)    → taplo        (TOML toolkit: fmt + lint + LSP)
-#   Shell     (5 files)   → shellcheck + shfmt
-#   JSON      (2 files)   → prettier     (JSON only — not prose)
-#   All files             → editorconfig-checker (if installed)
+#   Markdown (140 files) → rumdl        TOML  → taplo
+#   Shell                → shellcheck + shfmt   JSON  → prettier
+#   All files            → editorconfig-checker (soft — skipped if missing)
 #
-# Three verbs apply to each tool:
-#
-#   lint-X    Read-only diagnostic pass. Exits non-zero on any issue.
-#   fmt-X     Format check (read-only). Exits non-zero if any file would change.
-#   fix-X     Mutating fix pass. Writes to the filesystem.
-#
-# Aggregate recipes:
-#
-#   lint      Run every linter. Read-only. CI default.
-#   fmt       Run every formatter check. Read-only.
-#   check     lint + fmt (full read-only gate).
-#   fix       Run every auto-fixer. Writes to the filesystem.
-#   ci        check + tools (CI entry point).
-#   tools     Print which tools are installed and which are missing.
-#   install   Print install instructions for each tool.
-#
-# Philosophy: one tool per filetype, fail loudly, never run a destructive
-# fix inside the `check` or `ci` path.
-# ==============================================================================
+# Verbs per tool: lint-X (read-only diagnostics) · fmt-X (read-only format
+# check) · fix-X (mutating). Umbrellas: lint · fmt · check · fix · ci.
+# `ci` is the EXACT CI gate. Never run a destructive fix inside check/ci.
 
-# Use bash with strict mode for every recipe.
 set shell := ["bash", "-euo", "pipefail", "-c"]
 set dotenv-load := false
 set positional-arguments := true
 
-# Default recipe: show the help screen.
-default: help
+helpers := justfile_directory() / ".just" / "helpers"
 
-# ------------------------------------------------------------------------------
-# Meta
-# ------------------------------------------------------------------------------
-
-# Show all recipes with their one-line descriptions.
-help:
-    @just --list --unsorted
-
-# Print which linters/formatters are installed and which are missing.
-tools:
-    #!/usr/bin/env bash
-    set -uo pipefail
-    printf '%-22s %-10s %s\n' "TOOL" "STATUS" "VERSION"
-    printf '%-22s %-10s %s\n' "----" "------" "-------"
-    check() {
-      local name=$1 cmd=$2
-      if command -v "$cmd" >/dev/null 2>&1; then
-        local ver
-        ver=$("$cmd" --version 2>&1 | head -1 | tr -d '\r')
-        printf '%-22s %-10s %s\n' "$name" "OK" "$ver"
-      else
-        printf '%-22s %-10s %s\n' "$name" "MISSING" "-- install via 'just install'"
-      fi
-    }
-    check rumdl rumdl
-    check taplo taplo
-    check shellcheck shellcheck
-    check shfmt shfmt
-    check prettier prettier
-    check editorconfig-checker editorconfig-checker
-
-# Print install instructions for every tool this Justfile uses.
-install:
-    @echo "oh-my-forge uses the following tools. Install the ones marked MISSING"
-    @echo "by 'just tools'."
-    @echo ""
-    @echo "  rumdl       cargo install rumdl  |  brew install rumdl"
-    @echo "  taplo       cargo install taplo-cli --locked  |  brew install taplo"
-    @echo "  shellcheck  brew install shellcheck  |  apt install shellcheck"
-    @echo "  shfmt       brew install shfmt  |  go install mvdan.cc/sh/v3/cmd/shfmt@latest"
-    @echo "  prettier    npm i -g prettier  |  brew install prettier"
-    @echo "  editorconfig-checker  brew install editorconfig-checker  (optional)"
-    @echo ""
-    @echo "On macOS, a single brew one-liner installs everything:"
-    @echo "  brew install rumdl taplo shellcheck shfmt prettier editorconfig-checker"
-
-# ------------------------------------------------------------------------------
-# Markdown — rumdl
-# ------------------------------------------------------------------------------
-
-# Lint all Markdown files. Config: .rumdl.toml
-lint-md:
-    rumdl check .
-
-# Lint Markdown with structured JSON output (LLM format with fix ranges, jq-safe).
-lint-md-json:
-    @rumdl check --output-format json .
-
-# Lint Markdown with terse one-line-per-issue output (token-efficient).
-lint-md-concise:
-    @rumdl check --output-format concise .
-
-# Show what `rumdl fmt` would change, without writing.
-fmt-md:
-    rumdl check --diff .
-
-# Auto-fix every rumdl issue that is fixable. Writes to the filesystem.
-fix-md:
-    rumdl fmt .
-
-# Explain a specific rumdl rule. Usage: just explain-md MD013
-explain-md rule:
-    rumdl rule {{ rule }}
-
-# ------------------------------------------------------------------------------
-# TOML — taplo
-# ------------------------------------------------------------------------------
-
-# Lint all TOML files (schema + syntax). Config: .taplo.toml
-lint-toml:
-    taplo lint
-
-# Format-check all TOML files (read-only, exits non-zero on drift).
-fmt-toml:
-    taplo format --check --diff
-
-# Auto-format all TOML files. Writes to the filesystem.
-fix-toml:
-    taplo format
-
-# ------------------------------------------------------------------------------
-# Shell — shellcheck (lint) + shfmt (format)
-# ------------------------------------------------------------------------------
-
-# Shell file glob used by every shell recipe below.
+# Shell sources: repo scripts + the Justfile's own helper layer.
 _shell_files := "scripts/*.sh"
-
-# Static-analyze all shell scripts. Config: .shellcheckrc
-lint-sh:
-    shellcheck {{ _shell_files }}
-
-# Format-check all shell scripts (shfmt -d, exits non-zero on drift).
-fmt-sh:
-    shfmt -d -i 2 -ci -bn -sr {{ _shell_files }}
-
-# Auto-format all shell scripts. Writes to the filesystem.
-fix-sh:
-    shfmt -w -i 2 -ci -bn -sr {{ _shell_files }}
-
-# ------------------------------------------------------------------------------
-# JSON — prettier
-# ------------------------------------------------------------------------------
+_helper_files := ".just/helpers/*.bash"
 
 # JSON file glob — respects .prettierignore.
 _json_files := "**/*.json"
 
+# Parent directory that contains `forge/` (forgecode hardcodes $HOME/forge, so
+# install-omf overrides HOME to land at {{ forge_parent }}/forge).
+# Override: `just forge_parent=$HOME/.config install-omf` → ~/.config/forge
+forge_parent := env_var_or_default("OMF_FORGE_PARENT", env_var("HOME"))
+
+# Timestamped backups of overwritten files — deliberately OUTSIDE the install
+# target so the target's VCS (jj, git, fossil, none) never sees backup files.
+# Override: `just backup_root=/tmp/omf-backups install-omf`
+backup_root := env_var_or_default("OMF_BACKUP_ROOT", env_var("HOME") / ".cache/oh-my-forge/backups")
+
+alias m := menu
+alias f := fzf
+alias d := doctor
+alias l := lint
+alias c := check
+alias s := search
+alias h := help
+alias tools := doctor
+
+# ── meta ──────────────────────────────────────────────────────────────────────
+
+# Bare-`just` landing screen: info splash + countdown (never the bare list).
+[private]
+default:
+    @'{{ helpers }}/info-screen.bash'
+
+# Show all recipes with their one-line descriptions.
+[group('meta')]
+help:
+    @just --list --unsorted
+
+# Static info splash (same screen as bare `just`, no countdown).
+[group('meta')]
+[no-exit-message]
+info:
+    @'{{ helpers }}/info-screen.bash' --static
+
+# Guided command builder (gum): filter recipes, view source, prompt params.
+[group('meta')]
+[no-exit-message]
+menu:
+    @'{{ helpers }}/menu.bash'
+
+# Power launcher (fzf): tab multi-select, batch-run, stop on first failure.
+[group('meta')]
+[no-exit-message]
+fzf:
+    @'{{ helpers }}/fzf.bash'
+
+# Dependency audit + project checks. Flags: --summary | --factoid | --install.
+[group('meta')]
+doctor *args:
+    @'{{ helpers }}/doctor.bash' "$@"
+
+# ── umbrella ──────────────────────────────────────────────────────────────────
+
+# Run every linter. Read-only. Fails on the first tool that reports an issue.
+[group('umbrella')]
+lint: lint-md lint-toml lint-sh lint-json lint-editorconfig
+    @printf '\nlint: OK\n'
+
+# Run every formatter check (read-only). Reports which files would change.
+[group('umbrella')]
+fmt: fmt-md fmt-toml fmt-sh fmt-json
+    @printf '\nfmt check: OK\n'
+
+# Full read-only gate: lint + fmt. Suitable for CI and pre-commit hooks.
+[group('umbrella')]
+check: lint fmt
+    @printf '\ncheck: all clean\n'
+
+# Run every auto-fixer. WRITES TO THE FILESYSTEM.
+[group('umbrella')]
+fix: fix-md fix-toml fix-sh fix-json
+    @printf '\nfix: complete — review with `git diff`\n'
+
+# CI entry point: dep audit (fails on missing required tools) + full gate.
+[group('umbrella')]
+ci: doctor check
+
+# ── markdown — rumdl ──────────────────────────────────────────────────────────
+
+# Lint all Markdown files. Config: .rumdl.toml
+[group('md')]
+lint-md:
+    rumdl check .
+
+# Lint Markdown with structured JSON output (LLM format with fix ranges).
+[group('md')]
+lint-md-json:
+    @rumdl check --output-format json .
+
+# Lint Markdown with terse one-line-per-issue output (token-efficient).
+[group('md')]
+lint-md-concise:
+    @rumdl check --output-format concise .
+
+# Show what `rumdl fmt` would change, without writing.
+[group('md')]
+fmt-md:
+    rumdl check --diff .
+
+# Auto-fix every fixable rumdl issue. Writes to the filesystem.
+[group('md')]
+fix-md:
+    rumdl fmt .
+
+# Explain a specific rumdl rule. Usage: just explain-md MD013
+[group('md')]
+explain-md rule:
+    rumdl rule {{ rule }}
+
+# ── toml — taplo ──────────────────────────────────────────────────────────────
+
+# Lint all TOML files (schema + syntax). Config: .taplo.toml
+[group('toml')]
+lint-toml:
+    taplo lint
+
+# Format-check all TOML files (read-only, exits non-zero on drift).
+[group('toml')]
+fmt-toml:
+    taplo format --check --diff
+
+# Auto-format all TOML files. Writes to the filesystem.
+[group('toml')]
+fix-toml:
+    taplo format
+
+# ── shell — shellcheck + shfmt ────────────────────────────────────────────────
+
+# Static-analyze scripts/ and .just/helpers/. Config: .shellcheckrc
+[group('shell')]
+lint-sh:
+    shellcheck {{ _shell_files }}
+    shellcheck -x -P .just/helpers {{ _helper_files }}
+
+# Format-check all shell sources (shfmt -d, exits non-zero on drift).
+[group('shell')]
+fmt-sh:
+    shfmt -d -i 2 -ci -bn -sr {{ _shell_files }} {{ _helper_files }}
+
+# Auto-format all shell sources. Writes to the filesystem.
+[group('shell')]
+fix-sh:
+    shfmt -w -i 2 -ci -bn -sr {{ _shell_files }} {{ _helper_files }}
+
+# ── json — prettier ───────────────────────────────────────────────────────────
+
 # Format-check all JSON files. Config: .prettierrc.toml
+[group('json')]
 lint-json:
     prettier --check {{ _json_files }}
 
 # Alias: format check is the only check prettier does for JSON.
+[group('json')]
 fmt-json: lint-json
 
 # Auto-format all JSON files. Writes to the filesystem.
+[group('json')]
 fix-json:
     prettier --write {{ _json_files }}
 
-# ------------------------------------------------------------------------------
-# EditorConfig — verify indent / charset / line-ending compliance
-# ------------------------------------------------------------------------------
-# This is a soft check: if editorconfig-checker is not installed, skip silently.
+# ── files — editorconfig ──────────────────────────────────────────────────────
 
-# Verify every file matches .editorconfig rules.
+# Verify every file matches .editorconfig rules (soft check — skip if missing).
+[group('files')]
 lint-editorconfig:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    if command -v editorconfig-checker >/dev/null 2>&1; then
-      editorconfig-checker
-    else
-      echo "editorconfig-checker not installed — skipping (run 'just install' for instructions)"
+    @if command -v editorconfig-checker >/dev/null 2>&1; then \
+      editorconfig-checker; \
+    else \
+      printf 'editorconfig-checker not installed — skipping (see `just doctor`)\n' >&2; \
     fi
 
-# ------------------------------------------------------------------------------
-# Aggregate recipes
-# ------------------------------------------------------------------------------
+# ── install — oh-my-forge into a forge config root ───────────────────────────
 
-# Run every linter. Read-only. Fails on the first tool that reports an issue.
-lint: lint-md lint-toml lint-sh lint-json lint-editorconfig
-    @echo ""
-    @echo "lint: OK"
-
-# Run every formatter check (read-only). Reports which files would change.
-fmt: fmt-md fmt-toml fmt-sh fmt-json
-    @echo ""
-    @echo "fmt check: OK"
-
-# Full read-only gate: lint + fmt. Suitable for CI and pre-commit hooks.
-check: lint fmt
-    @echo ""
-    @echo "check: all clean"
-
-# Run every auto-fixer. WRITES TO THE FILESYSTEM.
-fix: fix-md fix-toml fix-sh fix-json
-    @echo ""
-    @echo "fix: complete — review with 'git diff'"
-
-# CI entry point: verify tools are installed, then run the full read-only gate.
-ci: tools check
-
-# ------------------------------------------------------------------------------
-# Repo-specific housekeeping
-# ------------------------------------------------------------------------------
-
-# Parent directory that contains `forge/` (the forgecode global config folder).
-# forgecode hardcodes its global config root to $HOME/forge, so we install by
-# invoking scripts/install.sh with a temporarily-overridden HOME that points
-# at `forge_parent`. The actual install destination is therefore
-# `{{ forge_parent }}/forge`. Default is $HOME, which means the install lands
-# at $HOME/forge — matching forgecode's expectation.
-#
-# Override on the CLI if your forge config root lives elsewhere:
-#   just forge_parent=$HOME/.config install-omf   # -> ~/.config/forge
-#   just forge_parent=/opt                        # -> /opt/forge
-forge_parent := env_var_or_default("OMF_FORGE_PARENT", env_var("HOME"))
-
-# Where timestamped backups of overwritten files go. This path is deliberately
-# OUTSIDE the install target so that whatever version control you run in your
-# forge directory (jj, git, fossil, none) does not pick up backup files as
-# changes. Backups are written under `{{ backup_root }}/YYYYMMDD-HHMMSS/`.
-#
-# Override on the CLI if you want backups somewhere else:
-#   just backup_root=/tmp/omf-backups install-omf
-backup_root := env_var_or_default("OMF_BACKUP_ROOT", env_var("HOME") / ".cache/oh-my-forge/backups")
-
-# Install oh-my-forge (agents, skills, commands, templates) into
-# `{{ forge_parent }}/forge`. Every file that would be overwritten is first
-# copied to a timestamped directory under `{{ backup_root }}`. The target
-# directory is never mutated without a backup, and `--force` is deliberately
-# NOT passed to install.sh. Safe to re-run; the only thing that changes
-# between runs is the backup timestamp.
-#
-# The target folder may be version-controlled with anything (jj, git, fossil)
-# or nothing — this recipe does not touch any VCS. Backups live OUTSIDE the
-# target folder by design so they never show up as tracked changes.
-# Install oh-my-forge into $HOME/forge (override via forge_parent=) with timestamped backups.
+# Install oh-my-forge into {{ forge_parent }}/forge with timestamped backups.
+[group('install')]
 install-omf:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -270,10 +229,8 @@ install-omf:
     fi
     printf '\nVerify the install with:  just doctor-omf\n'
 
-# Dry-run of install-omf. Prints every action the installer would take but
-# touches nothing on disk. Use this before the first real install, or after
-# pulling upstream changes, to see exactly which files will be replaced.
 # Preview install-omf without touching the filesystem.
+[group('install')]
 install-omf-dry:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -289,18 +246,40 @@ install-omf-dry:
       --dry-run \
       --backup-dir "${backup_dir}"
 
-# Run the installed-target doctor against `{{ forge_parent }}/forge`. Use
-# after install-omf to verify the layout forgecode expects (flat agents/,
-# one-deep skills/, …).
-# Verify the installed oh-my-forge layout.
+# Verify the installed oh-my-forge layout at {{ forge_parent }}/forge.
+[group('install')]
 doctor-omf:
     HOME="{{ forge_parent }}" ./scripts/doctor.sh --global
 
-# Run the repo's doctor script (verifies oh-my-forge installation layout).
-doctor:
+# Run the repo's own doctor script (this checkout, not the installed target).
+[group('install')]
+doctor-repo:
     ./scripts/doctor.sh --repo
 
+# ── clean ─────────────────────────────────────────────────────────────────────
+
 # Clean rumdl's on-disk cache.
+[group('clean')]
 clean:
     rumdl clean
-    @echo "clean: rumdl cache cleared"
+    @printf 'clean: rumdl cache cleared\n'
+
+# ── util ──────────────────────────────────────────────────────────────────────
+
+# Live ripgrep search → fzf → open the hit in $EDITOR. Usage: just search [query]
+[group('util')]
+[no-exit-message]
+search *query:
+    @'{{ helpers }}/search.bash' "$@"
+
+# Pick a file with fzf (bat preview) and open it in $EDITOR.
+[group('util')]
+[no-exit-message]
+pick:
+    @'{{ helpers }}/pick.bash' file
+
+# Switch git branch interactively.
+[group('util')]
+[no-exit-message]
+branch:
+    @'{{ helpers }}/pick.bash' branch

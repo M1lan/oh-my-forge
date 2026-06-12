@@ -48,13 +48,13 @@ tool_supported            = true
 
 # Newer forgecode knobs (>= the 2026-05 builds; harmless on older versions
 # that simply ignore unknown keys):
-verify_todos              = true   # verifier pass over todo_write items at turn end
-subagents                 = true   # enable task-tool delegation to sub-agents
-research_subagent         = false  # built-in research sub-agent (sage covers this)
-use_text_patch_fallback   = false  # plain-text patch fallback when structured patch fails
-merge_system_messages     = false  # keep system messages separate (better caching)
-use_forge_committer       = true   # forge-authored commits get the ForgeCode committer
-max_commit_count          = 20     # cap commits listed in context
+verify_todos            = true  # verifier pass over todo_write items at turn end
+subagents               = true  # enable task-tool delegation to sub-agents
+research_subagent       = false # built-in research sub-agent (sage covers this)
+use_text_patch_fallback = false # plain-text patch fallback when structured patch fails
+merge_system_messages   = false # keep system messages separate (better caching)
+use_forge_committer     = true  # forge-authored commits get the ForgeCode committer
+max_commit_count        = 20    # cap commits listed in context
 
 # ------------------------------------------------------------------------------
 # [retry] — network/provider retry behavior
