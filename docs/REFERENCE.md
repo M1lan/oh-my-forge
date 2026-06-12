@@ -222,6 +222,40 @@ If you see these in an agent file, it was written for a different tool's schema 
 
 ---
 
+## New skills in v2.1 (2026-06-12)
+
+The following skills were added in the OMC parity wave. They follow the same frontmatter conventions as above.
+
+### Ported workflows
+
+| Skill | Category | Description |
+|---|---|---|
+| `ask` | meta | Consult a second AI CLI (codex, claude, or gemini) for adversarial review or tie-breaking. |
+| `code-review` | quality | Structured diff review with severity ratings (Critical/Major/Minor/Nit) and a merge verdict. |
+| `security-review` | quality | OWASP Top 10 + secrets + trust-boundary audit; zero-noise bias, BLOCK/WATCH/CLEAR verdict. |
+| `tdd` | quality | Red-green-refactor discipline. Iron Law: no production code without a failing test first. |
+| `ultragoal` | execution | Durable multi-goal initiative tracked across sessions via a plan file ledger. |
+| `deepinit` | meta | Generate or regenerate hierarchical AGENTS.md documentation across the codebase. |
+| `mcp-setup` | meta | Guided wiring of MCP servers into `~/forge/.mcp.json` or `./.mcp.json`. |
+| `omf-reference` | meta | In-session reference card for oh-my-forge resource layout, routing, and conventions. |
+
+### House preference skills (always-active tooling)
+
+These skills encode standing preferences. Forge loads them for all relevant work without explicit invocation.
+
+| Skill | Description |
+|---|---|
+| `write-bash` | GNU Bash 5.3+ house style -- all shell and Bash work follows these rules. |
+| `use-rg` | Always use `rg` (ripgrep) instead of `grep` for all text search. |
+| `use-fd` | Always use `fd` instead of `find` for all file discovery. |
+| `use-gnu-tools` | Always use Homebrew-installed GNU tools over macOS/BSD built-ins. |
+| `karpathy-guidelines` | Anti-overengineering behavioral guidelines -- surgical changes, simplicity first. |
+| `typescript-pro` | Advanced TypeScript: generics, branded types, discriminated unions, tRPC. |
+| `emacs-integration` | Bidirectional Emacs editor integration via MCP tools on `~/.local/state/emacs/mcp.sock`. |
+| `use-grepai` | Semantic code search via the `grepai` CLI (call graphs, intent search, property graphs). |
+
+---
+
 ## Catalog manifest
 
 Every agent, skill, command, and template shipped by oh-my-forge is listed in `catalog-manifest.json` at the repo root. This file is the single source of truth for `scripts/install.sh`, `scripts/doctor.sh`, and `scripts/uninstall.sh`.

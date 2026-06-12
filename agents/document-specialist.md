@@ -2,7 +2,7 @@
 id: document-specialist
 title: Document Specialist
 description: Writes and maintains project documentation -- README, CONTRIBUTING, ADRs, API references, inline comments. Prioritizes the reader's task, avoids AI slop, and keeps docs in sync with code. Use when docs are missing, stale, bloated, or when a new feature needs user-facing documentation.
-model: claude-opus-4-6
+model: claude-fable-5
 reasoning:
   enabled: false
 tools:

@@ -1,8 +1,8 @@
 # oh-my-forge
 
-> A v2 ForgeCode (`forge`) workbench -- 40 specialist agents, 30 skills, 15 commands, MCP-ready, doctor-validated.
+> A v2 ForgeCode (`forge`) workbench -- 40 specialist agents, 46 skills, 22 commands, MCP-ready, doctor-validated.
 
-[![version](https://img.shields.io/badge/catalog-2026.04.09-blue)](./catalog-manifest.json) [![forge](https://img.shields.io/badge/forge-%E2%89%A52.5.2-green)](https://forgecode.dev/) [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![version](https://img.shields.io/badge/catalog-2026.06.12-blue)](./catalog-manifest.json) [![forge](https://img.shields.io/badge/forge-%E2%89%A52.5.2-green)](https://forgecode.dev/) [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
 ---
 
@@ -25,8 +25,8 @@ forge "plan: add user auth with refresh tokens"
 **oh-my-forge** is a curated content pack for the [ForgeCode](https://forgecode.dev/) CLI (`forge`). It ships:
 
 - **40 specialist agents** covering core implementation, architecture, review, testing, backend, frontend, DevOps, and specialist domains.
-- **30 skills** including execution modes (`autopilot`, `ralph`, `turbo`), planning workflows (`plan`, `ralplan`), QA (`verify`, `critic`, `visual-verdict`), investigation (`explore`, `deep-dive`, `tracer`), knowledge management (`note`, `recall`, `wiki`, `remember`), and meta workflows (`skillify`, `doctor`, `release`).
-- **15 slash commands** for common workflows (scaffold, feature, bugfix, review, refactor, test, document, deploy, etc.).
+- **46 skills** including execution modes (`autopilot`, `ralph`, `turbo`, `ultragoal`), planning workflows (`plan`, `ralplan`), QA (`verify`, `critic`, `code-review`, `security-review`, `visual-verdict`), TDD (`tdd`), investigation (`explore`, `deep-dive`, `tracer`), knowledge management (`note`, `recall`, `wiki`, `remember`), meta workflows (`skillify`, `doctor`, `deepinit`, `mcp-setup`, `ask`, `omf-reference`, `release`), and house preferences (`write-bash`, `use-rg`, `use-fd`, `use-gnu-tools`, `karpathy-guidelines`, `use-grepai`, `typescript-pro`, `emacs-integration`).
+- **22 slash commands** for common workflows (scaffold, feature, bugfix, review, refactor, test, document, deploy, code-review, security-review, deepinit, ask, etc.).
 - **Template overrides** for forge's built-in Handlebars prompts (stronger doom-loop breaker, smarter todo reminders).
 - **A doctor script** that validates your install.
 - **An installer** that safely copies files into `~/forge/` and/or `.forge/` in a project.
@@ -85,8 +85,8 @@ forge "plan: add a /health endpoint to the API"
 | Category | Count | Examples |
 |---|---|---|
 | Agents | 40 | `architect`, `executor`, `critic`, `tracer`, `verifier`, `code-reviewer`, `api-designer`, `git-master`, `qa-tester`, ... |
-| Skills | 30 | `plan`, `ralplan`, `autopilot`, `ralph`, `turbo`, `verify`, `critic`, `explore`, `deep-dive`, `tracer`, `doctor`, ... |
-| Commands | 15 | `/scaffold`, `/feature`, `/bugfix`, `/review`, `/refactor`, `/test`, `/document`, `/deploy`, `/migrate`, ... |
+| Skills | 46 | `plan`, `ralplan`, `autopilot`, `ralph`, `turbo`, `ultragoal`, `verify`, `critic`, `code-review`, `security-review`, `tdd`, `explore`, `deep-dive`, `tracer`, `doctor`, `ask`, `deepinit`, `mcp-setup`, `write-bash`, ... |
+| Commands | 22 | `/scaffold`, `/feature`, `/bugfix`, `/review`, `/refactor`, `/test`, `/document`, `/deploy`, `/code-review`, `/security-review`, `/deepinit`, `/ask`, ... |
 | Templates | 3 | `forge-doom-loop-reminder`, `forge-pending-todos-reminder`, `forge-partial-skill-instructions` |
 
 See [`catalog-manifest.json`](./catalog-manifest.json) for the complete, machine-readable inventory.
@@ -152,9 +152,13 @@ Plus planning-first modes:
 | `autopilot` | execution | Full autonomous idea-to-code. |
 | `ralph` | execution | Persistence mode -- does not stop until verified. |
 | `turbo` | execution | Maximum parallel throughput. |
+| `ultragoal` | execution | Durable multi-goal initiative tracked across sessions. |
 | `team` | execution | Multi-agent coordinated execution. |
 | `verify` | quality | Evidence-based completion check. |
 | `critic` | quality | Adversarial review with verdict. |
+| `code-review` | quality | Severity-rated diff review with merge verdict. |
+| `security-review` | quality | OWASP Top 10 + secrets audit with zero-noise filtering. |
+| `tdd` | quality | Red-green-refactor with Iron Law enforcement. |
 | `visual-verdict` | quality | UI visual QA with structured verdict. |
 | `ai-slop-cleaner` | quality | Strip AI filler and em-dash spam. |
 | `explore` | investigation | Read-only structured orientation. |
@@ -164,6 +168,10 @@ Plus planning-first modes:
 | `recall` | knowledge | Find prior context from notes/plans/git. |
 | `wiki` | knowledge | General external-knowledge Q&A. |
 | `remember` | knowledge | Persist rules to `AGENTS.md`. |
+| `ask` | meta | Consult codex, claude, or gemini for a second opinion. |
+| `deepinit` | meta | Generate hierarchical AGENTS.md across the codebase. |
+| `mcp-setup` | meta | Guided wiring of MCP servers into forge's JSON config. |
+| `omf-reference` | meta | In-session reference for oh-my-forge resource layout and routing. |
 | `skillify` | meta | Extract a session pattern into a reusable skill. |
 | `doctor` | meta | Diagnose the local install. |
 | `release` | release | Cut a clean tagged release with CHANGELOG. |
@@ -171,6 +179,12 @@ Plus planning-first modes:
 | `scaffold` | creation | Generate project boilerplate. |
 | `docker` | devops | Production Docker configs. |
 | `tailwind-v4` | frontend | Tailwind CSS v4 migration and usage. |
+| `typescript-pro` | tooling | Advanced TypeScript generics, branded types, and tRPC. |
+| `emacs-integration` | tooling | Bidirectional Emacs editor integration via MCP. |
+| `write-bash` | tooling | GNU Bash 5.3+ house style for all shell and script work. |
+| `use-rg` / `use-fd` / `use-gnu-tools` | tooling | House tool preferences (ripgrep, fd, GNU utils -- always active). |
+| `karpathy-guidelines` | tooling | Anti-overengineering behavioral guidelines (always active). |
+| `use-grepai` | tooling | Semantic code search via the `grepai` CLI. |
 
 ## Commands
 

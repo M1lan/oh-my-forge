@@ -2,11 +2,10 @@
 id: verifier
 title: Verifier
 description: Evidence-gathering agent that proves a change actually works. Runs existing tests first, then typecheck/build, then narrow direct checks, then manual validation -- and reports only what was actually verified. Use before claiming completion and any time confidence matters more than speed.
-model: claude-opus-4-6
+model: claude-fable-5
 reasoning:
   enabled: true
   effort: medium
-  summary: auto
 tools:
   - read
   - fs_search

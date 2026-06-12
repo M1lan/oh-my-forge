@@ -17,6 +17,7 @@ This file is loaded by forge (or read by the user) to pick the right tool for a 
 | "eco", "quick fix", "one-line", "minimal ceremony" | `eco` skill | Lightweight single-file changes |
 | "ultrawork", "parallel tasks", "many at once" | `ultrawork` skill | Max parallel throughput across subtasks |
 | "ultraqa", "make the tests pass", "test until green" | `ultraqa` skill | Test/fix cycling loop |
+| "ultragoal", "multi-goal initiative", "track goals across sessions", "goal ledger" | `ultragoal` skill | Durable multi-session goal tracking |
 
 ---
 
@@ -36,8 +37,11 @@ This file is loaded by forge (or read by the user) to pick the right tool for a 
 |---|---|---|
 | "critique", "poke holes", "what could go wrong", "review this plan" | `critic` skill / `critic` agent | Adversarial review with verdict |
 | "verify", "is this done", "prove it works", "evidence that it works" | `verify` skill / `verifier` agent | Evidence-based completion check |
+| "review this diff", "code review", "review my changes", "before I merge" | `code-review` skill | Severity-rated diff quality gate |
+| "security review", "OWASP scan", "check for vulns", "secrets check", "trust boundary" | `security-review` skill | OWASP + secrets + trust-boundary audit |
 | "code review", "review this PR", "review this change" | `code-reviewer` agent | Comprehensive code review |
 | "security review", "is this secure", "audit this" | `security-reviewer` agent | Security-focused review |
+| "tdd", "test first", "red-green", "write the test first", "test-driven" | `tdd` skill | Red-green-refactor with Iron Law |
 | "visual review", "does it match the design", "UI looks right" | `visual-verdict` skill | Structured visual QA |
 | "clean this up", "strip the fluff", "remove AI slop", "tighten this" | `ai-slop-cleaner` skill | Strip LLM filler and em-dash spam |
 
@@ -76,6 +80,16 @@ This file is loaded by forge (or read by the user) to pick the right tool for a 
 | "release", "cut a release", "tag a release", "ship v1.2.3" | `release` skill | Prepare tagged release |
 | "cancel", "stop", "abort", "never mind" | `cancel` skill | Safe exit from autonomous loops |
 | "scaffold", "bootstrap", "new project" | `scaffold` skill | Generate project boilerplate |
+| "second opinion", "ask codex", "ask gemini", "ask claude", "cross-check this" | `ask` skill | Multi-model consultation |
+| "set up mcp", "add mcp server", "configure context7", "wire up emacs mcp" | `mcp-setup` skill | MCP server wiring |
+| "deepinit", "init the codebase docs", "generate AGENTS.md", "document this project for agents" | `deepinit` skill | Hierarchical AGENTS.md generation |
+| "omf reference", "how does oh-my-forge work", "what skills are available" | `omf-reference` skill | oh-my-forge reference card |
+| "emacs", "open in emacs", "emacs diagnostics", "editor integration" | `emacs-integration` skill | Emacs MCP editor integration |
+| "bash", "shell script", "write a script" | `write-bash` skill | GNU Bash 5.3+ house style |
+| "grepai", "call graph", "who calls", "semantic search in this codebase" | `use-grepai` skill | Semantic code search |
+| "typescript types", "tRPC", "advanced generics", "branded types" | `typescript-pro` skill | Advanced TypeScript patterns |
+
+**House preference skills** (always-active, no trigger needed): `use-rg`, `use-fd`, `use-gnu-tools`, `karpathy-guidelines` apply to all shell commands and code work automatically.
 
 ---
 

@@ -2,7 +2,7 @@
 id: explorer
 title: Explorer
 description: Read-only codebase orientation agent. Produces a structured explorer report -- architecture map, entry points, critical path walk-through, conventions, and gotchas. Use at first touch with an unfamiliar codebase, before a risky refactor, or when the user asks "walk me through this".
-model: claude-opus-4-6
+model: claude-fable-5
 reasoning:
   enabled: false
 tools:

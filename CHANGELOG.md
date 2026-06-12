@@ -6,6 +6,28 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This p
 
 ---
 
+## [2026.06.12] -- 2026-06-12
+
+**v2.1 — OMC parity wave.** Closes the gap between the live `~/.claude` install and the oh-my-forge repo.
+
+### Added
+
+- **8 ported skills** from the oh-my-claudecode / oh-my-codex live install: `ask`, `code-review`, `security-review`, `tdd`, `ultragoal`, `deepinit`, `mcp-setup`, `omf-reference`. Each has a matching slash command under `commands/`.
+- **5 new commands**: `ask.md`, `code-review.md`, `security-review.md`, `deepinit.md` (verify-exact list via `ls commands/`).
+- **8 adopted house preference skills**: `write-bash`, `use-rg`, `use-fd`, `use-gnu-tools`, `karpathy-guidelines`, `typescript-pro`, `emacs-integration`, `use-grepai`. These encode standing tool and coding preferences that apply to every session.
+- MCP catalog documented in `skills/mcp-setup/SKILL.md`: gitnexus, context7, emacs, mempalace, cortex, github, fetch, filesystem server configs as ready-to-merge JSON snippets.
+
+### Changed
+
+- **Tool name strict-mode fix backported.** All `{{tool_names.X}}` Handlebars references in `agents/` and `skills/` were flattened to plain tool names, matching forgecode's strict-mode template behavior and eliminating silent render failures.
+- **Reasoning agents bumped to `claude-fable-5`.** Nine reasoning agents (`analyst`, `critic`, `qa-tester`, `tracer`, `verifier`, `architect`, `code-reviewer`, `debugger`, `planner`) now pin `model: claude-fable-5` in their frontmatter (was `claude-opus-4-6`).
+- **`summary:` key removed** from reasoning frontmatter in 5 agents (`analyst`, `critic`, `qa-tester`, `tracer`, `verifier`) -- not a valid forge field.
+- **`.forge.toml` baseline refreshed** for forge 2026-05+ knobs: `verify_todos`, `subagents`, `use_forge_committer`, `max_commit_count`, retry status code 524, and session model `claude-fable-5`.
+- Catalog `catalogVersion` bumped to `2026.06.12`. Description updated to reflect 46 skills and 22 commands.
+- `AGENTS.md`, `README.md`, `docs/REFERENCE.md`, `docs/FORGE_KEYWORDS.md` updated to reflect new skill/command inventory and keyword routing.
+
+---
+
 ## [2026.04.09] -- 2026-04-09
 
 **This is a full v2 rewrite.** Every agent, skill, and script was rebuilt against the verified forgecode source. If you used a previous version of oh-my-forge, treat this as a new install and run `scripts/migrate-from-v1.sh` to carry over your customizations.

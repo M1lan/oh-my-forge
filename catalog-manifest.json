@@ -1,9 +1,9 @@
 {
   "$schema": "./catalog-manifest.schema.json",
   "schemaVersion": 1,
-  "catalogVersion": "2026.04.09",
+  "catalogVersion": "2026.06.12",
   "name": "oh-my-forge",
-  "description": "A comprehensive v2 ForgeCode (forge) workbench: 40 specialist agents, 30 skills, and 15+ commands for multi-agent software engineering.",
+  "description": "A comprehensive v2 ForgeCode (forge) workbench: 40 specialist agents, 46 skills, and 22 commands for multi-agent software engineering.",
   "agents": [
     {
       "id": "analyst",
@@ -335,6 +335,13 @@
       "core": false
     },
     {
+      "name": "ask",
+      "path": "skills/ask/SKILL.md",
+      "category": "meta",
+      "status": "active",
+      "core": false
+    },
+    {
       "name": "autopilot",
       "path": "skills/autopilot/SKILL.md",
       "category": "execution",
@@ -347,6 +354,13 @@
       "category": "control",
       "status": "active",
       "core": true
+    },
+    {
+      "name": "code-review",
+      "path": "skills/code-review/SKILL.md",
+      "category": "quality",
+      "status": "active",
+      "core": false
     },
     {
       "name": "critic",
@@ -366,6 +380,13 @@
       "name": "deep-interview",
       "path": "skills/deep-interview/SKILL.md",
       "category": "planning",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "deepinit",
+      "path": "skills/deepinit/SKILL.md",
+      "category": "meta",
       "status": "active",
       "core": false
     },
@@ -391,11 +412,25 @@
       "core": false
     },
     {
+      "name": "emacs-integration",
+      "path": "skills/emacs-integration/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
       "name": "explore",
       "path": "skills/explore/SKILL.md",
       "category": "investigation",
       "status": "active",
       "core": true
+    },
+    {
+      "name": "karpathy-guidelines",
+      "path": "skills/karpathy-guidelines/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
     },
     {
       "name": "learner",
@@ -405,11 +440,25 @@
       "core": false
     },
     {
+      "name": "mcp-setup",
+      "path": "skills/mcp-setup/SKILL.md",
+      "category": "meta",
+      "status": "active",
+      "core": false
+    },
+    {
       "name": "note",
       "path": "skills/note/SKILL.md",
       "category": "knowledge",
       "status": "active",
       "core": true
+    },
+    {
+      "name": "omf-reference",
+      "path": "skills/omf-reference/SKILL.md",
+      "category": "meta",
+      "status": "active",
+      "core": false
     },
     {
       "name": "plan",
@@ -461,6 +510,13 @@
       "core": false
     },
     {
+      "name": "security-review",
+      "path": "skills/security-review/SKILL.md",
+      "category": "quality",
+      "status": "active",
+      "core": false
+    },
+    {
       "name": "skillify",
       "path": "skills/skillify/SKILL.md",
       "category": "meta",
@@ -471,6 +527,13 @@
       "name": "tailwind-v4",
       "path": "skills/tailwind-v4/SKILL.md",
       "category": "frontend",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "tdd",
+      "path": "skills/tdd/SKILL.md",
+      "category": "quality",
       "status": "active",
       "core": false
     },
@@ -503,6 +566,20 @@
       "core": false
     },
     {
+      "name": "typescript-pro",
+      "path": "skills/typescript-pro/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "ultragoal",
+      "path": "skills/ultragoal/SKILL.md",
+      "category": "execution",
+      "status": "active",
+      "core": false
+    },
+    {
       "name": "ultraqa",
       "path": "skills/ultraqa/SKILL.md",
       "category": "quality",
@@ -513,6 +590,34 @@
       "name": "ultrawork",
       "path": "skills/ultrawork/SKILL.md",
       "category": "execution",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "use-fd",
+      "path": "skills/use-fd/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "use-gnu-tools",
+      "path": "skills/use-gnu-tools/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "use-grepai",
+      "path": "skills/use-grepai/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "use-rg",
+      "path": "skills/use-rg/SKILL.md",
+      "category": "tooling",
       "status": "active",
       "core": false
     },
@@ -536,14 +641,33 @@
       "category": "knowledge",
       "status": "active",
       "core": false
+    },
+    {
+      "name": "write-bash",
+      "path": "skills/write-bash/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
     }
   ],
   "commands": [
+    {
+      "name": "ask",
+      "path": "commands/ask.md",
+      "status": "active",
+      "core": false
+    },
     {
       "name": "autopilot",
       "path": "commands/autopilot.md",
       "status": "active",
       "core": true
+    },
+    {
+      "name": "code-review",
+      "path": "commands/code-review.md",
+      "status": "active",
+      "core": false
     },
     {
       "name": "critic",
@@ -560,6 +684,12 @@
     {
       "name": "deep-dive",
       "path": "commands/deep-dive.md",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "deepinit",
+      "path": "commands/deepinit.md",
       "status": "active",
       "core": false
     },
@@ -630,6 +760,12 @@
       "core": false
     },
     {
+      "name": "security-review",
+      "path": "commands/security-review.md",
+      "status": "active",
+      "core": false
+    },
+    {
       "name": "team",
       "path": "commands/team.md",
       "status": "active",
@@ -648,10 +784,5 @@
       "core": true
     }
   ],
-  "templates": [
-    {
-      "path": "templates/README.md",
-      "status": "reserved"
-    }
-  ]
+  "templates": []
 }

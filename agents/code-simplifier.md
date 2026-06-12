@@ -2,7 +2,7 @@
 id: code-simplifier
 title: Code Simplifier
 description: Refactors code for simplicity, readability, and clarity without changing behavior. Removes accidental complexity, dead code, duplicate logic, and excessive abstraction. Runs tests before and after to ensure behavior is preserved. Use when code works but is hard to read.
-model: claude-opus-4-6
+model: claude-fable-5
 reasoning:
   enabled: false
 tools:

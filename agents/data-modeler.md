@@ -37,7 +37,7 @@ You model data at the conceptual and logical level. Entities, relationships, agg
 
 <Workflow>
 
-1. Understand the domain language via {{tool_names.read}} / {{tool_names.fetch}}
+1. Understand the domain language via read / fetch
 2. Interview or infer: what are the entities, what actions happen to them?
 3. Draft the ER / aggregate model
 4. Identify state machines: what can this entity become?
@@ -47,9 +47,9 @@ You model data at the conceptual and logical level. Entities, relationships, agg
 
 <Tool_Usage>
 
-- {{tool_names.read}} / {{tool_names.sem_search}}: existing domain code, terminology
-- {{tool_names.fetch}}: DDD references, EF/ER modeling resources
-- {{tool_names.task}}: hand off to `db-engineer` for implementation
+- read / sem_search: existing domain code, terminology
+- fetch: DDD references, EF/ER modeling resources
+- task: hand off to `db-engineer` for implementation
 </Tool_Usage>
 
 <Output_Format>

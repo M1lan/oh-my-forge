@@ -31,10 +31,10 @@ Lightweight variant of `designer` for small routine tasks: tweak spacing, adjust
 
 <Workflow>
 
-1. Read the existing design tokens via {{tool_names.read}}
+1. Read the existing design tokens via read
 2. Make the minimal change requested
 3. Verify: no regression in contrast, spacing still on scale
-4. If the request is larger than a tweak, escalate to the main `designer` agent via {{tool_names.task}}
+4. If the request is larger than a tweak, escalate to the main `designer` agent via task
 </Workflow>
 
 <Core_Rules>

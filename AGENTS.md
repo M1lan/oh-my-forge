@@ -64,9 +64,9 @@ every configured MCP tool.
 
 ## 2. oh-my-forge resource pack
 
-oh-my-forge adds **31 custom agents**, **20 skills**, and **~20 commands** on
-top of forgecode's built-ins. See `catalog-manifest.json` for the single source
-of truth and `docs/FORGE_KEYWORDS.md` for the cheat sheet.
+oh-my-forge adds **40 custom agents**, **46 skills**, and **22 commands** on
+top of forgecode's built-ins. See `catalog-manifest.json` for the authoritative
+counts and `docs/FORGE_KEYWORDS.md` for the cheat sheet.
 
 ### Notable custom agents
 
@@ -97,10 +97,14 @@ field and decides whether to invoke.
 | `autopilot` | Autonomous end-to-end execution for well-scoped work. |
 | `ralph` | Must-complete execution; does not give up on a task. |
 | `ultrawork` / `turbo` / `eco` | Tuned execution modes for quality / speed / cost. |
+| `ultragoal` | Durable multi-goal initiative tracked across sessions via a plan file ledger. |
 | `team` | Stage-gated multi-agent pipeline. |
 | `tracer` | Evidence-driven debugging. |
 | `verify` | Evidence-based completion check. |
 | `critic` | Final-gate multi-perspective review. |
+| `code-review` | Severity-rated diff review (Critical/Major/Minor/Nit) with merge verdict. |
+| `security-review` | OWASP Top 10 + secrets + trust-boundary audit with zero-noise bias. |
+| `tdd` | Red-green-refactor discipline enforcing the Iron Law: test first, always. |
 | `explore` | Read-only codebase exploration (delegates to `sage`). |
 | `ai-slop-cleaner` | Regression-safe deletion-first cleanup pass. |
 | `cancel` | Clean mode exit with dependency-ordered cleanup. |
@@ -111,6 +115,16 @@ field and decides whether to invoke.
 | `release` | oh-my-forge release flow. |
 | `doctor` | Run `scripts/doctor.sh` and interpret the result. |
 | `scaffold` / `learner` / `docker` / `tailwind-v4` / `ultraqa` | Task-specific helpers. |
+| `ask` | Consult codex, claude, or gemini for a second opinion without leaving the session. |
+| `mcp-setup` | Guided workflow for wiring MCP servers into `~/forge/.mcp.json`. |
+| `deepinit` | Generate hierarchical AGENTS.md documentation across a codebase. |
+| `omf-reference` | In-session reference card for oh-my-forge resource layout and routing. |
+| `typescript-pro` | Advanced TypeScript type systems, generics, branded types, tRPC setup. |
+| `emacs-integration` | Bidirectional Emacs editor integration via MCP tools. |
+| `write-bash` | GNU Bash 5.3+ house style — always active for all shell/Bash work. |
+| `use-rg` / `use-fd` / `use-gnu-tools` | House tool preferences — always active (see note below). |
+| `karpathy-guidelines` | Anti-overengineering behavioral guidelines — always active. |
+| `use-grepai` | Semantic code search via the `grepai` CLI for call graphs and intent search. |
 
 Full list in `catalog-manifest.json`.
 
@@ -145,6 +159,20 @@ Match on substrings, case-insensitive.
 | "visual check", "screenshot diff", "looks right?" | `visual-verdict` | Visual regression scoring. |
 | "make a skill", "extract skill from this session" | `skillify` | Skill extraction. |
 | "team", "assemble the team", "staged pipeline" | `team` | Stage-gated team pipeline. |
+| "review this diff", "code review", "review my changes" | `code-review` | Severity-rated diff quality gate. |
+| "security audit", "OWASP", "check for vulnerabilities", "secrets check" | `security-review` | OWASP + secrets scan. |
+| "tdd", "test first", "red-green", "write the test first" | `tdd` | Test-first discipline. |
+| "second opinion", "ask codex", "ask gemini", "cross-check this" | `ask` | Multi-model consultation. |
+| "set up mcp", "add mcp server", "configure context7", "wire up mcp" | `mcp-setup` | MCP server wiring. |
+| "deepinit", "init the codebase docs", "generate AGENTS.md", "document this project for agents" | `deepinit` | Hierarchical AGENTS.md generation. |
+| "ultragoal", "multi-goal initiative", "track goals across sessions", "goal ledger" | `ultragoal` | Durable multi-session goal tracking. |
+| "omf reference", "how does oh-my-forge work", "what skills are available" | `omf-reference` | oh-my-forge reference card. |
+| "emacs", "open in emacs", "emacs diagnostics" | `emacs-integration` | Emacs MCP editor integration. |
+| "grepai", "call graph", "semantic search", "who calls" | `use-grepai` | Semantic codebase search. |
+| "typescript types", "tRPC", "advanced generics", "branded types" | `typescript-pro` | Advanced TypeScript type patterns. |
+| "bash", "shell script", "write a script" | `write-bash` | GNU Bash 5.3+ house style. |
+
+**House preference skills** — `use-rg`, `use-fd`, `use-gnu-tools`, and `karpathy-guidelines` are standing preferences that apply automatically to all shell commands and code work. They do not need explicit invocation — forge loads them at the start of every relevant task.
 
 This table is **prose read by the LLM each turn** — it is not a code-enforced
 router. Keywords are heuristics; the model may override based on context.

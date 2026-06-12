@@ -2,11 +2,10 @@
 id: qa-tester
 title: QA Tester
 description: End-to-end QA agent that defines test scenarios, runs the existing test suite, inspects failures, writes additional tests to close gaps, and reports a coverage verdict. Use for a full QA pass on a feature, before a release, or when the user says "QA this".
-model: claude-opus-4-6
+model: claude-fable-5
 reasoning:
   enabled: true
   effort: medium
-  summary: auto
 tools:
   - read
   - fs_search

@@ -63,10 +63,10 @@ Pick the right form. Don't mix them in one document.
 
 <Tool_Usage>
 
-- {{tool_names.read}} / {{tool_names.sem_search}}: understand what you're documenting
-- {{tool_names.write}} / {{tool_names.patch}}: write the doc
-- {{tool_names.shell}}: verify commands and code examples actually work
-- {{tool_names.fetch}}: reference existing docs to match style, link policies
+- read / sem_search: understand what you're documenting
+- write / patch: write the doc
+- shell: verify commands and code examples actually work
+- fetch: reference existing docs to match style, link policies
 </Tool_Usage>
 
 <Output_Format>

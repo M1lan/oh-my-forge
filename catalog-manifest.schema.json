@@ -3,7 +3,14 @@
   "title": "oh-my-forge catalog manifest",
   "description": "Schema for catalog-manifest.json at the oh-my-forge repo root. Validates the single source of truth for the install, doctor, and uninstall scripts.",
   "type": "object",
-  "required": ["schemaVersion", "catalogVersion", "name", "description", "agents", "skills"],
+  "required": [
+    "schemaVersion",
+    "catalogVersion",
+    "name",
+    "description",
+    "agents",
+    "skills"
+  ],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -27,7 +34,12 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "path", "category", "status"],
+        "required": [
+          "id",
+          "path",
+          "category",
+          "status"
+        ],
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -40,11 +52,22 @@
           },
           "category": {
             "type": "string",
-            "enum": ["core", "backend", "frontend", "quality", "specialist", "devops"]
+            "enum": [
+              "core",
+              "backend",
+              "frontend",
+              "quality",
+              "specialist",
+              "devops"
+            ]
           },
           "status": {
             "type": "string",
-            "enum": ["active", "deprecated", "experimental"]
+            "enum": [
+              "active",
+              "deprecated",
+              "experimental"
+            ]
           },
           "core": {
             "type": "boolean",
@@ -61,7 +84,12 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "path", "category", "status"],
+        "required": [
+          "name",
+          "path",
+          "category",
+          "status"
+        ],
         "additionalProperties": false,
         "properties": {
           "name": {
@@ -77,7 +105,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["active", "deprecated", "experimental"]
+            "enum": [
+              "active",
+              "deprecated",
+              "experimental"
+            ]
           },
           "core": {
             "type": "boolean"
@@ -89,7 +121,10 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "path"],
+        "required": [
+          "name",
+          "path"
+        ],
         "additionalProperties": false,
         "properties": {
           "name": {
@@ -102,6 +137,17 @@
           },
           "category": {
             "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "deprecated",
+              "experimental"
+            ]
+          },
+          "core": {
+            "type": "boolean"
           }
         }
       }
@@ -110,7 +156,10 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "path"],
+        "required": [
+          "name",
+          "path"
+        ],
         "additionalProperties": false,
         "properties": {
           "name": {
