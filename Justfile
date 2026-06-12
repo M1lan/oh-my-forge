@@ -214,6 +214,88 @@ ci: tools check
 # Repo-specific housekeeping
 # ------------------------------------------------------------------------------
 
+# Parent directory that contains `forge/` (the forgecode global config folder).
+# forgecode hardcodes its global config root to $HOME/forge, so we install by
+# invoking scripts/install.sh with a temporarily-overridden HOME that points
+# at `forge_parent`. The actual install destination is therefore
+# `{{ forge_parent }}/forge`. Default is $HOME, which means the install lands
+# at $HOME/forge — matching forgecode's expectation.
+#
+# Override on the CLI if your forge config root lives elsewhere:
+#   just forge_parent=$HOME/.config install-omf   # -> ~/.config/forge
+#   just forge_parent=/opt                        # -> /opt/forge
+forge_parent := env_var_or_default("OMF_FORGE_PARENT", env_var("HOME"))
+
+# Where timestamped backups of overwritten files go. This path is deliberately
+# OUTSIDE the install target so that whatever version control you run in your
+# forge directory (jj, git, fossil, none) does not pick up backup files as
+# changes. Backups are written under `{{ backup_root }}/YYYYMMDD-HHMMSS/`.
+#
+# Override on the CLI if you want backups somewhere else:
+#   just backup_root=/tmp/omf-backups install-omf
+backup_root := env_var_or_default("OMF_BACKUP_ROOT", env_var("HOME") / ".cache/oh-my-forge/backups")
+
+# Install oh-my-forge (agents, skills, commands, templates) into
+# `{{ forge_parent }}/forge`. Every file that would be overwritten is first
+# copied to a timestamped directory under `{{ backup_root }}`. The target
+# directory is never mutated without a backup, and `--force` is deliberately
+# NOT passed to install.sh. Safe to re-run; the only thing that changes
+# between runs is the backup timestamp.
+#
+# The target folder may be version-controlled with anything (jj, git, fossil)
+# or nothing — this recipe does not touch any VCS. Backups live OUTSIDE the
+# target folder by design so they never show up as tracked changes.
+# Install oh-my-forge into $HOME/forge (override via forge_parent=) with timestamped backups.
+install-omf:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    target="{{ forge_parent }}/forge"
+    ts="$(date +%Y%m%d-%H%M%S)"
+    backup_dir="{{ backup_root }}/${ts}"
+    mkdir -p "{{ backup_root }}"
+    mkdir -p "${target}"
+    printf 'Installing oh-my-forge\n'
+    printf '  source : %s\n' "$(pwd)"
+    printf '  target : %s\n' "${target}"
+    printf '  backup : %s (only populated if files collide)\n' "${backup_dir}"
+    printf '\n'
+    HOME="{{ forge_parent }}" ./scripts/install.sh \
+      --global \
+      --backup-dir "${backup_dir}"
+    printf '\n'
+    if [[ -d "${backup_dir}" ]]; then
+      printf 'Backups of overwritten files saved to:\n  %s\n' "${backup_dir}"
+    else
+      printf 'No files were overwritten — no backup directory created.\n'
+    fi
+    printf '\nVerify the install with:  just doctor-omf\n'
+
+# Dry-run of install-omf. Prints every action the installer would take but
+# touches nothing on disk. Use this before the first real install, or after
+# pulling upstream changes, to see exactly which files will be replaced.
+# Preview install-omf without touching the filesystem.
+install-omf-dry:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    target="{{ forge_parent }}/forge"
+    ts="$(date +%Y%m%d-%H%M%S)"
+    backup_dir="{{ backup_root }}/${ts}"
+    printf 'Dry-run install of oh-my-forge (no files will be written)\n'
+    printf '  target : %s\n' "${target}"
+    printf '  backup : %s\n' "${backup_dir}"
+    printf '\n'
+    HOME="{{ forge_parent }}" ./scripts/install.sh \
+      --global \
+      --dry-run \
+      --backup-dir "${backup_dir}"
+
+# Run the installed-target doctor against `{{ forge_parent }}/forge`. Use
+# after install-omf to verify the layout forgecode expects (flat agents/,
+# one-deep skills/, …).
+# Verify the installed oh-my-forge layout.
+doctor-omf:
+    HOME="{{ forge_parent }}" ./scripts/doctor.sh --global
+
 # Run the repo's doctor script (verifies oh-my-forge installation layout).
 doctor:
     ./scripts/doctor.sh --repo
