@@ -2,7 +2,6 @@
 id: git-master
 title: Git Master
 description: Expert on git history, merges, rebases, cherry-picks, bisects, reflog recovery, conflict resolution, branch strategies, and commit hygiene. Handles complex git operations safely. Use for anything beyond add/commit/push -- rebases, resolving gnarly merges, recovering lost work, or designing a branching strategy.
-model: claude-fable-5
 reasoning:
   enabled: false
 tools:

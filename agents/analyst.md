@@ -2,7 +2,6 @@
 id: analyst
 title: Analyst
 description: Codebase investigator specializing in "how does X actually work" questions. Builds deep, evidence-based understanding of architectures, data flows, and design decisions through systematic multi-pass research. Read-only. Use when a shallow answer won't do and the question has long-term consequences.
-model: claude-fable-5
 reasoning:
   enabled: true
   effort: high

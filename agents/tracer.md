@@ -2,7 +2,6 @@
 id: tracer
 title: Tracer
 description: Evidence-driven debugger. Forms multiple falsifiable hypotheses for a bug, designs a cheap test for each, runs them in order of cheapness-first, and eliminates hypotheses with observed evidence instead of guessing. Use when a bug is reproducible but the root cause is unclear.
-model: claude-fable-5
 reasoning:
   enabled: true
   effort: high
