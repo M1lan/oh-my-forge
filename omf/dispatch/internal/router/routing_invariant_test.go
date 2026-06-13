@@ -93,6 +93,117 @@ func TestRoutedBackendStripsConfigRedirectEnvironment(t *testing.T) {
 	}
 }
 
+func TestRoutedBackendUsesFailClosedSafeEnvironmentAllowlist(t *testing.T) {
+	dangerous := []string{
+		"AWS_ACCESS_KEY_ID",
+		"AWS_SECRET_ACCESS_KEY",
+		"AWS_SESSION_TOKEN",
+		"AWS_PROFILE",
+		"OP_SERVICE_ACCOUNT_TOKEN",
+		"GOOGLE_APPLICATION_CREDENTIALS",
+		"CLOUDSDK_CONFIG",
+		"AZURE_CONFIG_DIR",
+		"CARGO_HOME",
+		"RUSTUP_HOME",
+		"GOPATH",
+		"GOMODCACHE",
+		"GH_TOKEN",
+		"GITHUB_TOKEN",
+		"VAULT_TOKEN",
+		"SSH_AUTH_SOCK",
+		"GIT_SSH_COMMAND",
+		"GIT_CONFIG_SYSTEM",
+		"GIT_CONFIG_COUNT",
+		"GIT_CONFIG_KEY_0",
+		"GIT_CONFIG_VALUE_0",
+		"NPM_TOKEN",
+		"NODE_AUTH_TOKEN",
+		"PIP_CONFIG_FILE",
+		"PYTHONPATH",
+	}
+	allowlist := []string{"PATH", "TERM", "LANG", "LC_ALL", "LC_CTYPE", "TZ", "COLORTERM"}
+	allowlist = append(allowlist, dangerous...)
+
+	env := map[string]string{
+		"PATH":      "/opt/homebrew/bin:/usr/bin:/bin",
+		"TERM":      "tmux-256color",
+		"LANG":      "en_US.UTF-8",
+		"LC_ALL":    "C.UTF-8",
+		"LC_CTYPE":  "C.UTF-8",
+		"TZ":        "Europe/Berlin",
+		"COLORTERM": "truecolor",
+	}
+	for _, name := range dangerous {
+		env[name] = PrivateHome + "/private-config/" + name
+	}
+
+	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "work-forge", Kind: manifest.KindForge, Routing: manifest.RoutingWork, Interactive: []string{"forge"}, EnvAllowlist: allowlist}}}
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(env))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	for _, name := range []string{"PATH", "TERM", "LANG", "LC_ALL", "LC_CTYPE", "TZ", "COLORTERM"} {
+		if plan.Env[name] != env[name] {
+			t.Fatalf("safe env %s = %q, want %q (all=%#v)", name, plan.Env[name], env[name], plan.Env)
+		}
+	}
+	for _, name := range dangerous {
+		if _, ok := plan.Env[name]; ok {
+			t.Fatalf("routed backend leaked dangerous env %s: %#v", name, plan.Env)
+		}
+	}
+}
+
+func TestRoutedBackendStripsSafeEnvValuesPointingAtSiblingHome(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{
+		Name:         "work-forge",
+		Kind:         manifest.KindForge,
+		Routing:      manifest.RoutingWork,
+		Interactive:  []string{"forge"},
+		EnvAllowlist: []string{"PATH", "TERM", "LANG"},
+	}}}
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(map[string]string{
+		"PATH": "/opt/homebrew/bin:" + PrivateHome + "/bin:/usr/bin",
+		"TERM": "tmux-256color",
+		"LANG": PrivateHome + "/not-a-locale",
+	}))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	if _, ok := plan.Env["PATH"]; ok {
+		t.Fatalf("PATH with private-home component leaked into work route: %#v", plan.Env)
+	}
+	if _, ok := plan.Env["LANG"]; ok {
+		t.Fatalf("LANG with private-home prefix leaked into work route: %#v", plan.Env)
+	}
+	if plan.Env["TERM"] != "tmux-256color" {
+		t.Fatalf("safe TERM stripped unexpectedly: %#v", plan.Env)
+	}
+}
+
+func TestPrivateRoutedBackendStripsWorkHomeValues(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{
+		Name:         "private-forge",
+		Kind:         manifest.KindForge,
+		Routing:      manifest.RoutingPrivate,
+		Interactive:  []string{"forge"},
+		EnvAllowlist: []string{"PATH", "TERM"},
+	}}}
+	plan, err := ResolveProfile(m, []string{"private-forge"}, testOptions(map[string]string{
+		"PATH": "/usr/bin:" + WorkHome + "/bin",
+		"TERM": "xterm-256color",
+	}))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	if _, ok := plan.Env["PATH"]; ok {
+		t.Fatalf("PATH with work-home component leaked into private route: %#v", plan.Env)
+	}
+	if plan.Env["TERM"] != "xterm-256color" {
+		t.Fatalf("safe TERM stripped unexpectedly: %#v", plan.Env)
+	}
+}
+
 func TestRoutingNoneBackendMayKeepConfigRedirectEnvironment(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "tool", Kind: manifest.KindVendor, Routing: manifest.RoutingNone, Interactive: []string{"tool"}, EnvAllowlist: []string{"XDG_CONFIG_HOME"}}}}
 	plan, err := ResolveProfile(m, []string{"tool"}, testOptions(map[string]string{"XDG_CONFIG_HOME": "/tmp/tool-config"}))

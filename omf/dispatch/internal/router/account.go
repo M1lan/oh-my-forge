@@ -99,15 +99,15 @@ func samePathOrWithin(path, root string) bool {
 
 func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]string, error) {
 	env := make(map[string]string)
-	_, routed := routeAccount(backend.Routing)
+	account, routed := routeAccount(backend.Routing)
 	for _, name := range backend.EnvAllowlist {
 		if isRoutingManagedEnv(name) {
 			continue
 		}
-		if routed && isConfigRedirectEnv(name) {
+		if routed && !isRoutedSafeEnvName(name) {
 			continue
 		}
-		if val, ok := environ[name]; ok {
+		if val, ok := environ[name]; ok && (!routed || !envValueReferencesSiblingHome(backend.Routing, account, val)) {
 			env[name] = val
 		}
 	}
@@ -125,24 +125,58 @@ func isRoutingManagedEnv(name string) bool {
 	return name == "HOME" || name == "FORGE_CONFIG"
 }
 
-func isConfigRedirectEnv(name string) bool {
+func isRoutedSafeEnvName(name string) bool {
 	switch name {
-	case "AWS_CONFIG_FILE",
-		"AWS_SHARED_CREDENTIALS_FILE",
-		"CLAUDE_CONFIG_DIR",
-		"CODEX_HOME",
-		"DOCKER_CONFIG",
-		"GEMINI_CONFIG_DIR",
-		"GH_CONFIG_DIR",
-		"GIT_CONFIG_GLOBAL",
-		"GNUPGHOME",
-		"KUBECONFIG",
-		"NPM_CONFIG_USERCONFIG",
-		"XDG_CACHE_HOME",
-		"XDG_CONFIG_HOME",
-		"XDG_DATA_HOME",
-		"XDG_STATE_HOME",
-		"npm_config_userconfig":
+	case "PATH", "TERM", "LANG", "TZ", "COLORTERM":
+		return true
+	default:
+		return strings.HasPrefix(name, "LC_")
+	}
+}
+
+func envValueReferencesSiblingHome(route manifest.Routing, account accountRoute, value string) bool {
+	forbidden := forbiddenSiblingHome(route)
+	if forbidden == "" {
+		return false
+	}
+	if valueHasPathPrefix(value, forbidden) {
+		return true
+	}
+	if account.Home != "" && valueHasPathPrefix(value, account.Home) {
+		return false
+	}
+	return false
+}
+
+func forbiddenSiblingHome(route manifest.Routing) string {
+	switch route {
+	case manifest.RoutingWork:
+		return PrivateHome
+	case manifest.RoutingPrivate:
+		return WorkHome
+	default:
+		return ""
+	}
+}
+
+func valueHasPathPrefix(value, root string) bool {
+	if root == "" || value == "" {
+		return false
+	}
+	if samePathOrWithin(value, root) {
+		return true
+	}
+	for _, segment := range strings.FieldsFunc(value, pathListOrShellSeparator) {
+		if samePathOrWithin(segment, root) {
+			return true
+		}
+	}
+	return false
+}
+
+func pathListOrShellSeparator(r rune) bool {
+	switch r {
+	case ':', ' ', '\t', '\n', '"', '\'', '=', ',':
 		return true
 	default:
 		return false
