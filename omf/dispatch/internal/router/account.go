@@ -76,9 +76,15 @@ func assertRoutingBoundary(r manifest.Routing, account accountRoute) error {
 		if account.Home != WorkHome || samePathOrWithin(account.Home, PrivateHome) {
 			return SecurityError{Message: fmt.Sprintf("work route resolved forbidden HOME %q", account.Home)}
 		}
+		if account.ForgeConfig != WorkForgeConfig || samePathOrWithin(account.ForgeConfig, PrivateHome) {
+			return SecurityError{Message: fmt.Sprintf("work route resolved forbidden FORGE_CONFIG %q", account.ForgeConfig)}
+		}
 	case manifest.RoutingPrivate:
 		if account.Home != PrivateHome || samePathOrWithin(account.Home, WorkHome) {
 			return SecurityError{Message: fmt.Sprintf("private route resolved forbidden HOME %q", account.Home)}
+		}
+		if account.ForgeConfig != PrivateForgeConfig || samePathOrWithin(account.ForgeConfig, WorkHome) {
+			return SecurityError{Message: fmt.Sprintf("private route resolved forbidden FORGE_CONFIG %q", account.ForgeConfig)}
 		}
 	}
 	return nil

@@ -26,6 +26,26 @@ func TestRoutingBoundaryRejectsPrivateBackendResolvingWorkHome(t *testing.T) {
 	}
 }
 
+func TestRoutingBoundaryRejectsWorkBackendResolvingPrivateForgeConfig(t *testing.T) {
+	err := assertRoutingBoundary(manifest.RoutingWork, accountRoute{Home: WorkHome, ForgeConfig: PrivateForgeConfig})
+	if err == nil {
+		t.Fatal("work route resolved private FORGE_CONFIG without failing closed")
+	}
+	if !IsSecurityError(err) {
+		t.Fatalf("err = %T %[1]v, want security error", err)
+	}
+}
+
+func TestRoutingBoundaryRejectsPrivateBackendResolvingWorkForgeConfig(t *testing.T) {
+	err := assertRoutingBoundary(manifest.RoutingPrivate, accountRoute{Home: PrivateHome, ForgeConfig: WorkForgeConfig})
+	if err == nil {
+		t.Fatal("private route resolved work FORGE_CONFIG without failing closed")
+	}
+	if !IsSecurityError(err) {
+		t.Fatalf("err = %T %[1]v, want security error", err)
+	}
+}
+
 func TestResolveProfileAllowsPrivateBackendResolvingPrivateHome(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "private-forge", Kind: manifest.KindForge, Routing: manifest.RoutingPrivate, Interactive: []string{"forge"}}}}
 	plan, err := ResolveProfile(m, []string{"private-forge"}, testOptions(nil))
