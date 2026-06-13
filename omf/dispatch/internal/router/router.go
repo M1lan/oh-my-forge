@@ -18,6 +18,7 @@ const (
 type Options struct {
 	Environ                map[string]string
 	HomeDir                string
+	UserHomeDir            func() (string, error)
 	PathExists             func(string) bool
 	AllowRouteHomeMismatch bool
 }

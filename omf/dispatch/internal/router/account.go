@@ -22,6 +22,9 @@ type SecurityError struct{ Message string }
 
 func (e SecurityError) Error() string { return e.Message }
 
+// RouteHomeMismatchError is accident-prevention for launches from the wrong
+// login HOME. It is intentionally not a SecurityError: callers can spoof HOME,
+// so this is not a uid-resistant process boundary.
 type RouteHomeMismatchError struct {
 	Message      string
 	BackendName  string
@@ -31,8 +34,6 @@ type RouteHomeMismatchError struct {
 }
 
 func (e RouteHomeMismatchError) Error() string { return e.Message }
-
-func (e RouteHomeMismatchError) Unwrap() error { return SecurityError{Message: e.Message} }
 
 func IsSecurityError(err error) bool {
 	var security SecurityError
@@ -143,7 +144,11 @@ func currentHomeDir(opts Options) string {
 	if opts.HomeDir != "" {
 		return opts.HomeDir
 	}
-	home, err := os.UserHomeDir()
+	lookup := opts.UserHomeDir
+	if lookup == nil {
+		lookup = os.UserHomeDir
+	}
+	home, err := lookup()
 	if err != nil {
 		return ""
 	}

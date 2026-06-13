@@ -53,6 +53,43 @@ env_allowlist = ["PATH"]
 	}
 }
 
+func TestRunRefusesRouteHomeMismatchBeforeExecute(t *testing.T) {
+	dir := t.TempDir()
+	manifestPath := filepath.Join(dir, "omf.toml")
+	writeFile(t, manifestPath, `
+schema_version = 0
+
+[[backend]]
+name = "work-forge"
+kind = "forge"
+routing = "work"
+interactive = ["forge"]
+env_allowlist = ["PATH"]
+`)
+
+	var executed bool
+	var stderr strings.Builder
+	a := App{
+		ManifestPath: manifestPath,
+		Runner: router.Runner{ExecReplace: func(argv []string, env map[string]string) error {
+			executed = true
+			return nil
+		}},
+		Environ: map[string]string{"PATH": "/bin"},
+		HomeDir: router.PrivateHome,
+		Stderr:  &stderr,
+	}
+	if code := a.Run([]string{"work-forge"}); code != ExitError {
+		t.Fatalf("Run exit code = %d, want %d", code, ExitError)
+	}
+	if executed {
+		t.Fatal("App.Run executed route with mismatched login HOME")
+	}
+	if !strings.Contains(stderr.String(), router.WorkHome) || !strings.Contains(stderr.String(), router.PrivateHome) {
+		t.Fatalf("stderr = %q, want route-home mismatch details", stderr.String())
+	}
+}
+
 func TestRunReturnsUsageForMissingProfile(t *testing.T) {
 	a := App{ManifestPath: filepath.Join(t.TempDir(), "missing.toml")}
 	if code := a.Run(nil); code != 2 {

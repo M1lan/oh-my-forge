@@ -1,6 +1,7 @@
 package router
 
 import (
+	"os"
 	"runtime"
 	"testing"
 
@@ -80,8 +81,29 @@ func TestResolveProfileRefusesWorkRouteFromPrivateLogin(t *testing.T) {
 	if err == nil {
 		t.Fatal("ResolveProfile accepted work route from private login home")
 	}
-	if !IsSecurityError(err) {
-		t.Fatalf("err = %T %[1]v, want security error", err)
+	if !IsRouteHomeMismatchError(err) {
+		t.Fatalf("err = %T %[1]v, want route home mismatch error", err)
+	}
+	if IsSecurityError(err) {
+		t.Fatalf("route-home mismatch was framed as security boundary error: %T %[1]v", err)
+	}
+}
+
+func TestResolveProfileRefusesRoutedLaunchWhenHomeLookupFails(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "private-forge", Kind: manifest.KindForge, Routing: manifest.RoutingPrivate, Interactive: []string{"forge"}}}}
+	_, err := ResolveProfile(m, []string{"private-forge"}, Options{
+		UserHomeDir: func() (string, error) {
+			return "", os.ErrPermission
+		},
+		PathExists: func(string) bool {
+			return false
+		},
+	})
+	if err == nil {
+		t.Fatal("ResolveProfile accepted routed launch after HOME lookup failed")
+	}
+	if !IsSecurityError(err) && !IsRouteHomeMismatchError(err) {
+		t.Fatalf("err = %T %[1]v, want fail-closed routed launch error", err)
 	}
 }
 
