@@ -104,6 +104,25 @@ env_allowlist = ["FORGE_CONFIG"]
 	}
 }
 
+func TestParseRejectsDuplicateBackendNames(t *testing.T) {
+	txt := `
+schema_version = 0
+
+[[backend]]
+name = "dup"
+kind = "forge"
+interactive = ["forge"]
+
+[[backend]]
+name = "dup"
+kind = "codex"
+interactive = ["codex"]
+`
+	if _, err := Parse([]byte(txt)); err == nil {
+		t.Fatal("Parse accepted duplicate backend names")
+	}
+}
+
 func TestClampManifestLimitsKeepsStricterValues(t *testing.T) {
 	m := Manifest{Backends: []Backend{{Name: "small", Limits: &Limits{WiredGiB: 8, MemoryGiB: 10, CacheGiB: 1}}}}
 	logs := m.ClampAll()

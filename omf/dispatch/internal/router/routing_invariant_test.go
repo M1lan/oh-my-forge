@@ -65,6 +65,45 @@ func TestRoutingNoneBackendCannotLeakCallerManagedEnv(t *testing.T) {
 	}
 }
 
+func TestRoutedBackendStripsConfigRedirectEnvironment(t *testing.T) {
+	names := []string{
+		"XDG_CONFIG_HOME",
+		"GNUPGHOME",
+		"GH_CONFIG_DIR",
+		"GIT_CONFIG_GLOBAL",
+		"CLAUDE_CONFIG_DIR",
+		"npm_config_userconfig",
+	}
+	env := map[string]string{"PATH": "/bin"}
+	for _, name := range names {
+		env[name] = PrivateHome + "/private-config/" + name
+	}
+	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "work-forge", Kind: manifest.KindForge, Routing: manifest.RoutingWork, Interactive: []string{"forge"}, EnvAllowlist: append([]string{"PATH"}, names...)}}}
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(env))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	if plan.Env["PATH"] != "/bin" {
+		t.Fatalf("PATH missing from env: %#v", plan.Env)
+	}
+	for _, name := range names {
+		if _, ok := plan.Env[name]; ok {
+			t.Fatalf("routed backend leaked config redirect %s: %#v", name, plan.Env)
+		}
+	}
+}
+
+func TestRoutingNoneBackendMayKeepConfigRedirectEnvironment(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "tool", Kind: manifest.KindVendor, Routing: manifest.RoutingNone, Interactive: []string{"tool"}, EnvAllowlist: []string{"XDG_CONFIG_HOME"}}}}
+	plan, err := ResolveProfile(m, []string{"tool"}, testOptions(map[string]string{"XDG_CONFIG_HOME": "/tmp/tool-config"}))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	if plan.Env["XDG_CONFIG_HOME"] != "/tmp/tool-config" {
+		t.Fatalf("routing=none stripped config redirect: %#v", plan.Env)
+	}
+}
+
 func TestRoutingInvariantUsesCompiledLiteralTableNotCallerEnvironment(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "work-forge", Kind: manifest.KindForge, Routing: manifest.RoutingWork, Interactive: []string{"forge"}, EnvAllowlist: []string{"HOME", "FORGE_CONFIG"}}}}
 	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(map[string]string{"HOME": PrivateHome, "FORGE_CONFIG": PrivateForgeConfig}))

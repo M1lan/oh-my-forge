@@ -42,6 +42,35 @@ func TestResolveProfileBuildsSupervisorPlanForLocalLLM(t *testing.T) {
 	assertStrings(t, plan.Argv, []string{"omf", "llm", "mlx", "qwen36-mlx"})
 }
 
+func TestResolveLocalLLMOneshotPromptUsesOneshotTemplate(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{
+		Name:        "qwen36-mlx",
+		Kind:        manifest.KindLocalLLM,
+		Routing:     manifest.RoutingNone,
+		Interactive: []string{"omf", "llm", "mlx", "qwen36-mlx"},
+		Oneshot:     []string{"omf", "llm", "load"},
+	}}}
+	plan, err := ResolveProfile(m, []string{"qwen36-mlx", "-p", "hello"}, testOptions(nil))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	if plan.Mode != ModeWrappedSubprocess {
+		t.Fatalf("mode = %s, want %s", plan.Mode, ModeWrappedSubprocess)
+	}
+	assertStrings(t, plan.Argv, []string{"omf", "llm", "load", "hello"})
+}
+
+func TestResolveLocalLLMWithoutInteractiveReturnsUsage(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "broken-llm", Kind: manifest.KindLocalLLM, Routing: manifest.RoutingNone}}}
+	_, err := ResolveProfile(m, []string{"broken-llm"}, testOptions(nil))
+	if err == nil {
+		t.Fatal("ResolveProfile accepted local-llm without interactive argv")
+	}
+	if !IsUsageError(err) {
+		t.Fatalf("err = %T %[1]v, want usage error", err)
+	}
+}
+
 func TestUnknownProfileReturnsUsageError(t *testing.T) {
 	_, err := ResolveProfile(manifest.Manifest{}, []string{"missing"}, testOptions(nil))
 	if err == nil {

@@ -99,8 +99,12 @@ func samePathOrWithin(path, root string) bool {
 
 func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]string, error) {
 	env := make(map[string]string)
+	_, routed := routeAccount(backend.Routing)
 	for _, name := range backend.EnvAllowlist {
 		if isRoutingManagedEnv(name) {
+			continue
+		}
+		if routed && isConfigRedirectEnv(name) {
 			continue
 		}
 		if val, ok := environ[name]; ok {
@@ -119,4 +123,28 @@ func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]s
 
 func isRoutingManagedEnv(name string) bool {
 	return name == "HOME" || name == "FORGE_CONFIG"
+}
+
+func isConfigRedirectEnv(name string) bool {
+	switch name {
+	case "AWS_CONFIG_FILE",
+		"AWS_SHARED_CREDENTIALS_FILE",
+		"CLAUDE_CONFIG_DIR",
+		"CODEX_HOME",
+		"DOCKER_CONFIG",
+		"GEMINI_CONFIG_DIR",
+		"GH_CONFIG_DIR",
+		"GIT_CONFIG_GLOBAL",
+		"GNUPGHOME",
+		"KUBECONFIG",
+		"NPM_CONFIG_USERCONFIG",
+		"XDG_CACHE_HOME",
+		"XDG_CONFIG_HOME",
+		"XDG_DATA_HOME",
+		"XDG_STATE_HOME",
+		"npm_config_userconfig":
+		return true
+	default:
+		return false
+	}
 }

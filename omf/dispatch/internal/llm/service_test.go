@@ -9,6 +9,13 @@ import (
 	"testing"
 )
 
+func TestDefaultClientHasBoundedHTTPTimeout(t *testing.T) {
+	client := NewClient(Config{})
+	if client.httpClient.Timeout == 0 {
+		t.Fatal("default HTTP client has no timeout")
+	}
+}
+
 func TestListMergesLlamaSwapAndOllamaModels(t *testing.T) {
 	client := NewClient(Config{LlamaSwapURL: "http://llama", OllamaURL: "http://ollama", HTTPClient: fakeHTTP(t, map[string]string{
 		"GET http://llama/v1/models": `{"data":[{"id":"/Users/milan.santosi/qwen36-mlx"},{"id":"qwen3-coder:latest"}]}`,
@@ -81,6 +88,41 @@ func TestLoadAdmitsFitsModel(t *testing.T) {
 	client := NewClient(Config{LlamaSwapURL: "http://llama", HTTPClient: &http.Client{Transport: &transport}, BudgetsGiB: map[string]uint64{"fits": 13}, MaxGiB: 14})
 	if err := client.Load(context.Background(), "fits"); err != nil {
 		t.Fatalf("Load returned error: %v", err)
+	}
+}
+
+func TestLoadRejectsUnbudgetedOverBudgetModelFromDiscoveredSize(t *testing.T) {
+	transport := recordingTransport{responses: map[string]string{
+		"GET http://llama/v1/models": `{"data":[]}`,
+		"GET http://ollama/api/tags": `{"models":[{"name":"huge","size":17179869184}]}`,
+	}}
+	client := NewClient(Config{LlamaSwapURL: "http://llama", OllamaURL: "http://ollama", HTTPClient: &http.Client{Transport: &transport}, MaxGiB: 14})
+	err := client.Load(context.Background(), "huge")
+	if err == nil {
+		t.Fatal("Load accepted over-budget unbudgeted model")
+	}
+	if !IsBudgetError(err) {
+		t.Fatalf("err = %T %[1]v, want budget error", err)
+	}
+	for _, call := range transport.calls {
+		if strings.HasPrefix(call, "POST ") {
+			t.Fatalf("over-budget discovered model made POST call: %#v", transport.calls)
+		}
+	}
+}
+
+func TestLoadAdmitsUnbudgetedFitsModelFromDiscoveredSize(t *testing.T) {
+	transport := recordingTransport{responses: map[string]string{
+		"GET http://llama/v1/models":            `{"data":[]}`,
+		"GET http://ollama/api/tags":            `{"models":[{"name":"fits","size":13958643712}]}`,
+		"POST http://llama/v1/chat/completions": `{"id":"warmup","choices":[]}`,
+	}}
+	client := NewClient(Config{LlamaSwapURL: "http://llama", OllamaURL: "http://ollama", HTTPClient: &http.Client{Transport: &transport}, MaxGiB: 14})
+	if err := client.Load(context.Background(), "fits"); err != nil {
+		t.Fatalf("Load returned error: %v", err)
+	}
+	if got := transport.calls[len(transport.calls)-1]; got != "POST http://llama/v1/chat/completions" {
+		t.Fatalf("last call = %q, want warmup POST (all=%#v)", got, transport.calls)
 	}
 }
 

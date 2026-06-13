@@ -51,16 +51,6 @@ func ResolveProfile(m manifest.Manifest, args []string, opts Options) (Plan, err
 	}
 
 	extra := append([]string(nil), args[1:]...)
-	if backend.Kind == manifest.KindLocalLLM {
-		env, err := buildEnv(backend, opts.Environ)
-		if err != nil {
-			return Plan{}, err
-		}
-		argv := append([]string(nil), backend.Interactive...)
-		argv = append(argv, extra...)
-		return Plan{Backend: backend, Mode: ModeSupervisor, Argv: argv, Env: env}, nil
-	}
-
 	if len(extra) > 0 && extra[0] == "-p" {
 		if len(backend.Oneshot) == 0 {
 			return Plan{}, UsageError{Message: fmt.Sprintf("profile %q does not support oneshot", profile)}
@@ -83,6 +73,9 @@ func ResolveProfile(m manifest.Manifest, args []string, opts Options) (Plan, err
 	}
 	argv := append([]string(nil), backend.Interactive...)
 	argv = append(argv, extra...)
+	if backend.Kind == manifest.KindLocalLLM {
+		return Plan{Backend: backend, Mode: ModeSupervisor, Argv: argv, Env: env}, nil
+	}
 	return Plan{Backend: backend, Mode: ModeExecReplace, Argv: argv, Env: env}, nil
 }
 

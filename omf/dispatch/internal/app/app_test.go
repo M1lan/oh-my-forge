@@ -7,8 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
+	"omf/dispatch/internal/doctor"
 	"omf/dispatch/internal/llm"
+	"omf/dispatch/internal/mlx"
 	"omf/dispatch/internal/router"
 )
 
@@ -72,6 +75,17 @@ func TestRunLLMListUsesLocalLLMService(t *testing.T) {
 	}
 }
 
+func TestRunLLMUsesBoundedContext(t *testing.T) {
+	fake := &deadlineLLM{}
+	a := App{LLM: fake, LLMTimeout: time.Second}
+	if code := a.Run([]string{"llm", "list"}); code != 0 {
+		t.Fatalf("Run exit code = %d, want 0", code)
+	}
+	if !fake.sawDeadline {
+		t.Fatal("llm command ran without a context deadline")
+	}
+}
+
 func TestRunLLMLoadAndUnloadUseLocalLLMService(t *testing.T) {
 	fake := &fakeLLM{}
 	a := App{LLM: fake}
@@ -89,6 +103,30 @@ func TestRunLLMRejectsUnknownLLMVerbAsUsage(t *testing.T) {
 	a := App{LLM: &fakeLLM{}}
 	if code := a.Run([]string{"llm", "unknown"}); code != 2 {
 		t.Fatalf("Run exit code = %d, want 2", code)
+	}
+}
+
+func TestRunLLMMLXLoadsThroughExistingWrapperManager(t *testing.T) {
+	var out strings.Builder
+	fake := &fakeMLX{report: mlx.Report{WrapperPath: mlx.DefaultWrapperPath, ModelID: mlx.DefaultModelID, Caps: mlx.Caps{WiredGiB: 14, MemoryGiB: 18, CacheGiB: 2}}}
+	a := App{MLX: fake, Stdout: &out}
+	if code := a.Run([]string{"llm", "mlx", "qwen36-mlx"}); code != 0 {
+		t.Fatalf("Run exit code = %d, want 0", code)
+	}
+	assertStrings(t, fake.loads, []string{"qwen36-mlx"})
+	if got := out.String(); !strings.Contains(got, mlx.DefaultWrapperPath) || !strings.Contains(got, mlx.DefaultModelID) {
+		t.Fatalf("stdout = %q, want wrapper and model id", got)
+	}
+}
+
+func TestRunDoctorPrintsCheckReport(t *testing.T) {
+	var out strings.Builder
+	a := App{Doctor: fakeDoctor{report: doctor.Report{Checks: []doctor.Check{{Name: "manifest validate", Status: doctor.StatusOK}}}}, Stdout: &out}
+	if code := a.Run([]string{"doctor"}); code != 0 {
+		t.Fatalf("Run exit code = %d, want 0", code)
+	}
+	if got := out.String(); got != "ok\tmanifest validate\n" {
+		t.Fatalf("stdout = %q", got)
 	}
 }
 
@@ -143,3 +181,41 @@ func (f *fakeLLM) Unload(_ context.Context, model string) error {
 	f.unloads = append(f.unloads, model)
 	return nil
 }
+
+type fakeMLX struct {
+	report mlx.Report
+	err    error
+	loads  []string
+}
+
+func (f *fakeMLX) Inspect(context.Context, string) (mlx.Report, error) {
+	return f.report, f.err
+}
+
+func (f *fakeMLX) Load(_ context.Context, model string) (mlx.Report, error) {
+	if f.err != nil {
+		return mlx.Report{}, f.err
+	}
+	f.loads = append(f.loads, model)
+	return f.report, nil
+}
+
+type fakeDoctor struct {
+	report doctor.Report
+	err    error
+}
+
+func (f fakeDoctor) Run(context.Context) (doctor.Report, error) {
+	return f.report, f.err
+}
+
+type deadlineLLM struct{ sawDeadline bool }
+
+func (d *deadlineLLM) List(ctx context.Context) ([]llm.Model, error) {
+	_, d.sawDeadline = ctx.Deadline()
+	return nil, nil
+}
+
+func (d *deadlineLLM) Load(context.Context, string) error { return nil }
+
+func (d *deadlineLLM) Unload(context.Context, string) error { return nil }

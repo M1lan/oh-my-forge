@@ -54,3 +54,9 @@ func TestExecutePlanUsesSupervisorForLocalLLM(t *testing.T) {
 		t.Fatal("RunSupervisor was not called")
 	}
 }
+
+func TestEnvListNilFailsClosed(t *testing.T) {
+	if got := envList(nil); len(got) != 0 {
+		t.Fatalf("envList(nil) len = %d, want 0: %#v", len(got), got)
+	}
+}

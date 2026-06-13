@@ -65,7 +65,7 @@ func runSubprocess(argv []string, env map[string]string) error {
 
 func envList(env map[string]string) []string {
 	if env == nil {
-		return os.Environ()
+		return []string{}
 	}
 	out := make([]string, 0, len(env))
 	for k, v := range env {

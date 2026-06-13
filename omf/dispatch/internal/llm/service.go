@@ -9,12 +9,14 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const (
 	DefaultLlamaSwapURL = "http://127.0.0.1:8080"
 	DefaultOllamaURL    = "http://127.0.0.1:11434"
 	DefaultMaxGiB       = 14
+	DefaultHTTPTimeout  = 30 * time.Second
 )
 
 type Source string
@@ -50,7 +52,7 @@ type Client struct {
 func NewClient(cfg Config) *Client {
 	client := cfg.HTTPClient
 	if client == nil {
-		client = http.DefaultClient
+		client = &http.Client{Timeout: DefaultHTTPTimeout}
 	}
 	limits := cfg.BudgetsGiB
 	if limits == nil {
@@ -102,7 +104,7 @@ func (c *Client) List(ctx context.Context) ([]Model, error) {
 }
 
 func (c *Client) Load(ctx context.Context, model string) error {
-	if err := c.checkBudget(model); err != nil {
+	if err := c.checkBudget(ctx, model); err != nil {
 		return err
 	}
 	body := map[string]any{
@@ -136,12 +138,35 @@ func IsBudgetError(err error) bool {
 	return errors.As(err, &budget)
 }
 
-func (c *Client) checkBudget(model string) error {
+func (c *Client) checkBudget(ctx context.Context, model string) error {
 	budget, ok := c.budgetsGiB[model]
-	if !ok || budget <= c.maxGiB {
+	if ok {
+		return c.checkBudgetGiB(model, budget)
+	}
+
+	models, err := c.List(ctx)
+	if err != nil {
+		return err
+	}
+	for _, discovered := range models {
+		if discovered.Name != model || discovered.SizeBytes == 0 {
+			continue
+		}
+		return c.checkBudgetGiB(model, bytesToGiBCeil(discovered.SizeBytes))
+	}
+	return nil
+}
+
+func (c *Client) checkBudgetGiB(model string, budget uint64) error {
+	if budget <= c.maxGiB {
 		return nil
 	}
 	return BudgetError{Model: model, BudgetGiB: budget, MaxGiB: c.maxGiB}
+}
+
+func bytesToGiBCeil(size uint64) uint64 {
+	const gib = 1 << 30
+	return (size + gib - 1) / gib
 }
 
 func (c *Client) listLlamaSwap(ctx context.Context) ([]Model, error) {

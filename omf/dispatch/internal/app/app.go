@@ -6,9 +6,12 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
+	"omf/dispatch/internal/doctor"
 	"omf/dispatch/internal/llm"
 	"omf/dispatch/internal/manifest"
+	"omf/dispatch/internal/mlx"
 	"omf/dispatch/internal/router"
 )
 
@@ -22,9 +25,12 @@ type App struct {
 	ManifestPath string
 	Runner       router.Runner
 	LLM          LLMClient
+	MLX          MLXClient
+	Doctor       DoctorRunner
 	Environ      map[string]string
 	HomeDir      string
 	PathExists   func(string) bool
+	LLMTimeout   time.Duration
 	Stdout       io.Writer
 	Stderr       io.Writer
 }
@@ -35,10 +41,26 @@ type LLMClient interface {
 	Unload(context.Context, string) error
 }
 
+type MLXClient interface {
+	Inspect(context.Context, string) (mlx.Report, error)
+	Load(context.Context, string) (mlx.Report, error)
+}
+
+type DoctorRunner interface {
+	Run(context.Context) (doctor.Report, error)
+}
+
 func (a App) Run(args []string) int {
 	if len(args) == 0 {
 		a.errorf("usage: omf <profile> [args...]\n")
 		return ExitUsage
+	}
+	if args[0] == "doctor" {
+		if len(args) != 1 {
+			a.errorf("usage: omf doctor\n")
+			return ExitUsage
+		}
+		return a.runDoctor()
 	}
 	if args[0] == "llm" {
 		return a.runLLM(args[1:])
@@ -76,7 +98,8 @@ func (a App) runLLM(args []string) int {
 		verb = args[0]
 	}
 	client := a.llmClient()
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), a.llmTimeout())
+	defer cancel()
 
 	switch verb {
 	case "list":
@@ -93,6 +116,8 @@ func (a App) runLLM(args []string) int {
 			_, _ = fmt.Fprintf(a.stdout(), "%s\t%s\n", model.Name, model.Source)
 		}
 		return ExitOK
+	case "mlx":
+		return a.runLLMMLX(ctx, args[1:])
 	case "load":
 		if len(args) != 2 {
 			a.errorf("usage: omf llm load <model>\n")
@@ -114,8 +139,73 @@ func (a App) runLLM(args []string) int {
 		}
 		return ExitOK
 	default:
-		a.errorf("usage: omf llm [list|load|unload]\n")
+		a.errorf("usage: omf llm [list|load|unload|mlx]\n")
 		return ExitUsage
+	}
+}
+
+func (a App) runLLMMLX(ctx context.Context, args []string) int {
+	manager := a.mlxClient()
+	model := mlx.DefaultModelAlias
+	load := false
+	switch len(args) {
+	case 0:
+	case 1:
+		model = args[0]
+		load = true
+	default:
+		a.errorf("usage: omf llm mlx [model]\n")
+		return ExitUsage
+	}
+
+	var report mlx.Report
+	var err error
+	if load {
+		report, err = manager.Load(ctx, model)
+	} else {
+		report, err = manager.Inspect(ctx, model)
+	}
+	if err != nil {
+		a.errorf("omf llm mlx: %v\n", err)
+		return ExitError
+	}
+	a.printMLXReport(report)
+	return ExitOK
+}
+
+func (a App) printMLXReport(report mlx.Report) {
+	_, _ = fmt.Fprintf(
+		a.stdout(),
+		"mlx\t%s\t%s\twired<=%dGiB memory<=%dGiB cache<=%dGiB\n",
+		report.WrapperPath,
+		report.ModelID,
+		report.Caps.WiredGiB,
+		report.Caps.MemoryGiB,
+		report.Caps.CacheGiB,
+	)
+}
+
+func (a App) runDoctor() int {
+	ctx, cancel := context.WithTimeout(context.Background(), a.llmTimeout())
+	defer cancel()
+	report, err := a.doctorRunner().Run(ctx)
+	a.printDoctorReport(report)
+	if err != nil || !report.OK() {
+		if err != nil {
+			a.errorf("omf doctor: %v\n", err)
+		}
+		return ExitError
+	}
+	return ExitOK
+}
+
+func (a App) printDoctorReport(report doctor.Report) {
+	for _, check := range report.Checks {
+		if check.Message == "" {
+			_, _ = fmt.Fprintf(a.stdout(), "%s\t%s\n", check.Status, check.Name)
+			continue
+		}
+		_, _ = fmt.Fprintf(a.stdout(), "%s\t%s\t%s\n", check.Status, check.Name, check.Message)
 	}
 }
 
@@ -124,6 +214,37 @@ func (a App) llmClient() LLMClient {
 		return a.LLM
 	}
 	return llm.NewClient(llm.Config{})
+}
+
+func (a App) mlxClient() MLXClient {
+	if a.MLX != nil {
+		return a.MLX
+	}
+	return mlx.Manager{LLM: a.llmClient()}
+}
+
+func (a App) doctorRunner() DoctorRunner {
+	if a.Doctor != nil {
+		return a.Doctor
+	}
+	path := a.ManifestPath
+	if path == "" {
+		path = defaultManifestPath()
+	}
+	return doctor.Runner{
+		ManifestPath: path,
+		Environ:      a.effectiveEnv(),
+		HomeDir:      a.HomeDir,
+		PathExists:   a.PathExists,
+		MLX:          a.mlxClient(),
+	}
+}
+
+func (a App) llmTimeout() time.Duration {
+	if a.LLMTimeout > 0 {
+		return a.LLMTimeout
+	}
+	return 5 * time.Minute
 }
 
 func (a App) effectiveEnv() map[string]string {

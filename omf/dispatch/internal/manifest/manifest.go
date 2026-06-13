@@ -198,11 +198,30 @@ func Parse(data []byte) (Manifest, error) {
 			return Manifest{}, fmt.Errorf("backend %q: missing kind", b.Name)
 		}
 	}
+	if err := m.Validate(); err != nil {
+		return Manifest{}, err
+	}
 	return m, nil
 }
 
 func isRoutingManagedEnv(name string) bool {
 	return name == "HOME" || name == "FORGE_CONFIG"
+}
+
+func (m Manifest) Validate() error {
+	seen := make(map[string]bool)
+	for _, b := range m.Backends {
+		if seen[b.Name] {
+			return fmt.Errorf("backend %q: duplicate name", b.Name)
+		}
+		seen[b.Name] = true
+		for _, name := range b.EnvAllowlist {
+			if isRoutingManagedEnv(name) {
+				return fmt.Errorf("backend %q: env_allowlist %q is routing-managed", b.Name, name)
+			}
+		}
+	}
+	return nil
 }
 
 func (m *Manifest) ClampAll() []ClampLog {
