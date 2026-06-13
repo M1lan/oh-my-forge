@@ -110,9 +110,9 @@ EOF
 ok "pane map -> $PANES_ENV"
 
 # Worker panes idle as labeled shells; forge launches+drives them.
-tmux send-keys -t "$OMC_PANE" -l "clear; printf '%s\n' 'OMC worker pane -- idle. The Orchestrator (forge) will launch \`omc launch\` here and dispatch beads-tracked tasks.'"
+tmux send-keys -t "$OMC_PANE" -l "clear; printf '%s\n' 'OMC worker pane -- idle. The Orchestrator (forge) will launch \`omc launch --madmax\` here and dispatch beads-tracked tasks.'"
 tmux send-keys -t "$OMC_PANE" C-m
-tmux send-keys -t "$OMX_PANE" -l "clear; printf '%s\n' 'OMX worker pane -- idle. The Orchestrator (forge) will launch \`omx\` here and dispatch beads-tracked tasks.'"
+tmux send-keys -t "$OMX_PANE" -l "clear; printf '%s\n' 'OMX worker pane -- idle. The Orchestrator (forge) will launch \`omx --madmax\` here and dispatch beads-tracked tasks.'"
 tmux send-keys -t "$OMX_PANE" C-m
 
 # --- the Orchestrator brief -------------------------------------------------
@@ -183,9 +183,13 @@ pane is alive with `tmux capture-pane -p -t <pane>` before dispatching.
 
     OMC=$(grep OMF_PANE_OMC ~/tmp/omf-panes.env | cut -d"'" -f2)
     OMX=$(grep OMF_PANE_OMX ~/tmp/omf-panes.env | cut -d"'" -f2)
-    tmux send-keys -t "$OMC" -l 'omc launch'   ; tmux send-keys -t "$OMC" C-m
-    tmux send-keys -t "$OMX" -l 'omx'          ; tmux send-keys -t "$OMX" C-m
+    tmux send-keys -t "$OMC" -l 'omc launch --madmax' ; tmux send-keys -t "$OMC" C-m
+    tmux send-keys -t "$OMX" -l 'omx --madmax'        ; tmux send-keys -t "$OMX" C-m
     # ...wait for boot, capture-pane to confirm the prompt, then:
+
+NON-NEGOTIABLE: launch BOTH workers in **--madmax** (yolo / auto-approve, no
+1/2 approval gates). The flag is mandatory for omc AND omx -- never launch a
+worker without it. This is the "trio-infernale" forever-loop mode.
     tmux send-keys -t "$OMX" -l 'Read ~/tmp/omf-orchestra-brief.md sections 1-2 and 4. You are the OMX worker. Claim and execute every br issue assigned -a omx. Use your full team/swarm + sub-agents. Coordinate ONLY via br; never touch files outside omf/dispatch/.'
     tmux send-keys -t "$OMX" C-m
 

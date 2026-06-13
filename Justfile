@@ -87,6 +87,15 @@ fzf:
 doctor *args:
     @'{{ helpers }}/doctor.bash' "$@"
 
+# ── trio — multi-agent orchestration (trio-infernale) ──────────────────────────
+
+# Run OUTSIDE tmux. Env knobs: OMF_SESSION, OMF_BOOT_WAIT, OMF_NO_ATTACH.
+# Launch the forge+omc+omx orchestra; BOTH workers boot in --madmax (yolo).
+[group('trio')]
+[no-exit-message]
+trio:
+    scripts/omf-orchestra.sh
+
 # ── umbrella ──────────────────────────────────────────────────────────────────
 
 # Run every linter. Read-only. Fails on the first tool that reports an issue.
