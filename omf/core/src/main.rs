@@ -1,11 +1,11 @@
 //! omf-core CLI entrypoint: argv subcommand dispatch.
 //!
 //! Usage:
-//!   omf-core secrets <...>   -- secrets subsystem (F2)
-//!   omf-core guard   <...>   -- memory-guard subsystem (F3)
+//!   omf-core secrets <...>   -- secrets subsystem
+//!   omf-core guard   <...>   -- memory-guard subsystem
 //!
-//! Scaffold behaviour: subcommands are recognised and routed but report
-//! "not yet implemented" until F2/F3 land. Unknown subcommands -> USAGE.
+//! Subcommands are routed to their subsystems (`secrets::run` / `guard::run`);
+//! unknown or missing subcommands -> USAGE.
 
 use std::process::ExitCode;
 
