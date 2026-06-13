@@ -77,7 +77,7 @@ func Parse(data []byte) (Manifest, error) {
 		}
 		switch line {
 		case "[[backend]]":
-			m.Backends = append(m.Backends, Backend{Routing: RoutingNone})
+			m.Backends = append(m.Backends, Backend{})
 			current = &m.Backends[len(m.Backends)-1]
 			inLimits = false
 			continue
@@ -215,6 +215,15 @@ func (m Manifest) Validate() error {
 			return fmt.Errorf("backend %q: duplicate name", b.Name)
 		}
 		seen[b.Name] = true
+		if b.Routing == "" {
+			return fmt.Errorf("backend %q: missing routing", b.Name)
+		}
+		if !validRouting(b.Routing) {
+			return fmt.Errorf("backend %q: unsupported routing %q", b.Name, b.Routing)
+		}
+		if b.Routing == RoutingNone && requiresAccountRouting(b.Kind) {
+			return fmt.Errorf("backend %q: kind %q cannot use routing=none", b.Name, b.Kind)
+		}
 		for _, name := range b.EnvAllowlist {
 			if isRoutingManagedEnv(name) {
 				return fmt.Errorf("backend %q: env_allowlist %q is routing-managed", b.Name, name)
@@ -250,6 +259,15 @@ func clampLimit(backend, field string, val *uint64, floor uint64) []ClampLog {
 func validKind(k Kind) bool {
 	switch k {
 	case KindForge, KindClaude, KindCodex, KindOmc, KindOmx, KindGemini, KindCopilot, KindVendor, KindLocalLLM:
+		return true
+	default:
+		return false
+	}
+}
+
+func requiresAccountRouting(k Kind) bool {
+	switch k {
+	case KindClaude, KindCodex, KindGemini, KindForge, KindOmc, KindOmx:
 		return true
 	default:
 		return false

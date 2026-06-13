@@ -1,6 +1,11 @@
 package manifest
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
 
 func TestLoadManifestParsesBackendRowsWithArgvArrays(t *testing.T) {
 	txt := `
@@ -57,6 +62,82 @@ cache_gib = 2
 	if *llm.Limits != (Limits{WiredGiB: 14, MemoryGiB: 18, CacheGiB: 2}) {
 		t.Fatalf("limits = %#v", *llm.Limits)
 	}
+}
+
+func TestParseRejectsBackendWithMissingRouting(t *testing.T) {
+	txt := `
+schema_version = 0
+
+[[backend]]
+name = "forge"
+kind = "forge"
+interactive = ["forge"]
+`
+	_, err := Parse([]byte(txt))
+	if err == nil {
+		t.Fatal("Parse accepted backend with missing routing")
+	}
+	if !strings.Contains(err.Error(), "missing routing") {
+		t.Fatalf("err = %v, want missing routing validation failure", err)
+	}
+}
+
+func TestParseRejectsCredentialKindWithRoutingNone(t *testing.T) {
+	for _, kind := range []Kind{KindClaude, KindCodex, KindGemini, KindForge, KindOmc, KindOmx} {
+		t.Run(string(kind), func(t *testing.T) {
+			txt := `
+schema_version = 0
+
+[[backend]]
+name = "leaky"
+kind = "` + string(kind) + `"
+routing = "none"
+interactive = ["tool"]
+`
+			_, err := Parse([]byte(txt))
+			if err == nil {
+				t.Fatalf("Parse accepted credential-bearing kind %s with routing=none", kind)
+			}
+			if !strings.Contains(err.Error(), "routing=none") {
+				t.Fatalf("err = %v, want routing=none validation failure", err)
+			}
+		})
+	}
+}
+
+func TestParseAllowsExplicitRoutingNoneForNonCredentialKind(t *testing.T) {
+	txt := `
+schema_version = 0
+
+[[backend]]
+name = "vendor-tool"
+kind = "vendor"
+routing = "none"
+interactive = ["vendor-tool"]
+`
+	if _, err := Parse([]byte(txt)); err != nil {
+		t.Fatalf("Parse rejected explicit routing=none for non-credential kind: %v", err)
+	}
+}
+
+func TestRepositoryManifestRoutesQwenMLXExplicitly(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", "..", "omf.toml"))
+	if err != nil {
+		t.Fatalf("read repository omf.toml: %v", err)
+	}
+	m, err := Parse(data)
+	if err != nil {
+		t.Fatalf("repository omf.toml did not parse: %v", err)
+	}
+	for _, b := range m.Backends {
+		if b.Name == "qwen36-mlx" {
+			if b.Routing == RoutingNone {
+				t.Fatalf("qwen36-mlx routing = %q, want explicit account route", b.Routing)
+			}
+			return
+		}
+	}
+	t.Fatal("qwen36-mlx backend missing from repository omf.toml")
 }
 
 func TestParseRejectsCommandTemplateShellString(t *testing.T) {

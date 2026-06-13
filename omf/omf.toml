@@ -31,7 +31,7 @@ danger_allowed = false
 [[backend]]
 name          = "qwen36-mlx"
 kind          = "local-llm"
-routing       = "none"
+routing       = "private"
 interactive   = ["omf", "llm", "mlx", "qwen36-mlx"]
 env_allowlist = ["PATH"]
 
