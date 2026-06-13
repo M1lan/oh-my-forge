@@ -12,12 +12,14 @@ source "$(cd -- "${BASH_SOURCE[0]%/*}" && pwd)/lib.bash"
 cd "${REPO_ROOT}" || exit 1
 trap 'exit 130' INT TERM HUP
 
-REQUIRED=(bash just rumdl taplo shellcheck shfmt prettier jq)
+REQUIRED=(bash just rumdl taplo shellcheck shfmt prettier jq go cargo cargo-clippy)
 RECOMMENDED=(gum fzf bat rg editorconfig-checker yq)
 OPTIONAL=(figlet fd eza)
 
 declare -A PKG=(
   [rg]=ripgrep
+  [cargo]=rust
+  ['cargo-clippy']=rust
 )
 
 declare -A WHY=(
@@ -29,6 +31,9 @@ declare -A WHY=(
   [shfmt]='shell formatter'
   [prettier]='JSON format check'
   [jq]='JSON parsing for menus, doctor, manifest facts'
+  [go]='Go >= 1.25 toolchain — builds/tests the omf dispatcher (omf/dispatch)'
+  [cargo]='Rust/cargo toolchain — builds/tests omf-core (omf/core)'
+  ['cargo-clippy']='Rust clippy lints — the omf-core `just lint-rust` gate'
   [gum]='the `just menu` TUI + splash panels'
   [fzf]='the `just fzf` launcher, search, pickers'
   [bat]='syntax-highlighted previews'

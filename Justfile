@@ -1,6 +1,7 @@
-# ── oh-my-forge Justfile — config-only pack: lint/fmt gates + dual TUI ───────
-# No build system, no test suite — the Justfile wires up one linter/formatter
-# per file type and a TUI layer in .just/helpers/ (GNU Bash >= 5.3 helpers).
+# ── oh-my-forge Justfile — config lint/fmt gates + omf compiled lanes + TUI ──
+# Wires one linter/formatter per config file type AND the omf/ compiled lanes
+# (Go dispatcher + Rust core), plus a TUI layer in .just/helpers/ (GNU Bash
+# >= 5.3 helpers).
 #
 # Start here:  bare `just`  → info splash (⏎/m menu · f fzf · countdown)
 #              `just menu`  → guided command builder (gum, prompts for params)
@@ -9,9 +10,10 @@
 #   Markdown (140 files) → rumdl        TOML  → taplo
 #   Shell                → shellcheck + shfmt   JSON  → prettier
 #   All files            → editorconfig-checker (soft — skipped if missing)
+#   omf/dispatch (Go)    → go build/vet/test   omf/core (Rust) → cargo build/clippy/test
 #
 # Verbs per tool: lint-X (read-only diagnostics) · fmt-X (read-only format
-# check) · fix-X (mutating). Umbrellas: lint · fmt · check · fix · ci.
+# check) · fix-X (mutating). Umbrellas: lint · fmt · check · fix · omf · ci.
 # `ci` is the EXACT CI gate. Never run a destructive fix inside check/ci.
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
@@ -26,6 +28,10 @@ _helper_files := ".just/helpers/*.bash"
 
 # JSON file glob — respects .prettierignore.
 _json_files := "**/*.json"
+
+# omf compiled lanes (cross-language, owned by separate agents/dirs).
+_omf_dispatch := justfile_directory() / "omf" / "dispatch" # Go module
+_omf_workspace := justfile_directory() / "omf"             # Cargo workspace (omf-core)
 
 # Parent directory that contains `forge/` (forgecode hardcodes $HOME/forge, so
 # install-omf overrides HOME to land at {{ forge_parent }}/forge).
@@ -103,9 +109,14 @@ check: lint fmt
 fix: fix-md fix-toml fix-sh fix-json
     @printf '\nfix: complete — review with `git diff`\n'
 
-# CI entry point: dep audit (fails on missing required tools) + full gate.
+# Build, lint, and test every omf compiled lane (Go dispatcher + Rust core).
 [group('umbrella')]
-ci: doctor check
+omf: build-go lint-go test-go build-rust lint-rust test-rust
+    @printf '\nomf: compiled lanes green\n'
+
+# CI entry point: dep audit + config gate + omf compiled lanes (build/lint/test).
+[group('umbrella')]
+ci: doctor check omf
 
 # ── markdown — rumdl ──────────────────────────────────────────────────────────
 
@@ -193,13 +204,49 @@ fix-json:
 # ── files — editorconfig ──────────────────────────────────────────────────────
 
 # Verify every file matches .editorconfig rules (soft check — skip if missing).
+# Generated agent-coordination state + virtualenvs are excluded: never
+# hand-edited, and they carry tool-native formatting.
 [group('files')]
 lint-editorconfig:
     @if command -v editorconfig-checker >/dev/null 2>&1; then \
-      editorconfig-checker; \
+      editorconfig-checker -exclude '\.beads/|\.omc/|\.omx/|\.venv/|__pycache__/|\.pytest_cache/|^plans/'; \
     else \
       printf 'editorconfig-checker not installed — skipping (see `just doctor`)\n' >&2; \
     fi
+
+# ── omf — Go dispatcher (omf/dispatch) ────────────────────────────────────────
+
+# Build the Go dispatcher. Compile-only; no install.
+[group('omf')]
+build-go:
+    cd {{ _omf_dispatch }} && go build ./...
+
+# Vet the Go dispatcher (go's built-in static analysis).
+[group('omf')]
+lint-go:
+    cd {{ _omf_dispatch }} && go vet ./...
+
+# Test the Go dispatcher (all packages).
+[group('omf')]
+test-go:
+    cd {{ _omf_dispatch }} && go test ./...
+
+# ── omf — Rust core (omf/core, omf-core crate) ────────────────────────────────
+
+# Build the Rust core workspace (debug profile).
+[group('omf')]
+build-rust:
+    cd {{ _omf_workspace }} && cargo build
+
+# Clippy the Rust core — warnings are errors (the omf-core lint gate).
+[group('omf')]
+lint-rust:
+    cd {{ _omf_workspace }} && cargo clippy --all-targets -- -D warnings
+
+# Test the Rust core workspace.
+[group('omf')]
+test-rust:
+    cd {{ _omf_workspace }} && cargo test
 
 # ── install — oh-my-forge into a forge config root ───────────────────────────
 
