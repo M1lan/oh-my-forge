@@ -7,3 +7,8 @@ node_modules/
 
 # Linter caches
 .rumdl_cache/
+
+# desloppify health-scan artifacts (local-only, never committed)
+.desloppify/
+scorecard.png
+query.json
