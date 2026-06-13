@@ -1,6 +1,7 @@
 package router
 
 import (
+	"runtime"
 	"testing"
 
 	"omf/dispatch/internal/manifest"
@@ -218,6 +219,55 @@ func TestPrivateRoutedBackendStripsWorkHomeValues(t *testing.T) {
 	}
 	if _, ok := plan.Env["PATH"]; ok {
 		t.Fatalf("PATH with work-home component leaked into private route: %#v", plan.Env)
+	}
+	if plan.Env["TERM"] != "xterm-256color" {
+		t.Fatalf("safe TERM stripped unexpectedly: %#v", plan.Env)
+	}
+}
+
+func TestRoutedBackendStripsSiblingHomeCaseInsensitivelyOnDarwin(t *testing.T) {
+	if runtime.GOOS != "darwin" {
+		t.Skip("APFS case-insensitive path comparison is darwin-specific")
+	}
+	m := manifest.Manifest{Backends: []manifest.Backend{{
+		Name:         "work-forge",
+		Kind:         manifest.KindForge,
+		Routing:      manifest.RoutingWork,
+		Interactive:  []string{"forge"},
+		EnvAllowlist: []string{"PATH", "TERM"},
+	}}}
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(map[string]string{
+		"PATH": "/usr/bin:/users/milan.santosi/bin:/bin",
+		"TERM": "xterm-256color",
+	}))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	if _, ok := plan.Env["PATH"]; ok {
+		t.Fatalf("lowercase private-home PATH component leaked into work route: %#v", plan.Env)
+	}
+	if plan.Env["TERM"] != "xterm-256color" {
+		t.Fatalf("safe TERM stripped unexpectedly: %#v", plan.Env)
+	}
+}
+
+func TestRoutedBackendKeepsSafeEnvValuePointingAtOwnHome(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{
+		Name:         "work-forge",
+		Kind:         manifest.KindForge,
+		Routing:      manifest.RoutingWork,
+		Interactive:  []string{"forge"},
+		EnvAllowlist: []string{"PATH", "TERM"},
+	}}}
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(map[string]string{
+		"PATH": WorkHome + "/bin:/usr/bin:/bin",
+		"TERM": "xterm-256color",
+	}))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	if plan.Env["PATH"] != WorkHome+"/bin:/usr/bin:/bin" {
+		t.Fatalf("own-home PATH stripped unexpectedly: %#v", plan.Env)
 	}
 	if plan.Env["TERM"] != "xterm-256color" {
 		t.Fatalf("safe TERM stripped unexpectedly: %#v", plan.Env)

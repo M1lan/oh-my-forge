@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"omf/dispatch/internal/manifest"
@@ -91,8 +92,8 @@ func assertRoutingBoundary(r manifest.Routing, account accountRoute) error {
 }
 
 func samePathOrWithin(path, root string) bool {
-	path = filepath.Clean(path)
-	root = filepath.Clean(root)
+	path = cleanPathForHostCompare(path)
+	root = cleanPathForHostCompare(root)
 	if path == root {
 		return true
 	}
@@ -101,6 +102,14 @@ func samePathOrWithin(path, root string) bool {
 		return false
 	}
 	return rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
+}
+
+func cleanPathForHostCompare(path string) string {
+	path = filepath.Clean(path)
+	if runtime.GOOS == "darwin" {
+		return strings.ToLower(path)
+	}
+	return path
 }
 
 func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]string, error) {
@@ -113,11 +122,11 @@ func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]s
 		if routed && !isRoutedSafeEnvName(name) {
 			continue
 		}
-		if val, ok := environ[name]; ok && (!routed || !envValueReferencesSiblingHome(backend.Routing, account, val)) {
+		if val, ok := environ[name]; ok && (!routed || !envValueReferencesSiblingHome(backend.Routing, val)) {
 			env[name] = val
 		}
 	}
-	if account, ok := routeAccount(backend.Routing); ok {
+	if routed {
 		if err := assertRoutingBoundary(backend.Routing, account); err != nil {
 			return nil, err
 		}
@@ -140,18 +149,9 @@ func isRoutedSafeEnvName(name string) bool {
 	}
 }
 
-func envValueReferencesSiblingHome(route manifest.Routing, account accountRoute, value string) bool {
+func envValueReferencesSiblingHome(route manifest.Routing, value string) bool {
 	forbidden := forbiddenSiblingHome(route)
-	if forbidden == "" {
-		return false
-	}
-	if valueHasPathPrefix(value, forbidden) {
-		return true
-	}
-	if account.Home != "" && valueHasPathPrefix(value, account.Home) {
-		return false
-	}
-	return false
+	return forbidden != "" && valueHasPathPrefix(value, forbidden)
 }
 
 func forbiddenSiblingHome(route manifest.Routing) string {
