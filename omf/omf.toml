@@ -1,0 +1,39 @@
+# omf.toml -- the omf backend manifest.
+#
+# Authoritative schema lives in omf-core (omf/core/src/manifest.rs, F4/omf-327).
+# OMX's Go struct in the dispatcher (omf/dispatch, omf-417) MUST mirror it.
+#
+# Invariants enforced by the compiled floor (not just documented):
+#   * command templates are argv ARRAYS, never shell strings
+#     (avoids the ai-dispatch.zsh:296-302 eval-quoting footgun);
+#   * routing class is one of: none | work | private;
+#   * `limits` may only request STRICTER values than the compiled floor;
+#     looser values are clamped down and the clamp is logged for `omf doctor`.
+
+schema_version = 0
+
+# ---- example backend rows (replace/extend; these show the exact shape) ----
+
+# A private-account forge profile: interactive + one-shot, env allowlisted.
+[[backend]]
+name = "forge"
+kind = "forge"
+routing = "private"
+interactive = ["forge"]
+oneshot = ["forge", "-p"]
+env_allowlist = ["HOME", "PATH", "TERM", "LANG"]
+danger_allowed = false
+
+# A local LLM backend with MLX caps. `limits` here are already within the
+# floor (<= 14/18/2), so nothing is clamped.
+[[backend]]
+name = "qwen36-mlx"
+kind = "local-llm"
+routing = "none"
+interactive = ["omf", "llm", "mlx", "qwen36-mlx"]
+env_allowlist = ["HOME", "PATH"]
+
+[backend.limits]
+wired_gib = 14
+memory_gib = 18
+cache_gib = 2

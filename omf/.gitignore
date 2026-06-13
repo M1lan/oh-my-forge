@@ -1,0 +1,8 @@
+# Rust build artifacts (omf-core / Cargo workspace).
+/target/
+/core/target/
+
+# Python registrar (uv) virtualenv + caches. The uv.lock IS committed.
+/registrar/.venv/
+__pycache__/
+.pytest_cache/

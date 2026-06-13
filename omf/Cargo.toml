@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = ["core"]
+
+# omf Cargo workspace -- the compiled security floor.
+# FORGE lane owns this file and everything under core/.
+# Add safety-critical crates here only; the Go dispatcher and Bash/Python
+# adapters live outside this workspace by design.
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+rust-version = "1.80"
+
+[profile.release]
+# Small, audited binary: favour predictable size over aggressive inlining.
+opt-level = "s"
+lto = true
+strip = true

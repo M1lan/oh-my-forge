@@ -1,0 +1,25 @@
+# omf-registrar -- offline model registrar for omf.
+#
+# Reads safetensors headers (no torch, no GPU, no model load) and emits model
+# footprint rows for the omf manifest. NOT a runtime dependency of omf: it is an
+# author-time tool you run to (re)generate model rows for omf.toml.
+[project]
+name            = "omf-registrar"
+version         = "0.1.0"
+description     = "Offline safetensors-header model registrar for omf (footprint rows)."
+requires-python = ">=3.14"
+dependencies    = []
+
+[project.scripts]
+omf-registrar = "omf_registrar.cli:main"
+
+[build-system]
+requires      = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv.build-backend]
+module-name = "omf_registrar"
+module-root = "src"
