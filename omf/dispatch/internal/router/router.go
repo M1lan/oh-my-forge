@@ -47,26 +47,38 @@ func ResolveProfile(m manifest.Manifest, args []string, opts Options) (Plan, err
 
 	extra := append([]string(nil), args[1:]...)
 	if backend.Kind == manifest.KindLocalLLM {
+		env, err := buildEnv(backend, opts.Environ)
+		if err != nil {
+			return Plan{}, err
+		}
 		argv := append([]string(nil), backend.Interactive...)
 		argv = append(argv, extra...)
-		return Plan{Backend: backend, Mode: ModeSupervisor, Argv: argv, Env: buildEnv(backend, opts.Environ)}, nil
+		return Plan{Backend: backend, Mode: ModeSupervisor, Argv: argv, Env: env}, nil
 	}
 
 	if len(extra) > 0 && extra[0] == "-p" {
 		if len(backend.Oneshot) == 0 {
 			return Plan{}, UsageError{Message: fmt.Sprintf("profile %q does not support oneshot", profile)}
 		}
+		env, err := buildEnv(backend, opts.Environ)
+		if err != nil {
+			return Plan{}, err
+		}
 		argv := append([]string(nil), backend.Oneshot...)
 		argv = append(argv, extra[1:]...)
-		return Plan{Backend: backend, Mode: ModeWrappedSubprocess, Argv: argv, Env: buildEnv(backend, opts.Environ)}, nil
+		return Plan{Backend: backend, Mode: ModeWrappedSubprocess, Argv: argv, Env: env}, nil
 	}
 
 	if len(backend.Interactive) == 0 {
 		return Plan{}, UsageError{Message: fmt.Sprintf("profile %q does not support interactive", profile)}
 	}
+	env, err := buildEnv(backend, opts.Environ)
+	if err != nil {
+		return Plan{}, err
+	}
 	argv := append([]string(nil), backend.Interactive...)
 	argv = append(argv, extra...)
-	return Plan{Backend: backend, Mode: ModeExecReplace, Argv: argv, Env: buildEnv(backend, opts.Environ)}, nil
+	return Plan{Backend: backend, Mode: ModeExecReplace, Argv: argv, Env: env}, nil
 }
 
 func findBackend(m manifest.Manifest, name string) (manifest.Backend, bool) {
