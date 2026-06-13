@@ -19,4 +19,4 @@ serde = { version = "1", features = ["derive"] }
 toml = "0.8"
 zeroize = "1"
 base64 = "0.22"
-# F3 (guard) adds: nix/libc for flock + rusage as needed.
+libc = "0.2"
