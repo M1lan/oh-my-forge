@@ -83,7 +83,7 @@ interactive = ["forge"]
 }
 
 func TestParseRejectsCredentialKindWithRoutingNone(t *testing.T) {
-	for _, kind := range []Kind{KindClaude, KindCodex, KindGemini, KindForge, KindOmc, KindOmx} {
+	for _, kind := range []Kind{KindClaude, KindCodex, KindGemini, KindCopilot, KindForge, KindOmc, KindOmx} {
 		t.Run(string(kind), func(t *testing.T) {
 			txt := `
 schema_version = 0

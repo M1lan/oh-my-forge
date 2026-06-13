@@ -285,6 +285,25 @@ func TestRoutingNoneBackendMayKeepConfigRedirectEnvironment(t *testing.T) {
 	}
 }
 
+func TestBuildEnvRefusesUnroutedCredentialKind(t *testing.T) {
+	_, err := buildEnv(
+		manifest.Backend{
+			Name:         "copilot",
+			Kind:         manifest.KindCopilot,
+			Routing:      manifest.RoutingNone,
+			Interactive:  []string{"copilot"},
+			EnvAllowlist: []string{"PATH"},
+		},
+		map[string]string{"PATH": "/bin"},
+	)
+	if err == nil {
+		t.Fatal("buildEnv accepted unrouted credential-bearing backend")
+	}
+	if !IsSecurityError(err) {
+		t.Fatalf("err = %T %[1]v, want security error", err)
+	}
+}
+
 func TestRoutingInvariantUsesCompiledLiteralTableNotCallerEnvironment(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "work-forge", Kind: manifest.KindForge, Routing: manifest.RoutingWork, Interactive: []string{"forge"}, EnvAllowlist: []string{"HOME", "FORGE_CONFIG"}}}}
 	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(map[string]string{"HOME": PrivateHome, "FORGE_CONFIG": PrivateForgeConfig}))

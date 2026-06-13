@@ -221,7 +221,7 @@ func (m Manifest) Validate() error {
 		if !validRouting(b.Routing) {
 			return fmt.Errorf("backend %q: unsupported routing %q", b.Name, b.Routing)
 		}
-		if b.Routing == RoutingNone && requiresAccountRouting(b.Kind) {
+		if b.Routing == RoutingNone && RequiresAccountRouting(b.Kind) {
 			return fmt.Errorf("backend %q: kind %q cannot use routing=none", b.Name, b.Kind)
 		}
 		for _, name := range b.EnvAllowlist {
@@ -265,12 +265,12 @@ func validKind(k Kind) bool {
 	}
 }
 
-func requiresAccountRouting(k Kind) bool {
+func RequiresAccountRouting(k Kind) bool {
 	switch k {
-	case KindClaude, KindCodex, KindGemini, KindForge, KindOmc, KindOmx:
-		return true
-	default:
+	case KindVendor, KindLocalLLM:
 		return false
+	default:
+		return true
 	}
 }
 

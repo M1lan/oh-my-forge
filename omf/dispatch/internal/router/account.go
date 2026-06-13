@@ -115,6 +115,9 @@ func cleanPathForHostCompare(path string) string {
 func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]string, error) {
 	env := make(map[string]string)
 	account, routed := routeAccount(backend.Routing)
+	if !routed && manifest.RequiresAccountRouting(backend.Kind) {
+		return nil, SecurityError{Message: fmt.Sprintf("backend %q kind %q requires account routing", backend.Name, backend.Kind)}
+	}
 	for _, name := range backend.EnvAllowlist {
 		if isRoutingManagedEnv(name) {
 			continue
