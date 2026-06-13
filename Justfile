@@ -204,12 +204,14 @@ fix-json:
 # ── files — editorconfig ──────────────────────────────────────────────────────
 
 # Verify every file matches .editorconfig rules (soft check — skip if missing).
-# Generated agent-coordination state + virtualenvs are excluded: never
-# hand-edited, and they carry tool-native formatting.
+# Excluded: generated agent-coordination state + virtualenvs (never hand-edited,
+# tool-native formatting), and *.go — gofmt owns Go formatting (it understands
+# raw-string literals; editorconfig-checker false-positives on spaces inside
+# embedded-fixture strings). Go formatting is enforced by `lint-go` via gofmt.
 [group('files')]
 lint-editorconfig:
     @if command -v editorconfig-checker >/dev/null 2>&1; then \
-      editorconfig-checker -exclude '\.beads/|\.omc/|\.omx/|\.venv/|__pycache__/|\.pytest_cache/|^plans/'; \
+      editorconfig-checker -exclude '\.beads/|\.omc/|\.omx/|\.venv/|__pycache__/|\.pytest_cache/|^plans/|\.go$'; \
     else \
       printf 'editorconfig-checker not installed — skipping (see `just doctor`)\n' >&2; \
     fi
@@ -221,10 +223,12 @@ lint-editorconfig:
 build-go:
     cd {{ _omf_dispatch }} && go build ./...
 
-# Vet the Go dispatcher (go's built-in static analysis).
+# Vet + gofmt-check the Go dispatcher. gofmt is the authoritative Go formatter
+# (it correctly leaves raw-string-literal contents alone, unlike editorconfig).
 [group('omf')]
 lint-go:
     cd {{ _omf_dispatch }} && go vet ./...
+    cd {{ _omf_dispatch }} && out=$(gofmt -l .); [ -z "$out" ] || { printf 'gofmt: needs formatting:\n%s\n' "$out" >&2; exit 1; }
 
 # Test the Go dispatcher (all packages).
 [group('omf')]
