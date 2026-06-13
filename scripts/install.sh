@@ -36,15 +36,19 @@ WITH_TOML_EXAMPLE=false
 EXPLICIT_COMPONENTS=false
 BACKUP_DIR=""
 
-# ---------- Colours (only when stdout is a tty) ----------
-if [[ -t 1 ]]; then
-  C_RESET='\033[0m'
-  C_DIM='\033[2m'
-  C_BOLD='\033[1m'
-  C_GREEN='\033[32m'
-  C_YELLOW='\033[33m'
-  C_RED='\033[31m'
-  C_BLUE='\033[34m'
+# ---------- Colours (tput only — never raw ANSI; honors NO_COLOR) ----------
+_ncolors=0
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  _ncolors="$(tput colors 2> /dev/null || printf 0)"
+fi
+if [[ "$_ncolors" -ge 8 ]]; then
+  C_RESET="$(tput sgr0)"
+  C_DIM="$(tput dim)"
+  C_BOLD="$(tput bold)"
+  C_GREEN="$(tput setaf 2)"
+  C_YELLOW="$(tput setaf 3)"
+  C_RED="$(tput setaf 1)"
+  C_BLUE="$(tput setaf 4)"
 else
   C_RESET=''
   C_DIM=''

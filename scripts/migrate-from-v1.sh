@@ -21,12 +21,17 @@ DIR="${1:-.}"
 }
 DIR="$(cd -- "$DIR" && pwd)"
 
-if [[ -t 1 ]]; then
-  R='\033[0m'
-  B='\033[1m'
-  G='\033[32m'
-  Y='\033[33m'
-  E='\033[31m'
+# tput only — never raw ANSI; honors NO_COLOR.
+_ncolors=0
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  _ncolors="$(tput colors 2> /dev/null || printf 0)"
+fi
+if [[ "$_ncolors" -ge 8 ]]; then
+  R="$(tput sgr0)"
+  B="$(tput bold)"
+  G="$(tput setaf 2)"
+  Y="$(tput setaf 3)"
+  E="$(tput setaf 1)"
 else
   R=''
   B=''
