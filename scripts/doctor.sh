@@ -117,6 +117,13 @@ for t in rsync find python3; do
   fi
 done
 
+# yq (mikefarah v4) powers the agent frontmatter validation — soft dependency.
+if command -v yq > /dev/null 2>&1; then
+  check_pass "yq found ($(yq --version 2>&1 | head -1))"
+else
+  check_warn "yq not found — agent frontmatter validation will be skipped (brew install yq)"
+fi
+
 # ---------- Layout ----------
 section "Layout"
 
@@ -154,45 +161,49 @@ if [[ -d "$AGENTS_DIR" ]]; then
   done < <(find "$AGENTS_DIR" -maxdepth 1 -type f -name '*.md' -print0)
   check_pass "agents: $md_count *.md files at top level"
 
-  # Frontmatter validation
-  if command -v python3 > /dev/null 2>&1; then
-    if python3 - "$AGENTS_DIR" << 'PY' > /tmp/.omf-doctor-agents.log 2>&1; then
-import os, re, sys
-try:
-    import yaml
-except Exception:
-    sys.exit("yaml module not available; install pyyaml to enable deep validation")
-base = sys.argv[1]
-bad = 0
-required = {"id", "title", "description", "tools"}
-for fn in sorted(os.listdir(base)):
-    if not fn.endswith(".md"): continue
-    path = os.path.join(base, fn)
-    text = open(path).read()
-    m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
-    if not m:
-        print(f"  {fn}: no frontmatter"); bad += 1; continue
-    try:
-        fm = yaml.safe_load(m.group(1))
-    except Exception as e:
-        print(f"  {fn}: yaml parse error: {e}"); bad += 1; continue
-    miss = required - set(fm or {})
-    if miss:
-        print(f"  {fn}: missing keys: {sorted(miss)}"); bad += 1; continue
-    if not isinstance(fm.get("tools"), list) or not fm["tools"]:
-        print(f"  {fn}: tools must be a non-empty list"); bad += 1; continue
-if bad:
-    print(f"{bad} agent(s) failed validation"); sys.exit(1)
-print("all agents validated")
-PY
-      check_pass "$(head -1 /tmp/.omf-doctor-agents.log)"
+  # Frontmatter validation — yq (mikefarah, v4) parses the YAML frontmatter
+  # directly via --front-matter=extract. No python/pyyaml dependency.
+  if command -v yq > /dev/null 2>&1; then
+    fm_bad=0
+    : > /tmp/.omf-doctor-agents.log
+    while IFS= read -r -d '' f; do
+      fn="$(basename "$f")"
+      if [[ "$(head -1 "$f")" != '---' ]]; then
+        printf '  %s: no frontmatter\n' "$fn" >> /tmp/.omf-doctor-agents.log
+        fm_bad=$((fm_bad + 1))
+        continue
+      fi
+      if ! fm_missing="$(yq --front-matter=extract \
+        '(["id","title","description","tools"] - keys) | join(",")' \
+        "$f" 2> /tmp/.omf-doctor-yq.err)"; then
+        printf '  %s: yaml parse error: %s\n' "$fn" "$(head -1 /tmp/.omf-doctor-yq.err)" >> /tmp/.omf-doctor-agents.log
+        fm_bad=$((fm_bad + 1))
+        continue
+      fi
+      if [[ -n "$fm_missing" ]]; then
+        printf '  %s: missing keys: %s\n' "$fn" "$fm_missing" >> /tmp/.omf-doctor-agents.log
+        fm_bad=$((fm_bad + 1))
+        continue
+      fi
+      # NB: keep .tools piped INSIDE each parenthesis — yq broadcasts boolean
+      # operators over sequences, so `.tools | tag == ... and length > 0`
+      # silently passes an empty list.
+      if ! yq --front-matter=extract -e '(.tools | tag) == "!!seq" and (.tools | length) > 0' "$f" > /dev/null 2>&1; then
+        printf '  %s: tools must be a non-empty list\n' "$fn" >> /tmp/.omf-doctor-agents.log
+        fm_bad=$((fm_bad + 1))
+        continue
+      fi
+    done < <(find "$AGENTS_DIR" -maxdepth 1 -type f -name '*.md' -print0)
+    rm -f /tmp/.omf-doctor-yq.err
+    if [[ $fm_bad -eq 0 ]]; then
+      check_pass "all agents validated (yq frontmatter check)"
     else
-      check_fail "agent frontmatter validation failed:"
+      check_fail "$fm_bad agent(s) failed validation:"
       while IFS= read -r line; do printf '  %s\n' "$line"; done < /tmp/.omf-doctor-agents.log
     fi
     rm -f /tmp/.omf-doctor-agents.log
   else
-    check_warn "python3 not available; skipping deep agent validation"
+    check_warn "yq not available; skipping deep agent validation (brew install yq)"
   fi
 fi
 

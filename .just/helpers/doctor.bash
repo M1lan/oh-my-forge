@@ -13,7 +13,7 @@ cd "${REPO_ROOT}" || exit 1
 trap 'exit 130' INT TERM HUP
 
 REQUIRED=(bash just rumdl taplo shellcheck shfmt prettier jq)
-RECOMMENDED=(gum fzf bat rg editorconfig-checker)
+RECOMMENDED=(gum fzf bat rg editorconfig-checker yq)
 OPTIONAL=(figlet fd eza)
 
 declare -A PKG=(
@@ -36,6 +36,7 @@ declare -A WHY=(
   # NOTE: dashed keys MUST be quoted or shfmt rewrites them as arithmetic
   # ([editorconfig-checker] → [editorconfig - checker]).
   ['editorconfig-checker']='indent/charset/EOL compliance gate'
+  [yq]='agent frontmatter validation in scripts/doctor.sh'
   [figlet]='splash banner'
   [fd]='fast file listing behind `just pick`'
   [eza]='directory listings'
