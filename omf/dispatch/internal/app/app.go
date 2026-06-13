@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -65,6 +66,12 @@ func (a App) Run(args []string) int {
 	if args[0] == "llm" {
 		return a.runLLM(args[1:])
 	}
+	if args[0] == "resume" {
+		return a.runResume(args[1:])
+	}
+	if args[0] == "hist" {
+		return a.runHist(args[1:])
+	}
 	path := a.ManifestPath
 	if path == "" {
 		path = defaultManifestPath()
@@ -87,6 +94,28 @@ func (a App) Run(args []string) int {
 	}
 	if err := a.Runner.Execute(plan); err != nil {
 		a.errorf("omf: execute: %v\n", err)
+		return ExitError
+	}
+	return ExitOK
+}
+
+func (a App) runResume(args []string) int {
+	if len(args) != 0 {
+		a.errorf("usage: omf resume\n")
+		return ExitUsage
+	}
+	return a.execAdapter("resume.bash", nil)
+}
+
+func (a App) runHist(args []string) int {
+	return a.execAdapter("hist.bash", args)
+}
+
+func (a App) execAdapter(script string, args []string) int {
+	argv := append([]string{filepath.Join(defaultAdapterDir(), script)}, args...)
+	plan := router.Plan{Mode: router.ModeExecReplace, Argv: argv, Env: a.effectiveEnv()}
+	if err := a.Runner.Execute(plan); err != nil {
+		a.errorf("omf: adapter: %v\n", err)
 		return ExitError
 	}
 	return ExitOK
@@ -278,4 +307,8 @@ func (a App) stdout() io.Writer {
 
 func defaultManifestPath() string {
 	return "../omf.toml"
+}
+
+func defaultAdapterDir() string {
+	return filepath.Join("..", "adapters")
 }

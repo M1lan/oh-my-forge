@@ -60,6 +60,49 @@ func TestRunReturnsUsageForMissingProfile(t *testing.T) {
 	}
 }
 
+func TestRunResumeExecsResumeAdapter(t *testing.T) {
+	var got router.Plan
+	a := App{
+		Runner: router.Runner{ExecReplace: func(argv []string, env map[string]string) error {
+			got = router.Plan{Mode: router.ModeExecReplace, Argv: argv, Env: env}
+			return nil
+		}},
+		Environ: map[string]string{"PATH": "/bin", "OMF_FCR_SNIPPET": "/tmp/fcr.zsh"},
+	}
+	if code := a.Run([]string{"resume"}); code != 0 {
+		t.Fatalf("Run exit code = %d, want 0", code)
+	}
+	assertStrings(t, got.Argv, []string{filepath.Join("..", "adapters", "resume.bash")})
+	if got.Env["PATH"] != "/bin" || got.Env["OMF_FCR_SNIPPET"] != "/tmp/fcr.zsh" {
+		t.Fatalf("adapter env = %#v", got.Env)
+	}
+}
+
+func TestRunHistExecsHistAdapterWithArgs(t *testing.T) {
+	var got router.Plan
+	a := App{
+		Runner: router.Runner{ExecReplace: func(argv []string, env map[string]string) error {
+			got = router.Plan{Mode: router.ModeExecReplace, Argv: argv, Env: env}
+			return nil
+		}},
+		Environ: map[string]string{"PATH": "/bin"},
+	}
+	if code := a.Run([]string{"hist", "-a", "-n", "20", "moe"}); code != 0 {
+		t.Fatalf("Run exit code = %d, want 0", code)
+	}
+	assertStrings(t, got.Argv, []string{filepath.Join("..", "adapters", "hist.bash"), "-a", "-n", "20", "moe"})
+}
+
+func TestRunResumeRejectsArgs(t *testing.T) {
+	a := App{Runner: router.Runner{ExecReplace: func([]string, map[string]string) error {
+		t.Fatal("resume with args should not exec adapter")
+		return nil
+	}}}
+	if code := a.Run([]string{"resume", "extra"}); code != ExitUsage {
+		t.Fatalf("Run exit code = %d, want %d", code, ExitUsage)
+	}
+}
+
 func TestRunLLMListUsesLocalLLMService(t *testing.T) {
 	var out strings.Builder
 	a := App{
