@@ -213,7 +213,15 @@ func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]s
 		if routed && !isRoutedSafeEnvName(name) {
 			continue
 		}
-		if val, ok := environ[name]; ok && (!routed || !envValueReferencesSiblingHome(backend.Routing, val)) {
+		if val, ok := environ[name]; ok {
+			if routed {
+				sanitized, keep := sanitizeRoutedEnvValue(backend.Routing, name, val)
+				if !keep {
+					continue
+				}
+				env[name] = sanitized
+				continue
+			}
 			env[name] = val
 		}
 	}
@@ -232,9 +240,41 @@ func isRoutedSafeEnvName(name string) bool {
 	switch name {
 	case "PATH", "TERM", "LANG", "TZ", "COLORTERM", "HTTPS_PROXY", "NO_PROXY", "TMPDIR":
 		return true
+	case "LC_ALL", "LC_COLLATE", "LC_CTYPE", "LC_MESSAGES", "LC_MONETARY", "LC_NUMERIC", "LC_TIME",
+		"LC_ADDRESS", "LC_IDENTIFICATION", "LC_MEASUREMENT", "LC_NAME", "LC_PAPER", "LC_TELEPHONE":
+		return true
 	default:
-		return strings.HasPrefix(name, "LC_")
+		return false
 	}
+}
+
+func sanitizeRoutedEnvValue(route manifest.Routing, name, value string) (string, bool) {
+	if name == "PATH" {
+		return sanitizeRoutedPath(route, value)
+	}
+	if envValueReferencesSiblingHome(route, value) {
+		return "", false
+	}
+	return value, true
+}
+
+func sanitizeRoutedPath(route manifest.Routing, value string) (string, bool) {
+	forbidden := forbiddenSiblingHome(route)
+	if forbidden == "" {
+		return value, true
+	}
+	parts := strings.Split(value, string(os.PathListSeparator))
+	kept := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if samePathOrWithin(part, forbidden) {
+			continue
+		}
+		kept = append(kept, part)
+	}
+	if len(kept) == 0 {
+		return "", false
+	}
+	return strings.Join(kept, string(os.PathListSeparator)), true
 }
 
 func envValueReferencesSiblingHome(route manifest.Routing, value string) bool {

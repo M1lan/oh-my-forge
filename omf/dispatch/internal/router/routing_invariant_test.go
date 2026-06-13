@@ -191,6 +191,32 @@ func TestRoutedBackendUsesFailClosedSafeEnvironmentAllowlist(t *testing.T) {
 	}
 }
 
+func TestRoutedBackendAllowsOnlyExplicitLocaleCategories(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{
+		Name:         "work-forge",
+		Kind:         manifest.KindForge,
+		Routing:      manifest.RoutingWork,
+		Interactive:  []string{"forge"},
+		EnvAllowlist: []string{"LC_ALL", "LC_CTYPE", "LC_FAKE"},
+	}}}
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptionsForHome(WorkHome, map[string]string{
+		"LC_ALL":   "C.UTF-8",
+		"LC_CTYPE": "C.UTF-8",
+		"LC_FAKE":  "private",
+	}))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	for _, name := range []string{"LC_ALL", "LC_CTYPE"} {
+		if plan.Env[name] == "" {
+			t.Fatalf("explicit locale category %s was stripped: %#v", name, plan.Env)
+		}
+	}
+	if _, ok := plan.Env["LC_FAKE"]; ok {
+		t.Fatalf("non-category LC_* env leaked through routed safe set: %#v", plan.Env)
+	}
+}
+
 func TestRoutedBackendAllowsReviewedRuntimeEnvEscapeHatch(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{
 		Name:         "work-forge",
@@ -260,8 +286,8 @@ func TestRoutedBackendStripsSafeEnvValuesPointingAtSiblingHome(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}
-	if _, ok := plan.Env["PATH"]; ok {
-		t.Fatalf("PATH with private-home component leaked into work route: %#v", plan.Env)
+	if plan.Env["PATH"] != "/opt/homebrew/bin:/usr/bin" {
+		t.Fatalf("PATH was not segment-filtered correctly: %#v", plan.Env)
 	}
 	if _, ok := plan.Env["LANG"]; ok {
 		t.Fatalf("LANG with private-home prefix leaked into work route: %#v", plan.Env)
@@ -286,8 +312,8 @@ func TestPrivateRoutedBackendStripsWorkHomeValues(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}
-	if _, ok := plan.Env["PATH"]; ok {
-		t.Fatalf("PATH with work-home component leaked into private route: %#v", plan.Env)
+	if plan.Env["PATH"] != "/usr/bin" {
+		t.Fatalf("PATH was not segment-filtered for private route: %#v", plan.Env)
 	}
 	if plan.Env["TERM"] != "xterm-256color" {
 		t.Fatalf("safe TERM stripped unexpectedly: %#v", plan.Env)
@@ -312,8 +338,8 @@ func TestRoutedBackendStripsSiblingHomeCaseInsensitivelyOnDarwin(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}
-	if _, ok := plan.Env["PATH"]; ok {
-		t.Fatalf("lowercase private-home PATH component leaked into work route: %#v", plan.Env)
+	if plan.Env["PATH"] != "/usr/bin:/bin" {
+		t.Fatalf("lowercase private-home PATH component was not segment-filtered: %#v", plan.Env)
 	}
 	if plan.Env["TERM"] != "xterm-256color" {
 		t.Fatalf("safe TERM stripped unexpectedly: %#v", plan.Env)

@@ -3,6 +3,7 @@ package router
 import (
 	"io"
 	"os"
+	"os/exec"
 	"sort"
 	"strings"
 	"testing"
@@ -110,6 +111,61 @@ func TestRunSubprocessPassesOnlyResolvedEnvironmentToRealChild(t *testing.T) {
 	for _, kv := range got {
 		if strings.HasPrefix(kv, "OMF_AMBIENT_SECRET=") {
 			t.Fatalf("ambient env leaked into real child: %#v", got)
+		}
+	}
+}
+
+func TestSyscallExecReplacePassesOnlyResolvedEnvironmentToRealChild(t *testing.T) {
+	const parentArg = "--omf-exec-replace-parent"
+	const childArg = "--omf-exec-replace-child"
+	resolved := map[string]string{
+		"HOME":         PrivateHome,
+		"FORGE_CONFIG": PrivateForgeConfig,
+		"PATH":         "/usr/bin:/bin",
+		"TERM":         "xterm-256color",
+	}
+
+	if hasArg(childArg) {
+		env := os.Environ()
+		sort.Strings(env)
+		_, _ = os.Stdout.WriteString(strings.Join(env, "\n"))
+		os.Exit(0)
+	}
+	if hasArg(parentArg) {
+		exe, err := os.Executable()
+		if err != nil {
+			_, _ = os.Stderr.WriteString(err.Error())
+			os.Exit(90)
+		}
+		if err := syscallExecReplace([]string{exe, "-test.run=TestSyscallExecReplacePassesOnlyResolvedEnvironmentToRealChild", "--", childArg}, resolved); err != nil {
+			_, _ = os.Stderr.WriteString(err.Error())
+			os.Exit(91)
+		}
+		os.Exit(92)
+	}
+
+	t.Setenv("OMF_AMBIENT_SECRET", "must-not-leak")
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatalf("os.Executable: %v", err)
+	}
+	cmd := exec.Command(exe, "-test.run=TestSyscallExecReplacePassesOnlyResolvedEnvironmentToRealChild", "--", parentArg)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("exec-replace helper returned error: %v\n%s", err, out)
+	}
+	got := splitEnvLines(string(out))
+	want := []string{
+		"FORGE_CONFIG=" + PrivateForgeConfig,
+		"HOME=" + PrivateHome,
+		"PATH=/usr/bin:/bin",
+		"TERM=xterm-256color",
+	}
+	sort.Strings(want)
+	assertStrings(t, got, want)
+	for _, kv := range got {
+		if strings.HasPrefix(kv, "OMF_AMBIENT_SECRET=") {
+			t.Fatalf("ambient env leaked through exec-replace: %#v", got)
 		}
 	}
 }

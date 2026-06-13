@@ -11,3 +11,7 @@ read files by absolute path. Do not deploy `omf` as a single privileged or
 shared-uid service for multiple accounts. If cross-account launching becomes a
 requirement, add and review an explicit credential-switching layer before first
 use.
+
+Migration note: manifest backends that omit `routing` now fail validation; use
+`routing = "none"` only for explicitly unrouted `vendor` or `local-llm`
+profiles.
