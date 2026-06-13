@@ -33,9 +33,13 @@ func TestResolveProfileSetsForgeConfigForPrivateRoute(t *testing.T) {
 }
 
 func testOptions(env map[string]string) Options {
+	return testOptionsForHome(PrivateHome, env)
+}
+
+func testOptionsForHome(home string, env map[string]string) Options {
 	return Options{
 		Environ: env,
-		HomeDir: PrivateHome,
+		HomeDir: home,
 		PathExists: func(string) bool {
 			return false
 		},

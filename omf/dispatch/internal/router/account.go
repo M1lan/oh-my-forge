@@ -22,9 +22,26 @@ type SecurityError struct{ Message string }
 
 func (e SecurityError) Error() string { return e.Message }
 
+type RouteHomeMismatchError struct {
+	Message      string
+	BackendName  string
+	Routing      manifest.Routing
+	CurrentHome  string
+	ExpectedHome string
+}
+
+func (e RouteHomeMismatchError) Error() string { return e.Message }
+
+func (e RouteHomeMismatchError) Unwrap() error { return SecurityError{Message: e.Message} }
+
 func IsSecurityError(err error) bool {
 	var security SecurityError
 	return errors.As(err, &security)
+}
+
+func IsRouteHomeMismatchError(err error) bool {
+	var mismatch RouteHomeMismatchError
+	return errors.As(err, &mismatch)
 }
 
 type accountRoute struct {
@@ -43,15 +60,54 @@ func routeAccount(r manifest.Routing) (accountRoute, bool) {
 	}
 }
 
-func assertCompiledAccountTable(opts Options) error {
-	home := opts.HomeDir
-	if home == "" {
-		var err error
-		home, err = os.UserHomeDir()
-		if err != nil {
-			home = ""
+func RouteHome(backend manifest.Backend) (string, bool, error) {
+	account, routed, err := backendAccountRoute(backend)
+	if err != nil || !routed {
+		return "", routed, err
+	}
+	return account.Home, true, nil
+}
+
+func CheckRouteHome(backend manifest.Backend, opts Options) error {
+	account, routed, err := backendAccountRoute(backend)
+	if err != nil || !routed {
+		return err
+	}
+	current := currentHomeDir(opts)
+	if current != "" && sameHostPath(current, account.Home) {
+		return nil
+	}
+	message := fmt.Sprintf(
+		"backend %q route %q requires login HOME %q, current login HOME %q; launch from the matching OS account",
+		backend.Name,
+		backend.Routing,
+		account.Home,
+		current,
+	)
+	return RouteHomeMismatchError{
+		Message:      message,
+		BackendName:  backend.Name,
+		Routing:      backend.Routing,
+		CurrentHome:  current,
+		ExpectedHome: account.Home,
+	}
+}
+
+func backendAccountRoute(backend manifest.Backend) (accountRoute, bool, error) {
+	account, routed := routeAccount(backend.Routing)
+	if !routed && manifest.RequiresAccountRouting(backend.Kind) {
+		return accountRoute{}, false, SecurityError{Message: fmt.Sprintf("backend %q kind %q requires account routing", backend.Name, backend.Kind)}
+	}
+	if routed {
+		if err := assertRoutingBoundary(backend.Routing, account); err != nil {
+			return accountRoute{}, false, err
 		}
 	}
+	return account, routed, nil
+}
+
+func assertCompiledAccountTable(opts Options) error {
+	home := currentHomeDir(opts)
 	if home == PrivateHome || home == WorkHome {
 		return nil
 	}
@@ -64,6 +120,17 @@ func assertCompiledAccountTable(opts Options) error {
 		return nil
 	}
 	return SecurityError{Message: fmt.Sprintf("compiled account table does not match this host: HOME=%q private=%q work=%q", home, PrivateHome, WorkHome)}
+}
+
+func currentHomeDir(opts Options) string {
+	if opts.HomeDir != "" {
+		return opts.HomeDir
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	return home
 }
 
 func dirExists(path string) bool {
@@ -104,6 +171,10 @@ func samePathOrWithin(path, root string) bool {
 	return rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
 }
 
+func sameHostPath(a, b string) bool {
+	return cleanPathForHostCompare(a) == cleanPathForHostCompare(b)
+}
+
 func cleanPathForHostCompare(path string) string {
 	path = filepath.Clean(path)
 	if runtime.GOOS == "darwin" {
@@ -114,9 +185,9 @@ func cleanPathForHostCompare(path string) string {
 
 func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]string, error) {
 	env := make(map[string]string)
-	account, routed := routeAccount(backend.Routing)
-	if !routed && manifest.RequiresAccountRouting(backend.Kind) {
-		return nil, SecurityError{Message: fmt.Sprintf("backend %q kind %q requires account routing", backend.Name, backend.Kind)}
+	account, routed, err := backendAccountRoute(backend)
+	if err != nil {
+		return nil, err
 	}
 	for _, name := range backend.EnvAllowlist {
 		if isRoutingManagedEnv(name) {
@@ -130,9 +201,6 @@ func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]s
 		}
 	}
 	if routed {
-		if err := assertRoutingBoundary(backend.Routing, account); err != nil {
-			return nil, err
-		}
 		env["HOME"] = account.Home
 		env["FORGE_CONFIG"] = account.ForgeConfig
 	}

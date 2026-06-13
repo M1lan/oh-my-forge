@@ -94,6 +94,38 @@ env_allowlist = ["HOME"]
 	}
 }
 
+func TestDoctorWarnsOnRouteHomeMismatch(t *testing.T) {
+	manifestPath := writeManifest(t, `
+schema_version = 0
+
+[[backend]]
+name = "work-forge"
+kind = "forge"
+routing = "work"
+interactive = ["forge"]
+env_allowlist = ["PATH"]
+`)
+	report, err := (Runner{
+		ManifestPath: manifestPath,
+		Environ:      map[string]string{"PATH": "/bin"},
+		HomeDir:      router.PrivateHome,
+		LookPath: func(name string) (string, error) {
+			return "/bin/" + name, nil
+		},
+	}).Run(context.Background())
+	if err != nil {
+		t.Fatalf("Run returned error for route mismatch warning: %v", err)
+	}
+	check := findCheck(t, report, "route home work-forge")
+	if check.Status != StatusWarn {
+		t.Fatalf("route home check = %#v, want warn", check)
+	}
+	if !strings.Contains(check.Message, router.WorkHome) || !strings.Contains(check.Message, router.PrivateHome) {
+		t.Fatalf("route home warning message = %q, want expected and current homes", check.Message)
+	}
+	assertCheckOK(t, report, "profile work-forge")
+}
+
 func writeManifest(t *testing.T, data string) string {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "omf.toml")
@@ -105,28 +137,29 @@ func writeManifest(t *testing.T, data string) string {
 
 func assertCheckOK(t *testing.T, report Report, name string) {
 	t.Helper()
-	for _, check := range report.Checks {
-		if check.Name == name {
-			if check.Status != StatusOK {
-				t.Fatalf("check %q = %#v, want ok", name, check)
-			}
-			return
-		}
+	check := findCheck(t, report, name)
+	if check.Status != StatusOK {
+		t.Fatalf("check %q = %#v, want ok", name, check)
 	}
-	t.Fatalf("check %q missing from %#v", name, report.Checks)
 }
 
 func assertCheckFailed(t *testing.T, report Report, name string) {
 	t.Helper()
+	check := findCheck(t, report, name)
+	if check.Status != StatusFailed {
+		t.Fatalf("check %q = %#v, want failed", name, check)
+	}
+}
+
+func findCheck(t *testing.T, report Report, name string) Check {
+	t.Helper()
 	for _, check := range report.Checks {
 		if check.Name == name {
-			if check.Status != StatusFailed {
-				t.Fatalf("check %q = %#v, want failed", name, check)
-			}
-			return
+			return check
 		}
 	}
 	t.Fatalf("check %q missing from %#v", name, report.Checks)
+	return Check{}
 }
 
 type fakeMLXInspector struct{ report mlx.Report }

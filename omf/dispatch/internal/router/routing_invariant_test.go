@@ -60,12 +60,28 @@ func TestResolveProfileAllowsPrivateBackendResolvingPrivateHome(t *testing.T) {
 
 func TestResolveProfileAllowsWorkBackendResolvingWorkHome(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "work-forge", Kind: manifest.KindForge, Routing: manifest.RoutingWork, Interactive: []string{"forge"}}}}
-	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(nil))
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptionsForHome(WorkHome, nil))
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}
 	if plan.Env["HOME"] != WorkHome {
 		t.Fatalf("HOME = %q, want work home", plan.Env["HOME"])
+	}
+}
+
+func TestResolveProfileRefusesWorkRouteFromPrivateLogin(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "work-forge", Kind: manifest.KindForge, Routing: manifest.RoutingWork, Interactive: []string{"forge"}}}}
+	_, err := ResolveProfile(m, []string{"work-forge"}, Options{
+		HomeDir: PrivateHome,
+		PathExists: func(string) bool {
+			return false
+		},
+	})
+	if err == nil {
+		t.Fatal("ResolveProfile accepted work route from private login home")
+	}
+	if !IsSecurityError(err) {
+		t.Fatalf("err = %T %[1]v, want security error", err)
 	}
 }
 
@@ -100,7 +116,7 @@ func TestRoutedBackendStripsConfigRedirectEnvironment(t *testing.T) {
 		env[name] = PrivateHome + "/private-config/" + name
 	}
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "work-forge", Kind: manifest.KindForge, Routing: manifest.RoutingWork, Interactive: []string{"forge"}, EnvAllowlist: append([]string{"PATH"}, names...)}}}
-	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(env))
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptionsForHome(WorkHome, env))
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}
@@ -159,7 +175,7 @@ func TestRoutedBackendUsesFailClosedSafeEnvironmentAllowlist(t *testing.T) {
 	}
 
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "work-forge", Kind: manifest.KindForge, Routing: manifest.RoutingWork, Interactive: []string{"forge"}, EnvAllowlist: allowlist}}}
-	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(env))
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptionsForHome(WorkHome, env))
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}
@@ -183,7 +199,7 @@ func TestRoutedBackendStripsSafeEnvValuesPointingAtSiblingHome(t *testing.T) {
 		Interactive:  []string{"forge"},
 		EnvAllowlist: []string{"PATH", "TERM", "LANG"},
 	}}}
-	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(map[string]string{
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptionsForHome(WorkHome, map[string]string{
 		"PATH": "/opt/homebrew/bin:" + PrivateHome + "/bin:/usr/bin",
 		"TERM": "tmux-256color",
 		"LANG": PrivateHome + "/not-a-locale",
@@ -236,7 +252,7 @@ func TestRoutedBackendStripsSiblingHomeCaseInsensitivelyOnDarwin(t *testing.T) {
 		Interactive:  []string{"forge"},
 		EnvAllowlist: []string{"PATH", "TERM"},
 	}}}
-	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(map[string]string{
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptionsForHome(WorkHome, map[string]string{
 		"PATH": "/usr/bin:/users/milan.santosi/bin:/bin",
 		"TERM": "xterm-256color",
 	}))
@@ -259,7 +275,7 @@ func TestRoutedBackendKeepsSafeEnvValuePointingAtOwnHome(t *testing.T) {
 		Interactive:  []string{"forge"},
 		EnvAllowlist: []string{"PATH", "TERM"},
 	}}}
-	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(map[string]string{
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptionsForHome(WorkHome, map[string]string{
 		"PATH": WorkHome + "/bin:/usr/bin:/bin",
 		"TERM": "xterm-256color",
 	}))
@@ -306,7 +322,7 @@ func TestBuildEnvRefusesUnroutedCredentialKind(t *testing.T) {
 
 func TestRoutingInvariantUsesCompiledLiteralTableNotCallerEnvironment(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "work-forge", Kind: manifest.KindForge, Routing: manifest.RoutingWork, Interactive: []string{"forge"}, EnvAllowlist: []string{"HOME", "FORGE_CONFIG"}}}}
-	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptions(map[string]string{"HOME": PrivateHome, "FORGE_CONFIG": PrivateForgeConfig}))
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptionsForHome(WorkHome, map[string]string{"HOME": PrivateHome, "FORGE_CONFIG": PrivateForgeConfig}))
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}

@@ -16,9 +16,10 @@ const (
 )
 
 type Options struct {
-	Environ    map[string]string
-	HomeDir    string
-	PathExists func(string) bool
+	Environ                map[string]string
+	HomeDir                string
+	PathExists             func(string) bool
+	AllowRouteHomeMismatch bool
 }
 
 type Plan struct {
@@ -48,6 +49,11 @@ func ResolveProfile(m manifest.Manifest, args []string, opts Options) (Plan, err
 	backend, ok := findBackend(m, profile)
 	if !ok {
 		return Plan{}, UsageError{Message: fmt.Sprintf("unknown profile %q", profile)}
+	}
+	if !opts.AllowRouteHomeMismatch {
+		if err := CheckRouteHome(backend, opts); err != nil {
+			return Plan{}, err
+		}
 	}
 
 	extra := append([]string(nil), args[1:]...)

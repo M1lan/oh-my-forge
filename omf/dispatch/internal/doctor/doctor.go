@@ -82,6 +82,9 @@ func (r Runner) Run(ctx context.Context) (Report, error) {
 	}
 	report.add(Check{Name: "backend discovery", Status: StatusOK, Message: fmt.Sprintf("%d backend(s)", len(m.Backends))})
 
+	if err := r.checkRouteHomes(&report, m); err != nil {
+		return report, err
+	}
 	if err := r.checkProfiles(&report, m); err != nil {
 		return report, err
 	}
@@ -110,15 +113,43 @@ func validateBackends(m manifest.Manifest) error {
 	return nil
 }
 
+func (r Runner) checkRouteHomes(report *Report, m manifest.Manifest) error {
+	opts := router.Options{
+		HomeDir:    r.HomeDir,
+		PathExists: r.PathExists,
+	}
+	for _, backend := range m.Backends {
+		home, routed, err := router.RouteHome(backend)
+		if err != nil {
+			report.add(Check{Name: "route home " + backend.Name, Status: StatusFailed, Message: err.Error()})
+			return err
+		}
+		if !routed {
+			continue
+		}
+		if err := router.CheckRouteHome(backend, opts); err != nil {
+			if router.IsRouteHomeMismatchError(err) {
+				report.add(Check{Name: "route home " + backend.Name, Status: StatusWarn, Message: err.Error()})
+				continue
+			}
+			report.add(Check{Name: "route home " + backend.Name, Status: StatusFailed, Message: err.Error()})
+			return err
+		}
+		report.add(Check{Name: "route home " + backend.Name, Status: StatusOK, Message: home})
+	}
+	return nil
+}
+
 func (r Runner) checkProfiles(report *Report, m manifest.Manifest) error {
 	for _, backend := range m.Backends {
 		if len(backend.Interactive) == 0 {
 			continue
 		}
 		_, err := router.ResolveProfile(m, []string{backend.Name}, router.Options{
-			Environ:    r.effectiveEnv(),
-			HomeDir:    r.HomeDir,
-			PathExists: r.PathExists,
+			Environ:                r.effectiveEnv(),
+			HomeDir:                r.HomeDir,
+			PathExists:             r.PathExists,
+			AllowRouteHomeMismatch: true,
 		})
 		if err != nil {
 			report.add(Check{Name: "profile " + backend.Name, Status: StatusFailed, Message: err.Error()})
