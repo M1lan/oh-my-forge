@@ -1,10 +1,14 @@
 package app
 
 import (
+	"context"
+	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
+	"omf/dispatch/internal/llm"
 	"omf/dispatch/internal/router"
 )
 
@@ -31,6 +35,7 @@ env_allowlist = ["PATH"]
 			return nil
 		}},
 		Environ: map[string]string{"PATH": "/bin"},
+		HomeDir: router.PrivateHome,
 	}
 	code := a.Run([]string{"forge"})
 	if code != 0 {
@@ -52,6 +57,41 @@ func TestRunReturnsUsageForMissingProfile(t *testing.T) {
 	}
 }
 
+func TestRunLLMListUsesLocalLLMService(t *testing.T) {
+	var out strings.Builder
+	a := App{
+		LLM:    &fakeLLM{models: []llm.Model{{Name: "qwen3-coder:latest", Source: llm.SourceBoth}}},
+		Stdout: &out,
+	}
+	code := a.Run([]string{"llm", "list"})
+	if code != 0 {
+		t.Fatalf("Run exit code = %d, want 0", code)
+	}
+	if got := out.String(); got != "qwen3-coder:latest\tllama-swap+ollama\n" {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
+func TestRunLLMLoadAndUnloadUseLocalLLMService(t *testing.T) {
+	fake := &fakeLLM{}
+	a := App{LLM: fake}
+	if code := a.Run([]string{"llm", "load", "qwen3-coder:latest"}); code != 0 {
+		t.Fatalf("load exit code = %d, want 0", code)
+	}
+	if code := a.Run([]string{"llm", "unload", "qwen3-coder:latest"}); code != 0 {
+		t.Fatalf("unload exit code = %d, want 0", code)
+	}
+	assertStrings(t, fake.loads, []string{"qwen3-coder:latest"})
+	assertStrings(t, fake.unloads, []string{"qwen3-coder:latest"})
+}
+
+func TestRunLLMRejectsUnknownLLMVerbAsUsage(t *testing.T) {
+	a := App{LLM: &fakeLLM{}}
+	if code := a.Run([]string{"llm", "unknown"}); code != 2 {
+		t.Fatalf("Run exit code = %d, want 2", code)
+	}
+}
+
 func writeFile(t *testing.T, path, data string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(data), 0o644); err != nil {
@@ -69,4 +109,37 @@ func assertStrings(t *testing.T, got, want []string) {
 			t.Fatalf("slice[%d] = %q, want %q (all=%#v)", i, got[i], want[i], got)
 		}
 	}
+}
+
+type fakeLLM struct {
+	models  []llm.Model
+	err     error
+	loads   []string
+	unloads []string
+}
+
+func (f *fakeLLM) List(context.Context) ([]llm.Model, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	return f.models, nil
+}
+
+func (f *fakeLLM) Load(_ context.Context, model string) error {
+	if f.err != nil {
+		return f.err
+	}
+	if model == "fail" {
+		return errors.New("load failed")
+	}
+	f.loads = append(f.loads, model)
+	return nil
+}
+
+func (f *fakeLLM) Unload(_ context.Context, model string) error {
+	if f.err != nil {
+		return f.err
+	}
+	f.unloads = append(f.unloads, model)
+	return nil
 }

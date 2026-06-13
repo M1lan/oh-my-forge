@@ -20,5 +20,17 @@ indent_size = unset
 [*.sh]
 indent_size = 2
 
+# This launcher embeds a Markdown brief in a quoted heredoc (cat > … <<'BRIEF_EOF').
+# The heredoc body is Markdown — numbered-list continuations align under "N. "
+# (3-space indent), which the generic 2-space shell rule wrongly flags. The
+# indentation is intentional; leave it to the eyeball, not the linter.
+[scripts/omf-orchestra.sh]
+indent_size = unset
+indent_style = unset
+
+# Go is gofmt-formatted: tabs for indentation, tool-enforced and non-negotiable.
+[*.go]
+indent_style = tab
+
 [Makefile]
 indent_style = tab

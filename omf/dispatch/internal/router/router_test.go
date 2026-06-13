@@ -8,7 +8,7 @@ import (
 
 func TestResolveProfileBuildsInteractiveExecPlan(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "forge", Kind: manifest.KindForge, Routing: manifest.RoutingPrivate, Interactive: []string{"forge"}}}}
-	plan, err := ResolveProfile(m, []string{"forge"}, Options{})
+	plan, err := ResolveProfile(m, []string{"forge"}, testOptions(nil))
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}
@@ -20,7 +20,7 @@ func TestResolveProfileBuildsInteractiveExecPlan(t *testing.T) {
 
 func TestResolveProfileBuildsOneshotSubprocessPlanWhenPromptFlagPresent(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "forge", Kind: manifest.KindForge, Routing: manifest.RoutingPrivate, Oneshot: []string{"forge", "-p"}}}}
-	plan, err := ResolveProfile(m, []string{"forge", "-p", "hello world"}, Options{})
+	plan, err := ResolveProfile(m, []string{"forge", "-p", "hello world"}, testOptions(nil))
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}
@@ -32,7 +32,7 @@ func TestResolveProfileBuildsOneshotSubprocessPlanWhenPromptFlagPresent(t *testi
 
 func TestResolveProfileBuildsSupervisorPlanForLocalLLM(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "qwen36-mlx", Kind: manifest.KindLocalLLM, Routing: manifest.RoutingNone, Interactive: []string{"omf", "llm", "mlx", "qwen36-mlx"}}}}
-	plan, err := ResolveProfile(m, []string{"qwen36-mlx"}, Options{})
+	plan, err := ResolveProfile(m, []string{"qwen36-mlx"}, testOptions(nil))
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}
@@ -43,7 +43,7 @@ func TestResolveProfileBuildsSupervisorPlanForLocalLLM(t *testing.T) {
 }
 
 func TestUnknownProfileReturnsUsageError(t *testing.T) {
-	_, err := ResolveProfile(manifest.Manifest{}, []string{"missing"}, Options{})
+	_, err := ResolveProfile(manifest.Manifest{}, []string{"missing"}, testOptions(nil))
 	if err == nil {
 		t.Fatal("ResolveProfile succeeded for missing profile")
 	}
@@ -54,7 +54,7 @@ func TestUnknownProfileReturnsUsageError(t *testing.T) {
 
 func TestDispatcherNeverReimplementsUpstreamSubcommand(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{Name: "forge", Kind: manifest.KindForge, Routing: manifest.RoutingPrivate, Interactive: []string{"forge"}}}}
-	plan, err := ResolveProfile(m, []string{"forge", "list", "agent", "--json"}, Options{})
+	plan, err := ResolveProfile(m, []string{"forge", "list", "agent", "--json"}, testOptions(nil))
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}

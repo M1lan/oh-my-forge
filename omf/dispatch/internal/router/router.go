@@ -16,7 +16,9 @@ const (
 )
 
 type Options struct {
-	Environ map[string]string
+	Environ    map[string]string
+	HomeDir    string
+	PathExists func(string) bool
 }
 
 type Plan struct {
@@ -36,6 +38,9 @@ func IsUsageError(err error) bool {
 }
 
 func ResolveProfile(m manifest.Manifest, args []string, opts Options) (Plan, error) {
+	if err := assertCompiledAccountTable(opts); err != nil {
+		return Plan{}, err
+	}
 	if len(args) == 0 {
 		return Plan{}, UsageError{Message: "missing profile"}
 	}

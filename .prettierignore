@@ -20,6 +20,14 @@ node_modules/
 plans/
 target/
 
+# Agent / tool runtime state (machine-owned formats — never hand-formatted).
+# .beads is the br coordination substrate; .omc/.omx are agent runtime state
+# (gitignored); .venv is the registrar's uv virtualenv. Matched at any depth.
+.beads/
+.omc/
+.omx/
+.venv/
+
 # Schemas are hand-edited with comments and intentional key order; prettier
 # would re-sort and strip whitespace we care about.
 catalog-manifest.schema.json

@@ -3,7 +3,9 @@ package router
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
+	"strings"
 
 	"omf/dispatch/internal/manifest"
 )
@@ -40,6 +42,34 @@ func routeAccount(r manifest.Routing) (accountRoute, bool) {
 	}
 }
 
+func assertCompiledAccountTable(opts Options) error {
+	home := opts.HomeDir
+	if home == "" {
+		var err error
+		home, err = os.UserHomeDir()
+		if err != nil {
+			home = ""
+		}
+	}
+	if home == PrivateHome || home == WorkHome {
+		return nil
+	}
+
+	pathExists := opts.PathExists
+	if pathExists == nil {
+		pathExists = dirExists
+	}
+	if pathExists(PrivateHome) || pathExists(WorkHome) {
+		return nil
+	}
+	return SecurityError{Message: fmt.Sprintf("compiled account table does not match this host: HOME=%q private=%q work=%q", home, PrivateHome, WorkHome)}
+}
+
+func dirExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
+}
+
 func assertRoutingBoundary(r manifest.Routing, account accountRoute) error {
 	switch r {
 	case manifest.RoutingWork:
@@ -64,12 +94,15 @@ func samePathOrWithin(path, root string) bool {
 	if err != nil {
 		return false
 	}
-	return rel != "." && rel != ".." && len(rel) >= 3 && rel[:3] != "../"
+	return rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
 }
 
 func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]string, error) {
 	env := make(map[string]string)
 	for _, name := range backend.EnvAllowlist {
+		if isRoutingManagedEnv(name) {
+			continue
+		}
 		if val, ok := environ[name]; ok {
 			env[name] = val
 		}
@@ -82,4 +115,8 @@ func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]s
 		env["FORGE_CONFIG"] = account.ForgeConfig
 	}
 	return env, nil
+}
+
+func isRoutingManagedEnv(name string) bool {
+	return name == "HOME" || name == "FORGE_CONFIG"
 }

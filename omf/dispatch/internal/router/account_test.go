@@ -14,7 +14,7 @@ func TestResolveProfileSetsForgeConfigForPrivateRoute(t *testing.T) {
 		Interactive:  []string{"forge"},
 		EnvAllowlist: []string{"PATH", "TERM"},
 	}}}
-	plan, err := ResolveProfile(m, []string{"forge"}, Options{Environ: map[string]string{"PATH": "/bin", "TERM": "xterm", "SECRET": "nope"}})
+	plan, err := ResolveProfile(m, []string{"forge"}, testOptions(map[string]string{"PATH": "/bin", "TERM": "xterm", "SECRET": "nope"}))
 	if err != nil {
 		t.Fatalf("ResolveProfile returned error: %v", err)
 	}
@@ -29,5 +29,15 @@ func TestResolveProfileSetsForgeConfigForPrivateRoute(t *testing.T) {
 	}
 	if _, ok := plan.Env["SECRET"]; ok {
 		t.Fatalf("non-allowlisted secret leaked into env: %#v", plan.Env)
+	}
+}
+
+func testOptions(env map[string]string) Options {
+	return Options{
+		Environ: env,
+		HomeDir: PrivateHome,
+		PathExists: func(string) bool {
+			return false
+		},
 	}
 }

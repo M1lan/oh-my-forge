@@ -70,7 +70,13 @@ pub fn try_single_flight(path: &Path) -> std::io::Result<Option<SingleFlight>> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
     }
-    let file = OpenOptions::new().create(true).write(true).open(path)?;
+    // The lock file is a pure flock target and carries no content, so we
+    // neither truncate nor append — keep whatever is there (nothing).
+    let file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(false)
+        .open(path)?;
     // SAFETY: flock on a valid open fd; the fd outlives the call via `file`.
     let rc = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) };
     if rc == 0 {

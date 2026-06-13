@@ -12,7 +12,7 @@ kind = "forge"
 routing = "private"
 interactive = ["forge"]
 oneshot = ["forge", "-p"]
-env_allowlist = ["HOME", "PATH", "TERM", "LANG"]
+env_allowlist = ["PATH", "TERM", "LANG"]
 danger_allowed = false
 
 [[backend]]
@@ -20,7 +20,7 @@ name = "qwen36-mlx"
 kind = "local-llm"
 routing = "none"
 interactive = ["omf", "llm", "mlx", "qwen36-mlx"]
-env_allowlist = ["HOME", "PATH"]
+env_allowlist = ["PATH"]
 
 [backend.limits]
 wired_gib = 14
@@ -45,7 +45,7 @@ cache_gib = 2
 	}
 	assertStrings(t, b.Interactive, []string{"forge"})
 	assertStrings(t, b.Oneshot, []string{"forge", "-p"})
-	assertStrings(t, b.EnvAllowlist, []string{"HOME", "PATH", "TERM", "LANG"})
+	assertStrings(t, b.EnvAllowlist, []string{"PATH", "TERM", "LANG"})
 	if b.DangerAllowed {
 		t.Fatal("danger_allowed default/parse = true, want false")
 	}
@@ -71,6 +71,36 @@ interactive = "forge -p unsafe"
 `
 	if _, err := Parse([]byte(txt)); err == nil {
 		t.Fatal("Parse accepted shell-string command template; want error")
+	}
+}
+
+func TestParseRejectsRoutingManagedEnvironmentAllowlist(t *testing.T) {
+	txt := `
+schema_version = 0
+
+[[backend]]
+name = "bad"
+kind = "local-llm"
+routing = "none"
+interactive = ["omf", "llm", "list"]
+env_allowlist = ["HOME"]
+`
+	if _, err := Parse([]byte(txt)); err == nil {
+		t.Fatal("Parse accepted routing-managed HOME in env_allowlist; want error")
+	}
+
+	txt = `
+schema_version = 0
+
+[[backend]]
+name = "bad"
+kind = "forge"
+routing = "private"
+interactive = ["forge"]
+env_allowlist = ["FORGE_CONFIG"]
+`
+	if _, err := Parse([]byte(txt)); err == nil {
+		t.Fatal("Parse accepted routing-managed FORGE_CONFIG in env_allowlist; want error")
 	}
 }
 

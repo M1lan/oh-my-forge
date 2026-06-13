@@ -173,6 +173,11 @@ func Parse(data []byte) (Manifest, error) {
 			if err != nil {
 				return Manifest{}, fmt.Errorf("line %d: env_allowlist must be an array: %w", lineNo+1, err)
 			}
+			for _, name := range argv {
+				if isRoutingManagedEnv(name) {
+					return Manifest{}, fmt.Errorf("line %d: env_allowlist %q is routing-managed", lineNo+1, name)
+				}
+			}
 			current.EnvAllowlist = argv
 		case "danger_allowed":
 			b, err := strconv.ParseBool(val)
@@ -194,6 +199,10 @@ func Parse(data []byte) (Manifest, error) {
 		}
 	}
 	return m, nil
+}
+
+func isRoutingManagedEnv(name string) bool {
+	return name == "HOME" || name == "FORGE_CONFIG"
 }
 
 func (m *Manifest) ClampAll() []ClampLog {
