@@ -83,9 +83,14 @@ pub fn try_single_flight(path: &Path) -> std::io::Result<Option<SingleFlight>> {
         Ok(Some(SingleFlight { _file: file }))
     } else {
         let err = std::io::Error::last_os_error();
-        match err.raw_os_error() {
-            Some(libc::EWOULDBLOCK) => Ok(None), // contended
-            _ => Err(err),
+        // EWOULDBLOCK == EAGAIN on macOS/Linux, but they are distinct symbols
+        // and may differ on other platforms; treat either as "contended". A
+        // runtime comparison avoids a duplicate-match-arm error where equal.
+        let code = err.raw_os_error();
+        if code == Some(libc::EWOULDBLOCK) || code == Some(libc::EAGAIN) {
+            Ok(None) // contended
+        } else {
+            Err(err)
         }
     }
 }

@@ -28,6 +28,10 @@ pub const KEYCHAIN_SERVICE: &str = "mein-zsh-op-cache";
 pub const PRIVATE_OP_ACCOUNT: &str = "my.1password.eu";
 /// The WORK 1Password account. omf must NEVER touch this for private routes.
 pub const WORK_OP_ACCOUNT: &str = "istase.1password.eu";
+
+/// The 1Password CLI, pinned to its Homebrew path. Resolving `op` off $PATH
+/// would let a planted binary intercept private-vault reads.
+pub const OP_BIN: &str = "/opt/homebrew/bin/op";
 /// Default cache TTL: bounds the keychain exposure window, not token validity.
 pub const DEFAULT_TTL_SECS: u64 = 86_400;
 
@@ -172,14 +176,33 @@ pub fn assert_private_account(op_account: &str) -> Result<(), String> {
 /// account. Returns the secret value on success.
 pub fn op_read(reference: &str, op_account: &str) -> Result<Secret, String> {
     assert_private_account(op_account)?;
-    let out = Command::new("op")
-        .args(["read", reference, "--account", op_account])
+    // Reject anything that is not an op:// reference. This both catches typos
+    // and prevents a leading-dash argument from being parsed as an op flag
+    // (belt-and-braces with the `--` separator below).
+    if !reference.starts_with("op://") {
+        return Err("op read: reference must be an op:// URI".to_string());
+    }
+    // Pin the Homebrew op binary rather than resolving `op` off $PATH: the
+    // keychain reader already pins /usr/bin/security, and a planted `op` on
+    // PATH would otherwise intercept every private-vault read.
+    let out = Command::new(OP_BIN)
+        .args(["read", "--account", op_account, "--", reference])
         .output()
         .map_err(|e| format!("op read failed to spawn: {e}"))?;
     if !out.status.success() {
         return Err("op read failed".to_string());
     }
-    let mut s = String::from_utf8(out.stdout).map_err(|_| "op read: non-UTF8".to_string())?;
+    let mut s = match String::from_utf8(out.stdout) {
+        Ok(s) => s,
+        Err(e) => {
+            // Wipe the raw bytes before dropping them on the error path too.
+            let mut bytes = e.into_bytes();
+            for b in bytes.iter_mut() {
+                *b = 0;
+            }
+            return Err("op read: non-UTF8".to_string());
+        }
+    };
     let value = Secret(s.trim_end_matches('\n').to_string());
     s.zeroize();
     Ok(value)
@@ -267,10 +290,18 @@ fn cmd_env(args: &[String]) -> i32 {
     let stdout = std::io::stdout();
     let mut out = stdout.lock();
     for (k, v) in filter_allowlist(&cache, &allow) {
-        // NUL-delimited so values may contain any byte except NUL.
-        let _ = write!(out, "{k}={v}\0");
+        // NUL-delimited so values may contain any byte except NUL. A failed
+        // write must NOT be reported as success -- a partial secret stream is
+        // a hard error (RULE 0: no false "done").
+        if write!(out, "{k}={v}\0").is_err() {
+            eprintln!("omf-core secrets env: write failed mid-stream -- aborting (partial output)");
+            return exit::ERR;
+        }
     }
-    let _ = out.flush();
+    if out.flush().is_err() {
+        eprintln!("omf-core secrets env: flush failed -- output may be incomplete");
+        return exit::ERR;
+    }
     exit::OK
 }
 
@@ -381,6 +412,20 @@ mod tests {
     fn work_account_is_refused() {
         assert!(assert_private_account(WORK_OP_ACCOUNT).is_err());
         assert!(assert_private_account(PRIVATE_OP_ACCOUNT).is_ok());
+    }
+
+    #[test]
+    fn op_read_rejects_non_op_reference() {
+        // Refused before any spawn: a non-op:// reference (incl. a leading-dash
+        // flag-injection attempt) never reaches the op binary.
+        assert!(op_read("--version", PRIVATE_OP_ACCOUNT).is_err());
+        assert!(op_read("/etc/passwd", PRIVATE_OP_ACCOUNT).is_err());
+    }
+
+    #[test]
+    fn op_read_refuses_work_account_before_anything_else() {
+        // Work account is refused even for a well-formed op:// reference.
+        assert!(op_read("op://Private/item/field", WORK_OP_ACCOUNT).is_err());
     }
 
     #[test]
