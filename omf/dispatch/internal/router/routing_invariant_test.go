@@ -191,6 +191,59 @@ func TestRoutedBackendUsesFailClosedSafeEnvironmentAllowlist(t *testing.T) {
 	}
 }
 
+func TestRoutedBackendAllowsReviewedRuntimeEnvEscapeHatch(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{
+		Name:         "work-forge",
+		Kind:         manifest.KindForge,
+		Routing:      manifest.RoutingWork,
+		Interactive:  []string{"forge"},
+		EnvAllowlist: []string{"PATH", "HTTPS_PROXY", "NO_PROXY", "TMPDIR", "XDG_CONFIG_HOME", "GH_TOKEN"},
+	}}}
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptionsForHome(WorkHome, map[string]string{
+		"PATH":            "/usr/bin:/bin",
+		"HTTPS_PROXY":     "http://proxy.local:8080",
+		"NO_PROXY":        "localhost,127.0.0.1",
+		"TMPDIR":          WorkHome + "/tmp",
+		"XDG_CONFIG_HOME": WorkHome + "/.config",
+		"GH_TOKEN":        "secret",
+	}))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	for _, name := range []string{"HTTPS_PROXY", "NO_PROXY", "TMPDIR"} {
+		if plan.Env[name] == "" {
+			t.Fatalf("reviewed runtime env %s was stripped: %#v", name, plan.Env)
+		}
+	}
+	for _, name := range []string{"XDG_CONFIG_HOME", "GH_TOKEN"} {
+		if _, ok := plan.Env[name]; ok {
+			t.Fatalf("credential/config env %s leaked through routed escape hatch: %#v", name, plan.Env)
+		}
+	}
+}
+
+func TestRoutedRuntimeEnvEscapeHatchIsSiblingHomeScanned(t *testing.T) {
+	m := manifest.Manifest{Backends: []manifest.Backend{{
+		Name:         "work-forge",
+		Kind:         manifest.KindForge,
+		Routing:      manifest.RoutingWork,
+		Interactive:  []string{"forge"},
+		EnvAllowlist: []string{"TMPDIR", "NO_PROXY"},
+	}}}
+	plan, err := ResolveProfile(m, []string{"work-forge"}, testOptionsForHome(WorkHome, map[string]string{
+		"TMPDIR":   PrivateHome + "/tmp",
+		"NO_PROXY": "localhost," + PrivateHome + "/socket",
+	}))
+	if err != nil {
+		t.Fatalf("ResolveProfile returned error: %v", err)
+	}
+	for _, name := range []string{"TMPDIR", "NO_PROXY"} {
+		if _, ok := plan.Env[name]; ok {
+			t.Fatalf("runtime env %s with private-home value leaked into work route: %#v", name, plan.Env)
+		}
+	}
+}
+
 func TestRoutedBackendStripsSafeEnvValuesPointingAtSiblingHome(t *testing.T) {
 	m := manifest.Manifest{Backends: []manifest.Backend{{
 		Name:         "work-forge",

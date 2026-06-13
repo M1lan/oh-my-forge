@@ -126,6 +126,52 @@ env_allowlist = ["PATH"]
 	assertCheckOK(t, report, "profile work-forge")
 }
 
+func TestDoctorWarnsWhenRoutedEnvAllowlistEntriesAreStripped(t *testing.T) {
+	manifestPath := writeManifest(t, `
+schema_version = 0
+
+[[backend]]
+name = "work-forge"
+kind = "forge"
+routing = "work"
+interactive = ["forge"]
+env_allowlist = ["PATH", "HTTPS_PROXY", "NO_PROXY", "TMPDIR", "XDG_CONFIG_HOME", "GH_TOKEN"]
+`)
+	report, err := (Runner{
+		ManifestPath: manifestPath,
+		Environ: map[string]string{
+			"PATH":            "/bin",
+			"HTTPS_PROXY":     "http://proxy.local:8080",
+			"NO_PROXY":        "localhost,127.0.0.1",
+			"TMPDIR":          router.WorkHome + "/tmp",
+			"XDG_CONFIG_HOME": router.WorkHome + "/.config",
+			"GH_TOKEN":        "secret",
+		},
+		HomeDir: router.WorkHome,
+		LookPath: func(name string) (string, error) {
+			return "/bin/" + name, nil
+		},
+	}).Run(context.Background())
+	if err != nil {
+		t.Fatalf("Run returned error for stripped env warning: %v", err)
+	}
+	check := findCheck(t, report, "env allowlist work-forge")
+	if check.Status != StatusWarn {
+		t.Fatalf("env allowlist check = %#v, want warn", check)
+	}
+	for _, name := range []string{"XDG_CONFIG_HOME", "GH_TOKEN"} {
+		if !strings.Contains(check.Message, name) {
+			t.Fatalf("env allowlist warning = %q, want stripped %s", check.Message, name)
+		}
+	}
+	for _, name := range []string{"HTTPS_PROXY", "NO_PROXY", "TMPDIR"} {
+		if strings.Contains(check.Message, name) {
+			t.Fatalf("env allowlist warning = %q, did not expect reviewed runtime var %s", check.Message, name)
+		}
+	}
+	assertCheckOK(t, report, "profile work-forge")
+}
+
 func writeManifest(t *testing.T, data string) string {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "omf.toml")

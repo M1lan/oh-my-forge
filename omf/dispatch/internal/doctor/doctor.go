@@ -85,6 +85,7 @@ func (r Runner) Run(ctx context.Context) (Report, error) {
 	if err := r.checkRouteHomes(&report, m); err != nil {
 		return report, err
 	}
+	r.checkEnvAllowlists(&report, m)
 	if err := r.checkProfiles(&report, m); err != nil {
 		return report, err
 	}
@@ -138,6 +139,16 @@ func (r Runner) checkRouteHomes(report *Report, m manifest.Manifest) error {
 		report.add(Check{Name: "route home " + backend.Name, Status: StatusOK, Message: home})
 	}
 	return nil
+}
+
+func (r Runner) checkEnvAllowlists(report *Report, m manifest.Manifest) {
+	for _, backend := range m.Backends {
+		stripped := router.StrippedRoutedEnvAllowlist(backend)
+		if len(stripped) == 0 {
+			continue
+		}
+		report.add(Check{Name: "env allowlist " + backend.Name, Status: StatusWarn, Message: "stripped routed env_allowlist entries: " + strings.Join(stripped, ", ")})
+	}
 }
 
 func (r Runner) checkProfiles(report *Report, m manifest.Manifest) error {

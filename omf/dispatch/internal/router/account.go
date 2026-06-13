@@ -68,6 +68,23 @@ func RouteHome(backend manifest.Backend) (string, bool, error) {
 	return account.Home, true, nil
 }
 
+func StrippedRoutedEnvAllowlist(backend manifest.Backend) []string {
+	_, routed := routeAccount(backend.Routing)
+	if !routed {
+		return nil
+	}
+	var stripped []string
+	for _, name := range backend.EnvAllowlist {
+		if isRoutingManagedEnv(name) {
+			continue
+		}
+		if !isRoutedSafeEnvName(name) {
+			stripped = append(stripped, name)
+		}
+	}
+	return stripped
+}
+
 func CheckRouteHome(backend manifest.Backend, opts Options) error {
 	account, routed, err := backendAccountRoute(backend)
 	if err != nil || !routed {
@@ -213,7 +230,7 @@ func isRoutingManagedEnv(name string) bool {
 
 func isRoutedSafeEnvName(name string) bool {
 	switch name {
-	case "PATH", "TERM", "LANG", "TZ", "COLORTERM":
+	case "PATH", "TERM", "LANG", "TZ", "COLORTERM", "HTTPS_PROXY", "NO_PROXY", "TMPDIR":
 		return true
 	default:
 		return strings.HasPrefix(name, "LC_")
