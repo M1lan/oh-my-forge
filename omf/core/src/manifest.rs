@@ -139,6 +139,33 @@ impl Limits {
     }
 }
 
+/// Env var names the routing layer owns. They are set by the compiled account
+/// table for work/private routes and must never be caller-supplied via the
+/// allowlist (mirrors the dispatcher's `isRoutingManagedEnv`).
+pub const ROUTING_MANAGED_ENV: [&str; 2] = ["HOME", "FORGE_CONFIG"];
+
+/// A manifest validation failure -- distinct from a TOML syntax error.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ValidationError {
+    /// A routing-managed env name (HOME/FORGE_CONFIG) appeared in a backend's
+    /// `env_allowlist`. These are set by the compiled account table, never
+    /// passed through from the caller, so allowlisting them is rejected.
+    RoutingManagedInAllowlist { backend: String, name: String },
+}
+
+impl std::fmt::Display for ValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ValidationError::RoutingManagedInAllowlist { backend, name } => write!(
+                f,
+                "backend {backend:?}: env_allowlist must not contain routing-managed name {name:?}"
+            ),
+        }
+    }
+}
+
+impl std::error::Error for ValidationError {}
+
 /// Parse a manifest from TOML text. Clamping is the caller's responsibility
 /// (via [`Manifest::clamp_all`]) so the raw parse stays side-effect free.
 pub fn parse(toml_text: &str) -> Result<Manifest, toml::de::Error> {
@@ -159,6 +186,24 @@ impl Manifest {
             }
         }
         all
+    }
+
+    /// Validate floor-enforced cross-field invariants. Currently: no backend
+    /// may allowlist a routing-managed env name (HOME/FORGE_CONFIG). This is
+    /// the security floor's copy of the rule the dispatcher also enforces;
+    /// `omf doctor` calls it so an invalid manifest is rejected before launch.
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        for b in &self.backends {
+            for name in &b.env_allowlist {
+                if ROUTING_MANAGED_ENV.contains(&name.as_str()) {
+                    return Err(ValidationError::RoutingManagedInAllowlist {
+                        backend: b.name.clone(),
+                        name: name.clone(),
+                    });
+                }
+            }
+        }
+        Ok(())
     }
 }
 
@@ -184,7 +229,7 @@ kind = "forge"
 routing = "private"
 interactive = ["forge"]
 oneshot = ["forge", "-p"]
-env_allowlist = ["HOME", "PATH", "TERM"]
+env_allowlist = ["PATH", "TERM"]
 "#;
         let m = parse(txt).expect("parses");
         assert_eq!(m.backends.len(), 1);
@@ -194,6 +239,46 @@ env_allowlist = ["HOME", "PATH", "TERM"]
         assert_eq!(b.interactive, vec!["forge"]);
         assert_eq!(b.oneshot, vec!["forge", "-p"]);
         assert!(!b.danger_allowed);
+        m.validate().expect("valid manifest");
+    }
+
+    #[test]
+    fn home_in_allowlist_is_rejected() {
+        let txt = r#"
+schema_version = 0
+
+[[backend]]
+name = "leaky"
+kind = "forge"
+routing = "work"
+interactive = ["forge"]
+env_allowlist = ["PATH", "HOME"]
+"#;
+        let m = parse(txt).expect("parses");
+        let err = m.validate().expect_err("HOME in allowlist must be rejected");
+        assert_eq!(
+            err,
+            ValidationError::RoutingManagedInAllowlist {
+                backend: "leaky".to_string(),
+                name: "HOME".to_string(),
+            }
+        );
+    }
+
+    #[test]
+    fn forge_config_in_allowlist_is_rejected() {
+        let txt = r#"
+schema_version = 0
+
+[[backend]]
+name = "leaky2"
+kind = "forge"
+routing = "private"
+interactive = ["forge"]
+env_allowlist = ["FORGE_CONFIG"]
+"#;
+        let m = parse(txt).expect("parses");
+        assert!(m.validate().is_err());
     }
 
     #[test]
