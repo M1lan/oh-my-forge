@@ -53,6 +53,9 @@ ok() { printf '%s ok%s %s\n' "$C_GREEN" "$C_RESET" "$*" >&2; }
 
 SESSION=${OMF_SESSION:-omf}
 BOOT_WAIT=${OMF_BOOT_WAIT:-5}
+# Minimum usable height (lines) for an agent / emacsclient pane. The cockpit
+# input/introspection strips and the worker panes must not collapse below this.
+MIN_PANE_HEIGHT=${OMF_MIN_PANE_HEIGHT:-4}
 
 need() { command -v "$1" > /dev/null 2>&1 || die "missing required tool: $1"; }
 for t in tmux forge br; do need "$t"; done
@@ -67,9 +70,14 @@ REPO=$(cd -- "$SCRIPT_DIR/.." && pwd -P)
 PLAN="plans/2026-06-13-omf-control-plane-v1.md"
 [[ -f "$REPO/$PLAN" ]] || die "plan file not found: $REPO/$PLAN"
 
-# --- refuse to clobber an existing session ----------------------------------
+# --- idempotent: reattach to an existing session instead of clobbering -------
 if tmux has-session -t "$SESSION" 2> /dev/null; then
-  die "tmux session '$SESSION' already exists. Attach: tmux attach -t $SESSION  |  or kill: tmux kill-session -t $SESSION"
+  ok "session '$SESSION' already exists -- reattaching (idempotent, not recreating)"
+  [[ -n ${OMF_NO_ATTACH:-} ]] && {
+    info "not attaching (OMF_NO_ATTACH set)"
+    exit 0
+  }
+  exec tmux attach -t "$SESSION"
 fi
 
 # --- ensure a beads workspace (shared coordination surface) -----------------
@@ -92,11 +100,20 @@ FORGE_PANE=$(tmux new-session -d -s "$SESSION" -n orchestra -c "$REPO" -PF '#{pa
 OMC_PANE=$(tmux split-window -h -l '45%' -t "$FORGE_PANE" -c "$REPO" -PF '#{pane_id}')
 OMX_PANE=$(tmux split-window -v -l '50%' -t "$OMC_PANE" -c "$REPO" -PF '#{pane_id}')
 
+# Min-pane-height guard: a too-short terminal collapses panes below what
+# emacsclient / the agent TUIs can usably render. Warn (don't fail) per pane.
+for _p in "$FORGE_PANE" "$OMC_PANE" "$OMX_PANE"; do
+  _h=$(tmux display-message -p -t "$_p" '#{pane_height}')
+  ((_h < MIN_PANE_HEIGHT)) \
+    && info "${C_YELLOW}warn${C_RESET}: pane $_p is ${_h} lines (< ${MIN_PANE_HEIGHT}-line usable min) -- resize the terminal for healthy panes"
+done
+
 tmux select-pane -t "$FORGE_PANE" -T 'forge (ORCHESTRATOR)'
 tmux select-pane -t "$OMC_PANE" -T 'omc (Claude worker)'
 tmux select-pane -t "$OMX_PANE" -T 'omx (Codex worker)'
-tmux set-option -t "$SESSION" pane-border-status top > /dev/null 2>&1 || true
-tmux set-option -t "$SESSION" pane-border-format ' #{pane_title} ' > /dev/null 2>&1 || true
+# Zero decorations (vision 9.2): no borders, titles, or status on any pane.
+# (-T titles above are kept for capture/identification but are not displayed.)
+tmux set-option -t "$SESSION" pane-border-status off > /dev/null 2>&1 || true
 
 # Persist real pane ids so the brief/forge can target panes unambiguously.
 cat > "$PANES_ENV" << EOF
