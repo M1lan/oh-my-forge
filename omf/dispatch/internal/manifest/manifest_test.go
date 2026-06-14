@@ -244,3 +244,28 @@ func assertStrings(t *testing.T, got, want []string) {
 		}
 	}
 }
+
+func TestDefaultPathUsesAppName(t *testing.T) {
+	old := os.Getenv("OMF_APP_NAME")
+	defer os.Setenv("OMF_APP_NAME", old)
+
+	tests := []struct {
+		name       string
+		appName    string
+		wantSubstr string
+	}{
+		{"forge", "forge", "/forge/omf.toml"},
+		{"omf", "omf", "/omf/omf.toml"},
+		{"custom", "custom-app", "/custom-app/omf.toml"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			os.Setenv("OMF_APP_NAME", tt.appName)
+			path := DefaultPath()
+			if !strings.Contains(path, tt.wantSubstr) {
+				t.Errorf("DefaultPath() = %q, want to contain %q", path, tt.wantSubstr)
+			}
+		})
+	}
+}

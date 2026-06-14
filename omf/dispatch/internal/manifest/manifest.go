@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"omf/dispatch/internal/config"
 )
 
 const (
@@ -17,9 +19,12 @@ const (
 // DefaultPath resolves the default location of the omf manifest. It is the
 // single source of truth shared by the dispatcher and `omf doctor` so the two
 // can never resolve different manifests. Search order:
-//  1. $HOME/forge/omf.toml   (preferred; returned even if absent so error
+//  1. $HOME/{appName}/omf.toml   (preferred; returned even if absent so error
 //     messages name a standard path, never the current directory)
 //  2. $HOME/.config/omf/omf.toml  (used only if it exists and (1) does not)
+//
+// The app name (e.g. 'forge', 'omf') is resolved via config.AppName(), which
+// can be overridden with the OMF_APP_NAME environment variable.
 //
 // It never resolves a cwd-relative path except when the home directory is
 // completely unresolvable, which does not happen in practice.
@@ -28,7 +33,8 @@ func DefaultPath() string {
 	if home == "" {
 		return "omf.toml"
 	}
-	preferred := filepath.Join(home, "forge", "omf.toml")
+	appName := config.AppName()
+	preferred := filepath.Join(home, appName, "omf.toml")
 	if fileExists(preferred) {
 		return preferred
 	}

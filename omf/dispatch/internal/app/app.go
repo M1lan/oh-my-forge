@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"omf/dispatch/internal/config"
 	"omf/dispatch/internal/doctor"
 	"omf/dispatch/internal/llm"
 	"omf/dispatch/internal/manifest"
@@ -379,7 +380,7 @@ Usage:
   omf help, -h, --help      show this help
 
 Manifest: %s
-  (override with OMF_MANIFEST; defaults to ~/forge/omf.toml)
+  (override with OMF_MANIFEST; set OMF_APP_NAME to switch dispatch app name)
 `, manifestPath)
 }
 
@@ -389,7 +390,7 @@ func defaultManifestPath() string {
 
 func defaultAdapterDir() string {
 	if home := manifest.HomeDir(); home != "" {
-		return filepath.Join(home, "forge", "omf", "adapters")
+		return filepath.Join(home, config.AppName(), "omf", "adapters")
 	}
 	return filepath.Join("omf", "adapters")
 }
