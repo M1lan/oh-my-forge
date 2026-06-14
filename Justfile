@@ -46,6 +46,8 @@ backup_root := env_var_or_default("OMF_BACKUP_ROOT", env_var("HOME") / ".cache/o
 alias m := menu
 alias f := fzf
 alias d := doctor
+alias b := build
+alias t := test
 alias l := lint
 alias c := check
 alias s := search
@@ -98,6 +100,16 @@ trio:
 
 # ── umbrella ──────────────────────────────────────────────────────────────────
 
+# Build every omf compiled lane (Go dispatcher + Rust core).
+[group('umbrella')]
+build: build-go build-rust
+    @printf '\nbuild: OK\n'
+
+# Test every omf compiled lane (Go dispatcher + Rust core).
+[group('umbrella')]
+test: test-go test-rust
+    @printf '\ntest: OK\n'
+
 # Run every linter. Read-only. Fails on the first tool that reports an issue.
 [group('umbrella')]
 lint: lint-md lint-toml lint-sh lint-json lint-editorconfig
@@ -120,7 +132,7 @@ fix: fix-md fix-toml fix-sh fix-json
 
 # Build, lint, and test every omf compiled lane (Go dispatcher + Rust core).
 [group('umbrella')]
-omf: build-go lint-go test-go build-rust lint-rust test-rust
+omf: build lint-go lint-rust test
     @printf '\nomf: compiled lanes green\n'
 
 # CI entry point: dep audit + config gate + omf compiled lanes (build/lint/test).
