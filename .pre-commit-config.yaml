@@ -1,0 +1,64 @@
+# prek / pre-commit configuration for oh-my-forge.
+#
+# Run manually with:  prek run --all-files
+# The forbidden-word patterns below are deliberately written as character
+# classes so this config file does not itself trip the hooks.
+
+repos:
+  # ── Forbidden-word taboo (mirrors the desloppify hook) ──
+  - repo: local
+    hooks:
+      - id: ban-forbidden-word-h
+        name: Reject forbidden word (h-word)
+        description: The h-word is banned; use "fraumes" instead.
+        language: pygrep
+        entry: '(?i)h[e3]rm[e3]s'
+        types: [text]
+      - id: ban-forbidden-word-c
+        name: Reject forbidden word (c-word)
+        description: The c-word (lobster-hands) is banned.
+        language: pygrep
+        entry: '(?i)cl[a4]w'
+        types: [text]
+
+  # ── Standard hygiene hooks ──
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # ── Go (module rooted at omf/dispatch) ──
+  - repo: local
+    hooks:
+      - id: gofmt
+        name: gofmt
+        description: Reject unformatted Go files.
+        language: system
+        entry: bash -c 'cd omf/dispatch && out=$(gofmt -l .); if [ -n "$out" ]; then echo "unformatted:"; echo "$out"; exit 1; fi'
+        types: [go]
+        pass_filenames: false
+      - id: go-vet
+        name: go vet
+        description: Run go vet over the module.
+        language: system
+        entry: bash -c 'cd omf/dispatch && go vet ./...'
+        types: [go]
+        pass_filenames: false
+
+  # ── Markdown ──
+  - repo: local
+    hooks:
+      - id: rumdl
+        name: rumdl check
+        description: Lint Markdown with rumdl.
+        language: system
+        entry: rumdl check
+        types: [markdown]

@@ -38,7 +38,7 @@ user / zsh / emacs ─▶ omf  (Go)  CLI dispatcher + TUI launcher
         ┌──────────────┼───────────────┬───────────────┬──────────────┐
    compiled floor   shell out      shell out        call core     plugin exec
         ▼              ▼               ▼                ▼              ▼
-  ROUTING (Go)     Bash TUIs       tmux orch (Go)   omf-core (Rust)  omf-backend-* 
+  ROUTING (Go)     Bash TUIs       tmux orch (Go)   omf-core (Rust)  omf-backend-*
   account→HOME     fcr / hist /    panes/sessions   guard + secrets  (external,
   work≠private     ai-menu /       forge-as-driver  (tiny audited)   thin contract)
   literals+test    compose(emacs)
