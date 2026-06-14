@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -15,12 +16,24 @@ const (
 	ModeSupervisor        Mode = "supervisor"
 )
 
+// SecretsProvider injects private-vault secrets into a routed child env. The
+// dispatcher's omfcore.Client satisfies it; router stays decoupled from the
+// concrete shell-out so buildEnv is unit-testable with a fake.
+type SecretsProvider interface {
+	SecretsEnv(ctx context.Context, allow []string, opAccount string) (map[string]string, error)
+}
+
 type Options struct {
 	Environ                map[string]string
 	HomeDir                string
 	UserHomeDir            func() (string, error)
 	PathExists             func(string) bool
 	AllowRouteHomeMismatch bool
+	// SecretsProvider, when set, sources credential-shaped env_allowlist names
+	// from the private vault for private routes. nil => no injection.
+	SecretsProvider SecretsProvider
+	// Warnf, when set, receives non-fatal warnings (e.g. secrets unavailable).
+	Warnf func(format string, args ...any)
 }
 
 type Plan struct {
@@ -62,7 +75,7 @@ func ResolveProfile(m manifest.Manifest, args []string, opts Options) (Plan, err
 		if len(backend.Oneshot) == 0 {
 			return Plan{}, UsageError{Message: fmt.Sprintf("profile %q does not support oneshot", profile)}
 		}
-		env, err := buildEnv(backend, opts.Environ)
+		env, err := buildEnv(backend, opts)
 		if err != nil {
 			return Plan{}, err
 		}
@@ -74,7 +87,7 @@ func ResolveProfile(m manifest.Manifest, args []string, opts Options) (Plan, err
 	if len(backend.Interactive) == 0 {
 		return Plan{}, UsageError{Message: fmt.Sprintf("profile %q does not support interactive", profile)}
 	}
-	env, err := buildEnv(backend, opts.Environ)
+	env, err := buildEnv(backend, opts)
 	if err != nil {
 		return Plan{}, err
 	}

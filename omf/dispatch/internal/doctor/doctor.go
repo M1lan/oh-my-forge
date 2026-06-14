@@ -9,6 +9,7 @@ import (
 
 	"omf/dispatch/internal/manifest"
 	"omf/dispatch/internal/mlx"
+	"omf/dispatch/internal/omfcore"
 	"omf/dispatch/internal/router"
 )
 
@@ -55,6 +56,10 @@ type Runner struct {
 	PathExists   func(string) bool
 	LookPath     func(string) (string, error)
 	MLX          MLXInspector
+	// CoreLocate / CoreCaps probe the compiled omf-core floor; nil => the live
+	// omfcore client. Injected in tests so doctor runs without the binary.
+	CoreLocate func() (string, error)
+	CoreCaps   func(context.Context) (omfcore.Caps, error)
 }
 
 func (r Runner) Run(ctx context.Context) (Report, error) {
@@ -98,6 +103,7 @@ func (r Runner) Run(ctx context.Context) (Report, error) {
 	if err := r.checkMLX(ctx, &report, m); err != nil {
 		return report, err
 	}
+	r.checkCore(ctx, &report)
 	return report, nil
 }
 
@@ -244,6 +250,42 @@ func (r Runner) checkMLX(ctx context.Context, report *Report, m manifest.Manifes
 	}
 	report.add(Check{Name: "mlx runtime safety", Status: StatusFailed, Message: "runtime safety drift"})
 	return fmt.Errorf("mlx runtime safety drift")
+}
+
+// checkCore probes the compiled omf-core security floor. Absence is a warning,
+// not a failure: the dispatcher still runs without it (degraded -- no secret
+// injection, no admission gate), and doctor is also run in environments where
+// the floor is intentionally not installed. A cap disagreement between the Go
+// dispatcher and the Rust floor IS a failure -- the two compiled constant sets
+// must never drift, or admission decisions diverge from the clamp.
+func (r Runner) checkCore(ctx context.Context, report *Report) {
+	locate := r.CoreLocate
+	if locate == nil {
+		locate = omfcore.Locate
+	}
+	bin, err := locate()
+	if err != nil {
+		report.add(Check{Name: "omf-core floor", Status: StatusWarn, Message: "not installed -- secrets/guard floor inactive (run: just install-bin)"})
+		return
+	}
+	caps := r.CoreCaps
+	if caps == nil {
+		caps = omfcore.New().GuardCaps
+	}
+	got, err := caps(ctx)
+	if err != nil {
+		report.add(Check{Name: "omf-core floor", Status: StatusFailed, Message: "guard caps failed: " + err.Error()})
+		return
+	}
+	if got.WiredGiB != manifest.MLXWiredLimitGiB || got.MemoryGiB != manifest.MLXMemoryLimitGiB || got.CacheGiB != manifest.MLXCacheLimitGiB {
+		report.add(Check{Name: "omf-core floor", Status: StatusFailed, Message: fmt.Sprintf(
+			"cap drift: core wired=%d memory=%d cache=%d, dispatcher wired=%d memory=%d cache=%d",
+			got.WiredGiB, got.MemoryGiB, got.CacheGiB,
+			manifest.MLXWiredLimitGiB, manifest.MLXMemoryLimitGiB, manifest.MLXCacheLimitGiB)})
+		return
+	}
+	report.add(Check{Name: "omf-core floor", Status: StatusOK, Message: fmt.Sprintf(
+		"%s wired=%d memory=%d cache=%d", bin, got.WiredGiB, got.MemoryGiB, got.CacheGiB)})
 }
 
 func firstLocalLLMBackend(m manifest.Manifest) (manifest.Backend, bool) {

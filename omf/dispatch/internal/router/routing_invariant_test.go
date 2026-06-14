@@ -411,7 +411,7 @@ func TestBuildEnvRefusesUnroutedCredentialKind(t *testing.T) {
 			Interactive:  []string{"copilot"},
 			EnvAllowlist: []string{"PATH"},
 		},
-		map[string]string{"PATH": "/bin"},
+		testOptions(map[string]string{"PATH": "/bin"}),
 	)
 	if err == nil {
 		t.Fatal("buildEnv accepted unrouted credential-bearing backend")

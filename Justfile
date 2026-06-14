@@ -280,6 +280,14 @@ lint-rust:
 test-rust:
     cd {{ _omf_workspace }} && cargo test
 
+# Emit the release `omf-core` binary → omf/target/release/omf-core.
+# This is the compiled security floor the Go dispatcher shells out to; the
+# release profile (small, stripped, LTO) is defined in the workspace Cargo.toml.
+[group('omf')]
+build-core-bin:
+    cd {{ _omf_workspace }} && cargo build --release --bin omf-core
+    @printf 'built: omf/target/release/omf-core\n'
+
 # ── install — oh-my-forge into a forge config root ───────────────────────────
 
 # Install oh-my-forge into {{ forge_parent }}/forge with timestamped backups.
@@ -326,16 +334,20 @@ install-omf-dry:
       --backup-dir "${backup_dir}"
 
 # Install the `omf` dispatcher binary to ~/.local/bin (builds it first).
-# Also syncs adapter scripts to ~/forge/omf/adapters/ (runtime dependency of
-# `omf resume` and `omf hist`). The manifest template (omf.toml) is written
-# to ~/forge/omf.toml only when it does not already exist there.
+# Also installs the compiled `omf-core` security floor (secrets + memory guard)
+# the dispatcher shells out to, and syncs adapter scripts to
+# ~/forge/omf/adapters/ (runtime dependency of `omf resume` and `omf hist`).
+# The manifest template (omf.toml) is written to ~/forge/omf.toml only when it
+# does not already exist there.
 [group('install')]
-install-bin: build-bin
+install-bin: build-bin build-core-bin
     #!/usr/bin/env bash
     set -euo pipefail
     install -d "$HOME/.local/bin"
     install -m 0755 "{{ _omf_dispatch }}/bin/omf" "$HOME/.local/bin/omf"
     printf 'installed: %s/.local/bin/omf\n' "$HOME"
+    install -m 0755 "{{ _omf_workspace }}/target/release/omf-core" "$HOME/.local/bin/omf-core"
+    printf 'installed: %s/.local/bin/omf-core\n' "$HOME"
     mkdir -p "$HOME/forge/omf/adapters"
     rsync -a --delete "{{ _omf_workspace }}/adapters/" "$HOME/forge/omf/adapters/"
     printf 'synced:    %s/forge/omf/adapters/\n' "$HOME"

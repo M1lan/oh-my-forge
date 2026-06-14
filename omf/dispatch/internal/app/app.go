@@ -13,6 +13,7 @@ import (
 	"omf/dispatch/internal/llm"
 	"omf/dispatch/internal/manifest"
 	"omf/dispatch/internal/mlx"
+	"omf/dispatch/internal/omfcore"
 	"omf/dispatch/internal/router"
 )
 
@@ -29,6 +30,7 @@ type App struct {
 	LLM          LLMClient
 	MLX          MLXClient
 	Doctor       DoctorRunner
+	Secrets      router.SecretsProvider
 	Environ      map[string]string
 	HomeDir      string
 	PathExists   func(string) bool
@@ -86,7 +88,13 @@ func (a App) Run(args []string) int {
 	for _, log := range logs {
 		a.errorf("omf: clamped %s.%s from %d to %d\n", log.Backend, log.Field, log.Requested, log.ClampedTo)
 	}
-	plan, err := router.ResolveProfile(m, args, router.Options{Environ: a.effectiveEnv(), HomeDir: a.HomeDir, PathExists: a.PathExists})
+	plan, err := router.ResolveProfile(m, args, router.Options{
+		Environ:         a.effectiveEnv(),
+		HomeDir:         a.HomeDir,
+		PathExists:      a.PathExists,
+		SecretsProvider: a.secretsProvider(),
+		Warnf:           a.errorf,
+	})
 	if err != nil {
 		a.errorf("omf: %v\n", err)
 		if router.IsUsageError(err) {
@@ -248,7 +256,17 @@ func (a App) llmClient() LLMClient {
 	if a.LLM != nil {
 		return a.LLM
 	}
-	return llm.NewClient(llm.Config{})
+	return llm.NewClient(llm.Config{Guard: a.guard()})
+}
+
+// guard wires the live omf-core admission gate into the LLM client, but only
+// when the binary is installed. Absent => nil, so llm.Load proceeds without the
+// floor instead of failing every load on a host without omf-core.
+func (a App) guard() llm.Guard {
+	if _, err := omfcore.Locate(); err != nil {
+		return nil
+	}
+	return omfcore.New()
 }
 
 func (a App) mlxClient() MLXClient {
@@ -256,6 +274,21 @@ func (a App) mlxClient() MLXClient {
 		return a.MLX
 	}
 	return mlx.Manager{LLM: a.llmClient()}
+}
+
+// secretsProvider returns the private-vault secrets source for routed launches.
+// An explicitly injected provider wins (tests). Otherwise the live omf-core
+// client is wired only when the binary is actually installed -- absent means a
+// nil provider, so router.buildEnv silently skips injection instead of logging
+// an unavailable-binary warning on every private launch.
+func (a App) secretsProvider() router.SecretsProvider {
+	if a.Secrets != nil {
+		return a.Secrets
+	}
+	if _, err := omfcore.Locate(); err != nil {
+		return nil
+	}
+	return omfcore.New()
 }
 
 func (a App) doctorRunner() DoctorRunner {
