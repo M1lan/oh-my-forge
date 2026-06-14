@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -205,7 +206,7 @@ func cleanPathForHostCompare(path string) string {
 	return path
 }
 
-func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]string, error) {
+func buildEnv(backend manifest.Backend, opts Options) (map[string]string, error) {
 	env := make(map[string]string)
 	account, routed, err := backendAccountRoute(backend)
 	if err != nil {
@@ -218,7 +219,7 @@ func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]s
 		if routed && !isRoutedSafeEnvName(name) {
 			continue
 		}
-		if val, ok := environ[name]; ok {
+		if val, ok := opts.Environ[name]; ok {
 			if routed {
 				sanitized, keep := sanitizeRoutedEnvValue(backend.Routing, name, val)
 				if !keep {
@@ -233,8 +234,61 @@ func buildEnv(backend manifest.Backend, environ map[string]string) (map[string]s
 	if routed {
 		env["HOME"] = account.Home
 		env["FORGE_CONFIG"] = account.ForgeConfig
+		injectPrivateSecrets(backend, opts, env)
 	}
 	return env, nil
+}
+
+// injectPrivateSecrets sources the backend's credential-shaped env_allowlist
+// names from the private 1Password vault (via omf-core) and writes them into
+// env. These are exactly the names the routed allowlist STRIPS from the
+// ambient parent env -- so a credential reaches the child only from the vault,
+// never inherited from a sibling account. Private routes only: omf-core refuses
+// the work account, and work children must never see private secrets.
+//
+// Non-fatal by design: a missing omf-core binary or a cold keychain cache logs
+// a warning and proceeds without the secret (the child can still authenticate
+// via its own FORGE_CONFIG), rather than blocking the launch.
+func injectPrivateSecrets(backend manifest.Backend, opts Options, env map[string]string) {
+	if opts.SecretsProvider == nil || backend.Routing != manifest.RoutingPrivate {
+		return
+	}
+	names := credentialAllowlist(backend)
+	if len(names) == 0 {
+		return
+	}
+	secrets, err := opts.SecretsProvider.SecretsEnv(context.Background(), names, "")
+	if err != nil {
+		warnf(opts, "omf: secrets injection skipped for %q: %v", backend.Name, err)
+		return
+	}
+	for k, v := range secrets {
+		// Never let an injected secret override a routing-managed name.
+		if isRoutingManagedEnv(k) {
+			continue
+		}
+		env[k] = v
+	}
+}
+
+// credentialAllowlist is the subset of a backend's env_allowlist that routing
+// strips from the ambient env (not routing-managed, not routed-safe) -- i.e.
+// the credential-shaped names that must come from the vault instead.
+func credentialAllowlist(backend manifest.Backend) []string {
+	var names []string
+	for _, name := range backend.EnvAllowlist {
+		if isRoutingManagedEnv(name) || isRoutedSafeEnvName(name) {
+			continue
+		}
+		names = append(names, name)
+	}
+	return names
+}
+
+func warnf(opts Options, format string, args ...any) {
+	if opts.Warnf != nil {
+		opts.Warnf(format, args...)
+	}
 }
 
 func isRoutingManagedEnv(name string) bool {

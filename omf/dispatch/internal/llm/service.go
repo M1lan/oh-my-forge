@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"omf/dispatch/internal/omfcore"
 )
 
 const (
@@ -33,12 +35,24 @@ type Model struct {
 	SizeBytes uint64
 }
 
+// Guard is the optional admission gate satisfied by *omfcore.Client. When set,
+// Load asks the compiled omf-core floor to re-admit the model's footprint and
+// confirms the single-flight runtime lock is free before warming a model. It is
+// defense in depth: checkBudgetGiB already screens known sizes in-process, but
+// the compiled floor is the authoritative budget and the only holder of the
+// cross-process lock.
+type Guard interface {
+	GuardAdmit(ctx context.Context, peakGiB, budgetGiB uint64, isMLX bool) error
+	GuardLockFree(ctx context.Context, path string) (bool, error)
+}
+
 type Config struct {
 	LlamaSwapURL string
 	OllamaURL    string
 	HTTPClient   *http.Client
 	BudgetsGiB   map[string]uint64
 	MaxGiB       uint64
+	Guard        Guard
 }
 
 type Client struct {
@@ -47,6 +61,7 @@ type Client struct {
 	httpClient   *http.Client
 	budgetsGiB   map[string]uint64
 	maxGiB       uint64
+	guard        Guard
 }
 
 func NewClient(cfg Config) *Client {
@@ -68,6 +83,7 @@ func NewClient(cfg Config) *Client {
 		httpClient:   client,
 		budgetsGiB:   limits,
 		maxGiB:       maxGiB,
+		guard:        cfg.Guard,
 	}
 }
 
@@ -104,7 +120,16 @@ func (c *Client) List(ctx context.Context) ([]Model, error) {
 }
 
 func (c *Client) Load(ctx context.Context, model string) error {
-	if err := c.checkBudget(ctx, model); err != nil {
+	peakGiB, known, err := c.modelGiB(ctx, model)
+	if err != nil {
+		return err
+	}
+	if known {
+		if err := c.checkBudgetGiB(model, peakGiB); err != nil {
+			return err
+		}
+	}
+	if err := c.guardAdmit(ctx, peakGiB, known); err != nil {
 		return err
 	}
 	body := map[string]any{
@@ -138,21 +163,54 @@ func IsBudgetError(err error) bool {
 	return errors.As(err, &budget)
 }
 
-func (c *Client) checkBudget(ctx context.Context, model string) error {
-	budget, ok := c.budgetsGiB[model]
-	if ok {
-		return c.checkBudgetGiB(model, budget)
-	}
+// ErrLoadInFlight is returned when another model load holds the single-flight
+// runtime lock, so this load must not race it for VRAM.
+var ErrLoadInFlight = errors.New("another model load is in flight")
 
+// modelGiB resolves a model's GiB footprint: an explicit budget first, then the
+// discovered ollama size. known=false means neither source knew the size, in
+// which case no budget or admission check can be made (proceed unguarded).
+func (c *Client) modelGiB(ctx context.Context, model string) (uint64, bool, error) {
+	if budget, ok := c.budgetsGiB[model]; ok {
+		return budget, true, nil
+	}
 	models, err := c.List(ctx)
 	if err != nil {
-		return err
+		return 0, false, err
 	}
 	for _, discovered := range models {
-		if discovered.Name != model || discovered.SizeBytes == 0 {
-			continue
+		if discovered.Name == model && discovered.SizeBytes != 0 {
+			return bytesToGiBCeil(discovered.SizeBytes), true, nil
 		}
-		return c.checkBudgetGiB(model, bytesToGiBCeil(discovered.SizeBytes))
+	}
+	return 0, false, nil
+}
+
+// guardAdmit runs the compiled omf-core floor before a warmup: it confirms the
+// single-flight lock is free, then re-admits the footprint against the budget.
+// A nil guard or unknown size skips it. A vanished binary (ErrUnavailable) is
+// treated as skip rather than a hard block, since app.go only wires the guard
+// when omf-core was located -- a mid-flight disappearance should not wedge the
+// load. ErrRefused (over budget) and a held lock DO block.
+func (c *Client) guardAdmit(ctx context.Context, peakGiB uint64, known bool) error {
+	if c.guard == nil || !known {
+		return nil
+	}
+	free, err := c.guard.GuardLockFree(ctx, "")
+	if err != nil {
+		if errors.Is(err, omfcore.ErrUnavailable) {
+			return nil
+		}
+		return err
+	}
+	if !free {
+		return ErrLoadInFlight
+	}
+	if err := c.guard.GuardAdmit(ctx, peakGiB, c.maxGiB, false); err != nil {
+		if errors.Is(err, omfcore.ErrUnavailable) {
+			return nil
+		}
+		return err
 	}
 	return nil
 }

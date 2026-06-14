@@ -2,12 +2,14 @@ package doctor
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"omf/dispatch/internal/mlx"
+	"omf/dispatch/internal/omfcore"
 	"omf/dispatch/internal/router"
 )
 
@@ -58,6 +60,10 @@ cache_gib = 2
 			CheckEndpoint:     "/v1/models",
 			LlamaSwapModelCmd: "${mlx-server}",
 		}},
+		CoreLocate: func() (string, error) { return "/fake/omf-core", nil },
+		CoreCaps: func(context.Context) (omfcore.Caps, error) {
+			return omfcore.Caps{WiredGiB: 14, MemoryGiB: 18, CacheGiB: 2}, nil
+		},
 	}
 
 	report, err := runner.Run(context.Background())
@@ -71,6 +77,7 @@ cache_gib = 2
 	assertCheckOK(t, report, "mlx wrapper caps")
 	assertCheckOK(t, report, "mlx llama-swap entry")
 	assertCheckOK(t, report, "mlx runtime safety")
+	assertCheckOK(t, report, "omf-core floor")
 }
 
 func TestDoctorRejectsManifestThatFailsGoValidation(t *testing.T) {
@@ -112,6 +119,7 @@ env_allowlist = ["PATH"]
 		LookPath: func(name string) (string, error) {
 			return "/bin/" + name, nil
 		},
+		CoreLocate: func() (string, error) { return "", omfcore.ErrUnavailable },
 	}).Run(context.Background())
 	if err != nil {
 		t.Fatalf("Run returned error for route mismatch warning: %v", err)
@@ -151,6 +159,7 @@ env_allowlist = ["PATH", "HTTPS_PROXY", "NO_PROXY", "TMPDIR", "XDG_CONFIG_HOME",
 		LookPath: func(name string) (string, error) {
 			return "/bin/" + name, nil
 		},
+		CoreLocate: func() (string, error) { return "", omfcore.ErrUnavailable },
 	}).Run(context.Background())
 	if err != nil {
 		t.Fatalf("Run returned error for stripped env warning: %v", err)
@@ -212,4 +221,79 @@ type fakeMLXInspector struct{ report mlx.Report }
 
 func (f fakeMLXInspector) Inspect(context.Context, string) (mlx.Report, error) {
 	return f.report, nil
+}
+
+func coreRunner(t *testing.T, locate func() (string, error), caps func(context.Context) (omfcore.Caps, error)) Runner {
+	t.Helper()
+	path := writeManifest(t, `
+schema_version = 0
+
+[[backend]]
+name = "forge"
+kind = "forge"
+routing = "private"
+interactive = ["forge"]
+env_allowlist = ["PATH"]
+`)
+	return Runner{
+		ManifestPath: path,
+		Environ:      map[string]string{"PATH": "/bin"},
+		HomeDir:      router.PrivateHome,
+		PathExists:   func(p string) bool { return p == router.PrivateForgeConfig },
+		LookPath:     func(name string) (string, error) { return "/bin/" + name, nil },
+		CoreLocate:   locate,
+		CoreCaps:     caps,
+	}
+}
+
+func TestDoctorWarnsWhenCoreAbsent(t *testing.T) {
+	runner := coreRunner(t,
+		func() (string, error) { return "", omfcore.ErrUnavailable },
+		nil)
+	report, err := runner.Run(context.Background())
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	check := findCheck(t, report, "omf-core floor")
+	if check.Status != StatusWarn {
+		t.Fatalf("omf-core floor = %#v, want warn when binary absent", check)
+	}
+	if !report.OK() {
+		t.Fatal("absent floor made doctor fail; absence must be a warning, not a failure")
+	}
+	if !strings.Contains(check.Message, "not installed") {
+		t.Fatalf("warn message = %q, want 'not installed' guidance", check.Message)
+	}
+}
+
+func TestDoctorFailsOnCoreCapDrift(t *testing.T) {
+	runner := coreRunner(t,
+		func() (string, error) { return "/fake/omf-core", nil },
+		func(context.Context) (omfcore.Caps, error) {
+			return omfcore.Caps{WiredGiB: 99, MemoryGiB: 18, CacheGiB: 2}, nil
+		})
+	report, err := runner.Run(context.Background())
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	assertCheckFailed(t, report, "omf-core floor")
+	if report.OK() {
+		t.Fatal("cap drift between dispatcher and floor must fail doctor")
+	}
+}
+
+func TestDoctorFailsWhenCoreCapsErrors(t *testing.T) {
+	runner := coreRunner(t,
+		func() (string, error) { return "/fake/omf-core", nil },
+		func(context.Context) (omfcore.Caps, error) {
+			return omfcore.Caps{}, errors.New("spawn failed")
+		})
+	report, err := runner.Run(context.Background())
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	check := findCheck(t, report, "omf-core floor")
+	if check.Status != StatusFailed {
+		t.Fatalf("omf-core floor = %#v, want failed when caps probe errors", check)
+	}
 }
