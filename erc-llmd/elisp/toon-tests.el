@@ -135,7 +135,14 @@ apples-to-apples."
         (pcase (car cell)
           ('strict (setq opts (plist-put opts :strict (not (eq (cdr cell) :false)))))
           ('indent (setq opts (plist-put opts :indent (cdr cell))))
-          ('delimiter (setq opts (plist-put opts :delimiter (cdr cell)))))))
+          ('delimiter (setq opts (plist-put opts :delimiter (cdr cell))))
+          ('keyFolding
+           (setq opts (plist-put opts :key-folding
+                                 (if (equal (cdr cell) "safe") 'safe 'off))))
+          ('flattenDepth (setq opts (plist-put opts :flatten-depth (cdr cell))))
+          ('expandPaths
+           (setq opts (plist-put opts :expand-paths
+                                 (if (equal (cdr cell) "safe") 'safe 'off)))))))
     opts))
 
 ;;;; Test running
@@ -264,20 +271,17 @@ the parsed alist back to JSON is avoided; instead the canonical comparison
         (toon-tests--summarize ,file #'toon-tests--run-encode-file))
      t)))
 
-;; STRETCH: key folding / path expansion are documented default-OFF.  These
-;; fixtures require keyFolding="safe" / expandPaths="safe", which are not
-;; implemented; the test is marked :expected-result :failed so the suite
-;; stays green while reporting the gap honestly.
+;; Optional Section 13.4 transforms: key folding (encoder, `:key-folding'
+;; = `safe') and path expansion (decoder, `:expand-paths' = `safe').  Now
+;; implemented opt-in; the fixtures drive both via the options passthrough.
 (ert-deftest toon-encode/key-folding ()
-  "STRETCH (not implemented): key folding is default-off only."
-  :expected-result :failed
+  "Encode conformance: key folding (opt-in, Section 13.4)."
   (let ((file (expand-file-name "encode/key-folding.json" toon-tests-fixtures-dir)))
     (skip-unless (file-exists-p file))
     (toon-tests--summarize file #'toon-tests--run-encode-file)))
 
 (ert-deftest toon-decode/path-expansion ()
-  "STRETCH (not implemented): path expansion is default-off only."
-  :expected-result :failed
+  "Decode conformance: path expansion (opt-in, Section 13.4)."
   (let ((file (expand-file-name "decode/path-expansion.json" toon-tests-fixtures-dir)))
     (skip-unless (file-exists-p file))
     (toon-tests--summarize file #'toon-tests--run-decode-file)))

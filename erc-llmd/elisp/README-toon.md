@@ -34,11 +34,14 @@ decoupling guarantee.
 
 `OPTS` is a plist:
 
-| Key          | Default   | Meaning                                         |
-|--------------|-----------|-------------------------------------------------|
-| `:indent`    | `2`       | Spaces per indentation level.                   |
-| `:delimiter` | `comma`   | Document delimiter: `comma`, `tab`, or `pipe`.  |
-| `:strict`    | `t`       | Enforce strict-mode validation (decode).        |
+| Key             | Default     | Meaning                                       |
+|-----------------|-------------|-----------------------------------------------|
+| `:indent`       | `2`         | Spaces per indentation level.                 |
+| `:delimiter`    | `comma`     | Document delimiter: `comma`, `tab`, or `pipe`.|
+| `:strict`       | `t`         | Enforce strict-mode validation (decode).      |
+| `:key-folding`  | `off`       | Encoder dotted-path folding: `off` or `safe`. |
+| `:flatten-depth`| `Infinity`  | Max segments to fold when `:key-folding safe`.|
+| `:expand-paths` | `off`       | Decoder dotted-path expansion: `off` or `safe`.|
 
 Decode errors are raised via `signal` under the `toon-error` condition
 (`(define-error 'toon-error ...)`), so callers can wrap decoding in
@@ -111,14 +114,14 @@ to one fixture file and lists any sub-case failures in its failure message.
 
 ## Conformance status
 
-All **core** categories pass fully. The optional **key folding** (§13.4
-encoder) and **path expansion** (§13.4 decoder) features are implemented
-**default-off only** (dotted keys stay literal), per scope; their fixtures
-that require `keyFolding="safe"` / `expandPaths="safe"` are not supported and
-are reported honestly as `:expected-result :failed` ERT tests so the suite
-stays green while surfacing the gap.
+All categories pass fully, including the optional Section 13.4 transforms:
+encoder key folding (`:key-folding 'safe`, with `:flatten-depth`) and decoder
+path expansion (`:expand-paths 'safe`, with strict-mode conflict handling per
+Section 14.5). Both default off, so the wire format is unchanged unless a
+caller opts in; quoted dotted keys are preserved literal on expansion, and
+folding honors IdentifierSegment, depth, and sibling/root collision rules.
 
-Sub-case tally (340/358 ≈ 95%; every gap is a documented STRETCH feature):
+Sub-case tally (358/358 = 100%):
 
 | Category                    | Pass / Total |
 |-----------------------------|--------------|
@@ -134,7 +137,7 @@ Sub-case tally (340/358 ≈ 95%; every gap is a documented STRETCH feature):
 | decode/blank-lines          | 13 / 13      |
 | decode/validation-errors    | 10 / 10      |
 | decode/indentation-errors   | 15 / 15      |
-| decode/path-expansion       |  2 / 12  (STRETCH: expansion default-off) |
+| decode/path-expansion       | 12 / 12      |
 | encode/primitives           | 39 / 39      |
 | encode/objects              | 26 / 26      |
 | encode/arrays-primitive     | 12 / 12      |
@@ -143,7 +146,7 @@ Sub-case tally (340/358 ≈ 95%; every gap is a documented STRETCH feature):
 | encode/arrays-objects       | 16 / 16      |
 | encode/delimiters           | 22 / 22      |
 | encode/whitespace           |  3 / 3       |
-| encode/key-folding          |  5 / 13  (STRETCH: folding default-off) |
+| encode/key-folding          | 13 / 13      |
 
 Regenerate this tally instead of trusting the snapshot:
 

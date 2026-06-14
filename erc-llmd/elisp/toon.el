@@ -45,9 +45,15 @@
 ;;   (toon-decode STRING &optional OPTS) -> Lisp value
 ;;
 ;; OPTS is a plist:
-;;   :indent     integer spaces per level (default 2)
-;;   :delimiter  one of `comma' (default), `tab', `pipe'
-;;   :strict     non-nil to enforce strict-mode validation (default t)
+;;   :indent       integer spaces per level (default 2)
+;;   :delimiter    one of `comma' (default), `tab', `pipe'
+;;   :strict       non-nil to enforce strict-mode validation (default t)
+;;   :key-folding  `off' (default) or `safe' -- encoder dotted-path folding
+;;   :flatten-depth max folded segments when key folding (default Infinity)
+;;   :expand-paths `off' (default) or `safe' -- decoder dotted-path expansion
+;;
+;; Key folding (encoder) and path expansion (decoder) are the optional
+;; Section 13.4 transforms; both default off and run purely on the model.
 ;;
 ;; Decode errors are raised via `signal' under the `toon-error' condition.
 
@@ -60,6 +66,24 @@
 (defconst toon-empty-object 'toon-empty-object
   "Sentinel value representing an empty JSON object `{}'.
 Distinct from the empty list `nil', which represents an empty array `[]'.")
+
+;;;; Quoted-key tracking (for optional path expansion, Section 13.4)
+
+(defvar toon--mark-quoted-keys nil
+  "When non-nil, the decoder tags quoted object keys.
+This lets optional path expansion (`:expand-paths' = `safe') leave a
+quoted dotted key such as \"c.d\" literal instead of splitting it.")
+
+(defun toon--qkey (s)
+  "Return key string S, tagged as originally quoted when tracking is enabled."
+  (if toon--mark-quoted-keys
+      (propertize (copy-sequence s) 'toon-quoted-key t)
+    s))
+
+(defun toon--qkey-p (s)
+  "Return non-nil if key string S was originally a quoted key."
+  (and (stringp s) (> (length s) 0)
+       (get-text-property 0 'toon-quoted-key s)))
 
 ;;;; Options helpers
 
@@ -427,11 +451,15 @@ elements (Section 9.4)."
 ;;;###autoload
 (defun toon-encode (value &optional opts)
   "Encode VALUE (codec Lisp model) to a TOON string per OPTS.
-OPTS is a plist accepting :indent, :delimiter, :strict (ignored on encode)."
+OPTS is a plist accepting :indent, :delimiter, :strict (ignored on encode),
+and :key-folding / :flatten-depth (optional Section 13.4 key folding)."
   (let* ((indent-size (toon--opt opts :indent 2))
          (delim-char (toon--delimiter-char (toon--opt opts :delimiter 'comma)))
          (enc (toon--enc-make :indent-size indent-size :doc-delim-char delim-char))
          (suffix (toon--delim-suffix delim-char)))
+    (when (eq (toon--opt opts :key-folding 'off) 'safe)
+      (setq value (toon--fold-model
+                   value (toon--opt opts :flatten-depth most-positive-fixnum))))
     (cond
      ;; Empty object at root -> empty document.
      ((eq value toon-empty-object) "")
@@ -635,7 +663,7 @@ Falls through to nil (key-value parsing) for malformed/extra-bracket lines."
        ((and (> len 0) (eq (aref text 0) ?\"))
         (condition-case nil
             (let ((res (toon--read-quoted text 0)))
-              (setq key (car res) i (cdr res)))
+              (setq key (toon--qkey (car res)) i (cdr res)))
           (toon-error (cl-return-from toon--parse-header nil))))
        ((and (> len 0) (eq (aref text 0) ?\[))
         (setq key nil i 0))
@@ -692,7 +720,7 @@ Falls through to nil (key-value parsing) for malformed/extra-bracket lines."
 (defun toon--parse-field-name (tok)
   "Parse a header field-name token TOK (quoted or unquoted) to a string."
   (if (and (> (length tok) 0) (eq (aref tok 0) ?\"))
-      (car (toon--read-quoted tok 0))
+      (toon--qkey (car (toon--read-quoted tok 0)))
     tok))
 
 ;;;; Key-value line parsing
@@ -709,7 +737,7 @@ Errors when no colon follows the key (Section 14.2)."
         (unless (and (< i len) (eq (aref text i) ?:))
           (toon--derr "Missing colon after key"))
         (cl-incf i)
-        (cons k (toon--value-after-colon text i)))
+        (cons (toon--qkey k) (toon--value-after-colon text i)))
     (let ((ci (string-search ":" text)))
       (unless ci (toon--derr "Missing colon after key"))
       (cons (substring text 0 ci)
@@ -953,16 +981,20 @@ fields sit at DEPTH+1; a first-field nested object sits at DEPTH+2."
 ;;;###autoload
 (defun toon-decode (string &optional opts)
   "Decode TOON STRING to the codec Lisp model per OPTS.
-OPTS is a plist accepting :indent, :strict.  Errors are signalled under
-`toon-error' in strict mode."
+OPTS is a plist accepting :indent, :strict, and :expand-paths (optional
+Section 13.4 path expansion).  Errors are signalled under `toon-error' in
+strict mode."
   (let* ((indent (toon--opt opts :indent 2))
-         (strict (toon--opt opts :strict t)))
+         (strict (toon--opt opts :strict t))
+         (expand (eq (toon--opt opts :expand-paths 'off) 'safe))
+         (toon--mark-quoted-keys expand))
     (let* ((lines (toon--scan-lines string indent strict))
-           (d (toon--dec-make :lines lines :pos 0 :indent indent :strict strict)))
-      (cond
-       ;; Empty document -> empty object (Section 5).
-       ((= (length lines) 0) toon-empty-object)
-       (t (toon--decode-root d strict))))))
+           (d (toon--dec-make :lines lines :pos 0 :indent indent :strict strict))
+           (model (cond
+                   ;; Empty document -> empty object (Section 5).
+                   ((= (length lines) 0) toon-empty-object)
+                   (t (toon--decode-root d strict)))))
+      (if expand (toon--expand-model model strict) model))))
 
 (defun toon--decode-root (d strict)
   "Decode the document root from decoder D (Section 5)."
@@ -999,6 +1031,210 @@ OPTS is a plist accepting :indent, :strict.  Errors are signalled under
           (setq all nil)))
       (cl-incf i))
     all))
+
+;;;; ------------------------------------------------------------------
+;;;; Optional transforms: key folding (encoder) / path expansion (decoder)
+;;;; Section 13.4 + 14.5.  Both default OFF and operate on the codec model:
+;;;;   encode folds the model BEFORE encoding   (`:key-folding' = `safe')
+;;;;   decode expands the model AFTER decoding   (`:expand-paths' = `safe')
+;;;; Semantics match the reference conformance fixtures.
+;;;; ------------------------------------------------------------------
+
+(defun toon--ident-segment-p (s)
+  "Return non-nil if S is an IdentifierSegment per Section 1.9.
+That is, S matches `^[A-Za-z_][A-Za-z0-9_]*$' (letters, digits, underscore;
+no dots; not starting with a digit)."
+  (and (stringp s) (string-match-p "\\`[A-Za-z_][A-Za-z0-9_]*\\'" s)))
+
+;;;;; Encoder: key folding
+
+(defvar toon--fold-default-depth most-positive-fixnum
+  "Flatten depth used when folding restarts in a fresh array-element context.")
+
+(defun toon--fold-root-keys (alist)
+  "Return the keys of ALIST that contain a path separator (root collision set)."
+  (delq nil (mapcar (lambda (c) (and (string-search "." (car c)) (car c))) alist)))
+
+(defun toon--fold-collect (key val budget)
+  "Collect the single-key chain rooted at KEY/VAL, at most BUDGET segments.
+Return (SEGMENTS LEAF TAIL).  LEAF is the value reached at the end of the
+walk; TAIL is that value only when it is still a non-empty object (a partial
+fold), otherwise nil."
+  (let ((segments (list key)) (cur val) (stop nil))
+    (while (and (not stop) (< (length segments) budget) (toon--object-p cur))
+      (let ((al (toon--object-alist cur)))
+        (if (/= (length al) 1)
+            (setq stop t)
+          (setq segments (nconc segments (list (caar al)))
+                cur (cdar al)))))
+    (list segments cur (and (toon--object-p cur) cur))))
+
+(defun toon--fold-try (key val siblings budget prefix rootkeys)
+  "Attempt to fold KEY/VAL into a dotted path.
+Return (FOLDED-KEY TAIL LEAF SEGMENT-COUNT) on success, else nil.  SIBLINGS
+are the literal keys at this level; PREFIX is the absolute folded path built
+so far; ROOTKEYS is the set of root-level literal dotted keys.  Folding is
+refused on fewer than two segments, a non-IdentifierSegment, a sibling
+collision, or a root literal-key collision (Section 13.4)."
+  (when (toon--object-p val)
+    (pcase-let ((`(,segments ,leaf ,tail) (toon--fold-collect key val budget)))
+      (when (and (>= (length segments) 2)
+                 (cl-every #'toon--ident-segment-p segments))
+        (let* ((folded (mapconcat #'identity segments "."))
+               (abspath (if prefix (concat prefix "." folded) folded)))
+          (unless (or (member folded siblings)
+                      (and rootkeys (member abspath rootkeys)))
+            (list folded tail leaf (length segments))))))))
+
+(defun toon--fold-object (obj budget prefix rootkeys)
+  "Return object OBJ with key folding applied, within depth BUDGET under PREFIX.
+ROOTKEYS is the root literal dotted-key collision set (Section 13.4)."
+  (let* ((alist (toon--object-alist obj))
+         (siblings (mapcar #'car alist))
+         (out nil))
+    (dolist (cell alist)
+      (let* ((k (car cell)) (val (cdr cell))
+             (fr (toon--fold-try k val siblings budget prefix rootkeys)))
+        (if fr
+            (pcase-let ((`(,folded ,tail ,leaf ,segcount) fr))
+              (if tail
+                  (let ((fpath (if prefix (concat prefix "." folded) folded)))
+                    (push (cons folded
+                                (toon--fold-object tail (- budget segcount)
+                                                   fpath rootkeys))
+                          out))
+                (push (cons folded
+                            (toon--fold-value leaf toon--fold-default-depth nil nil))
+                      out)))
+          (let ((cpath (if prefix (concat prefix "." k) k)))
+            (push (cons k (toon--fold-value val budget cpath rootkeys)) out)))))
+    (toon--make-object (nreverse out))))
+
+(defun toon--fold-value (v budget prefix rootkeys)
+  "Recursively fold value V with remaining depth BUDGET under PREFIX/ROOTKEYS.
+Arrays restart folding in a fresh context (no prefix, no root collision set,
+full depth), mirroring the reference encoder."
+  (cond
+   ((or (toon--object-p v) (eq v toon-empty-object))
+    (toon--fold-object v budget prefix rootkeys))
+   ((toon--array-p v)
+    (mapcar (lambda (el) (toon--fold-value el toon--fold-default-depth nil nil)) v))
+   (t v)))
+
+(defun toon--fold-model (value default-depth)
+  "Return VALUE with safe key folding applied; DEFAULT-DEPTH is the flatten depth."
+  (let ((toon--fold-default-depth default-depth))
+    (cond
+     ((or (toon--object-p value) (eq value toon-empty-object))
+      (toon--fold-object value default-depth nil
+                         (toon--fold-root-keys (toon--object-alist value))))
+     ((toon--array-p value)
+      (mapcar (lambda (el) (toon--fold-value el default-depth nil nil)) value))
+     (t value))))
+
+;;;;; Decoder: path expansion
+
+(cl-defstruct (toon--mnode (:constructor toon--mnode-make))
+  "Mutable, order-preserving object node used while expanding dotted keys."
+  alist)
+
+(defun toon--mnode-set (node key val)
+  "Set KEY to VAL in NODE, appending in encounter order when KEY is new."
+  (let ((cell (assoc key (toon--mnode-alist node))))
+    (if cell
+        (setcdr cell val)
+      (setf (toon--mnode-alist node)
+            (nconc (toon--mnode-alist node) (list (cons key val)))))))
+
+(defun toon--expand-value (v strict)
+  "Expand dotted keys throughout value V (Section 13.4).
+STRICT enforces conflict errors; otherwise last-write-wins is applied."
+  (cond
+   ((or (toon--object-p v) (eq v toon-empty-object)) (toon--expand-object v strict))
+   ((toon--array-p v) (mapcar (lambda (el) (toon--expand-value el strict)) v))
+   (t v)))
+
+(defun toon--expand-object (obj strict)
+  "Expand object OBJ into a mutable node tree, honoring STRICT conflicts.
+A key is expanded only when it was not originally quoted, contains a path
+separator, and splits into IdentifierSegments only (Section 13.4)."
+  (let ((node (toon--mnode-make :alist nil)))
+    (dolist (cell (toon--object-alist obj) node)
+      (let* ((key (car cell))
+             (ev (toon--expand-value (cdr cell) strict))
+             (segs (and (not (toon--qkey-p key))
+                        (string-search "." key)
+                        (split-string key "\\."))))
+        (if (and segs (cl-every #'toon--ident-segment-p segs))
+            (toon--expand-insert node segs ev strict)
+          (toon--expand-merge-key node key ev strict))))))
+
+(defun toon--expand-merge-key (node key ev strict)
+  "Insert KEY -> EV into NODE, deep-merging or resolving conflicts per STRICT."
+  (let ((cell (assoc key (toon--mnode-alist node))))
+    (cond
+     ((null cell) (toon--mnode-set node key ev))
+     ((and (toon--mnode-p (cdr cell)) (toon--mnode-p ev))
+      (toon--expand-merge-nodes (cdr cell) ev strict))
+     (strict (toon--derr "Path expansion conflict at key %S" key))
+     (t (setcdr cell ev)))))
+
+(defun toon--expand-insert (node segments value strict)
+  "Insert VALUE at the SEGMENTS path within NODE.
+Intermediate objects are created as needed; an existing non-object on the
+path is a conflict (strict errors, otherwise overwritten).  Section 13.4."
+  (let ((cur node) (i 0) (n (length segments)))
+    (while (< i (1- n))
+      (let* ((seg (nth i segments))
+             (cell (assoc seg (toon--mnode-alist cur))))
+        (cond
+         ((null cell)
+          (let ((new (toon--mnode-make :alist nil)))
+            (toon--mnode-set cur seg new) (setq cur new)))
+         ((toon--mnode-p (cdr cell)) (setq cur (cdr cell)))
+         (strict (toon--derr "Path expansion conflict at segment %S" seg))
+         (t (let ((new (toon--mnode-make :alist nil)))
+              (setcdr cell new) (setq cur new)))))
+      (cl-incf i))
+    (let* ((last (nth (1- n) segments))
+           (cell (assoc last (toon--mnode-alist cur))))
+      (cond
+       ((null cell) (toon--mnode-set cur last value))
+       ((and (toon--mnode-p (cdr cell)) (toon--mnode-p value))
+        (toon--expand-merge-nodes (cdr cell) value strict))
+       (strict (toon--derr "Path expansion conflict at key %S" last))
+       (t (setcdr cell value))))))
+
+(defun toon--expand-merge-nodes (target source strict)
+  "Deep-merge SOURCE node into TARGET node, honoring STRICT conflicts."
+  (dolist (cell (toon--mnode-alist source))
+    (let* ((k (car cell)) (sv (cdr cell))
+           (tcell (assoc k (toon--mnode-alist target))))
+      (cond
+       ((null tcell) (toon--mnode-set target k sv))
+       ((and (toon--mnode-p (cdr tcell)) (toon--mnode-p sv))
+        (toon--expand-merge-nodes (cdr tcell) sv strict))
+       (strict (toon--derr "Path expansion conflict at key %S" k))
+       (t (setcdr tcell sv))))))
+
+(defun toon--mnode->model (v)
+  "Convert mutable node tree V back into the codec Lisp model."
+  (cond
+   ((toon--mnode-p v)
+    (let ((al (toon--mnode-alist v)))
+      (if (null al)
+          toon-empty-object
+        (toon--make-object
+         (mapcar (lambda (c)
+                   (cons (substring-no-properties (car c))
+                         (toon--mnode->model (cdr c))))
+                 al)))))
+   ((toon--array-p v) (mapcar #'toon--mnode->model v))
+   (t v)))
+
+(defun toon--expand-model (model strict)
+  "Return MODEL with safe path expansion applied (Section 13.4)."
+  (toon--mnode->model (toon--expand-value model strict)))
 
 (provide 'toon)
 ;;; toon.el ends here
