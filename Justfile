@@ -326,11 +326,25 @@ install-omf-dry:
       --backup-dir "${backup_dir}"
 
 # Install the `omf` dispatcher binary to ~/.local/bin (builds it first).
+# Also syncs adapter scripts to ~/forge/omf/adapters/ (runtime dependency of
+# `omf resume` and `omf hist`). The manifest template (omf.toml) is written
+# to ~/forge/omf.toml only when it does not already exist there.
 [group('install')]
 install-bin: build-bin
+    #!/usr/bin/env bash
+    set -euo pipefail
     install -d "$HOME/.local/bin"
-    install -m 0755 {{ _omf_dispatch }}/bin/omf "$HOME/.local/bin/omf"
-    @printf 'installed: %s/.local/bin/omf\n' "$HOME"
+    install -m 0755 "{{ _omf_dispatch }}/bin/omf" "$HOME/.local/bin/omf"
+    printf 'installed: %s/.local/bin/omf\n' "$HOME"
+    mkdir -p "$HOME/forge/omf/adapters"
+    rsync -a --delete "{{ _omf_workspace }}/adapters/" "$HOME/forge/omf/adapters/"
+    printf 'synced:    %s/forge/omf/adapters/\n' "$HOME"
+    if [[ ! -f "$HOME/forge/omf.toml" ]]; then
+      cp "{{ _omf_workspace }}/omf.toml" "$HOME/forge/omf.toml"
+      printf 'installed: %s/forge/omf.toml (edit to add your backends)\n' "$HOME"
+    else
+      printf 'kept:      %s/forge/omf.toml (already exists)\n' "$HOME"
+    fi
 
 # Verify the installed oh-my-forge layout at {{ forge_parent }}/forge.
 [group('install')]

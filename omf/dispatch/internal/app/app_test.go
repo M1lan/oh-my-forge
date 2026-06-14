@@ -100,6 +100,7 @@ func TestRunReturnsUsageForMissingProfile(t *testing.T) {
 func TestRunResumeExecsResumeAdapter(t *testing.T) {
 	var got router.Plan
 	a := App{
+		AdapterDir: filepath.Join("..", "adapters"),
 		Runner: router.Runner{ExecReplace: func(argv []string, env map[string]string) error {
 			got = router.Plan{Mode: router.ModeExecReplace, Argv: argv, Env: env}
 			return nil
@@ -118,6 +119,7 @@ func TestRunResumeExecsResumeAdapter(t *testing.T) {
 func TestRunHistExecsHistAdapterWithArgs(t *testing.T) {
 	var got router.Plan
 	a := App{
+		AdapterDir: filepath.Join("..", "adapters"),
 		Runner: router.Runner{ExecReplace: func(argv []string, env map[string]string) error {
 			got = router.Plan{Mode: router.ModeExecReplace, Argv: argv, Env: env}
 			return nil

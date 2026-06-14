@@ -24,6 +24,7 @@ const (
 
 type App struct {
 	ManifestPath string
+	AdapterDir   string
 	Runner       router.Runner
 	LLM          LLMClient
 	MLX          MLXClient
@@ -112,7 +113,11 @@ func (a App) runHist(args []string) int {
 }
 
 func (a App) execAdapter(script string, args []string) int {
-	argv := append([]string{filepath.Join(defaultAdapterDir(), script)}, args...)
+	adapterDir := a.AdapterDir
+	if adapterDir == "" {
+		adapterDir = defaultAdapterDir()
+	}
+	argv := append([]string{filepath.Join(adapterDir, script)}, args...)
 	plan := router.Plan{Mode: router.ModeExecReplace, Argv: argv, Env: a.effectiveEnv()}
 	if err := a.Runner.Execute(plan); err != nil {
 		a.errorf("omf: adapter: %v\n", err)
@@ -306,9 +311,12 @@ func (a App) stdout() io.Writer {
 }
 
 func defaultManifestPath() string {
-	return "../omf.toml"
+	return manifest.DefaultPath()
 }
 
 func defaultAdapterDir() string {
-	return filepath.Join("..", "adapters")
+	if home := manifest.HomeDir(); home != "" {
+		return filepath.Join(home, "forge", "omf", "adapters")
+	}
+	return filepath.Join("omf", "adapters")
 }

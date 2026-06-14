@@ -3,6 +3,7 @@ package manifest
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -12,6 +13,27 @@ const (
 	MLXMemoryLimitGiB uint64 = 18
 	MLXCacheLimitGiB  uint64 = 2
 )
+
+// DefaultPath resolves the default location of the omf manifest:
+// $HOME/forge/omf.toml. It is the single source of truth shared by the
+// dispatcher and `omf doctor` so the two can never resolve different
+// manifests. Falls back to a bare relative "omf.toml" only when the home
+// directory is completely unresolvable.
+func DefaultPath() string {
+	if home := HomeDir(); home != "" {
+		return filepath.Join(home, "forge", "omf.toml")
+	}
+	return "omf.toml"
+}
+
+// HomeDir returns the user's home directory, preferring os.UserHomeDir() and
+// falling back to $HOME. Returns "" only when both are unavailable.
+func HomeDir() string {
+	if h, err := os.UserHomeDir(); err == nil && h != "" {
+		return h
+	}
+	return os.Getenv("HOME")
+}
 
 type Kind string
 

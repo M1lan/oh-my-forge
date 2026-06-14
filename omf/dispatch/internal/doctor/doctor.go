@@ -12,7 +12,10 @@ import (
 	"omf/dispatch/internal/router"
 )
 
-const DefaultManifestPath = "../omf.toml"
+// DefaultManifestPath is the resolved default location of the omf manifest,
+// shared with the dispatcher via manifest.DefaultPath() so doctor and
+// `omf <profile>` can never validate different manifests.
+var DefaultManifestPath = manifest.DefaultPath() //nolint:gochecknoglobals
 
 type Status string
 
@@ -58,7 +61,7 @@ func (r Runner) Run(ctx context.Context) (Report, error) {
 	var report Report
 	path := r.ManifestPath
 	if path == "" {
-		path = DefaultManifestPath
+		path = manifest.DefaultPath()
 	}
 
 	m, logs, err := manifest.LoadFile(path)
