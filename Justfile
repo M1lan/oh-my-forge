@@ -239,10 +239,17 @@ lint-editorconfig:
 
 # ── omf — Go dispatcher (omf/dispatch) ────────────────────────────────────────
 
-# Build the Go dispatcher. Compile-only; no install.
+# Build the Go dispatcher. Compile-only; no install (use `build-bin` for the binary).
 [group('omf')]
 build-go:
     cd {{ _omf_dispatch }} && go build ./...
+
+# Emit the actual `omf` dispatcher binary → omf/dispatch/bin/omf.
+# `go build ./...` only compile-checks and discards the executable; this writes it.
+[group('omf')]
+build-bin:
+    cd {{ _omf_dispatch }} && go build -o bin/omf ./cmd/omf
+    @printf 'built: omf/dispatch/bin/omf\n'
 
 # Vet + gofmt-check the Go dispatcher. gofmt is the authoritative Go formatter
 # (it correctly leaves raw-string-literal contents alone, unlike editorconfig).
@@ -317,6 +324,13 @@ install-omf-dry:
       --global \
       --dry-run \
       --backup-dir "${backup_dir}"
+
+# Install the `omf` dispatcher binary to ~/.local/bin (builds it first).
+[group('install')]
+install-bin: build-bin
+    install -d "$HOME/.local/bin"
+    install -m 0755 {{ _omf_dispatch }}/bin/omf "$HOME/.local/bin/omf"
+    @printf 'installed: %s/.local/bin/omf\n' "$HOME"
 
 # Verify the installed oh-my-forge layout at {{ forge_parent }}/forge.
 [group('install')]
