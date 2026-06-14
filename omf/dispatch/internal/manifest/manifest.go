@@ -14,16 +14,33 @@ const (
 	MLXCacheLimitGiB  uint64 = 2
 )
 
-// DefaultPath resolves the default location of the omf manifest:
-// $HOME/forge/omf.toml. It is the single source of truth shared by the
-// dispatcher and `omf doctor` so the two can never resolve different
-// manifests. Falls back to a bare relative "omf.toml" only when the home
-// directory is completely unresolvable.
+// DefaultPath resolves the default location of the omf manifest. It is the
+// single source of truth shared by the dispatcher and `omf doctor` so the two
+// can never resolve different manifests. Search order:
+//  1. $HOME/forge/omf.toml   (preferred; returned even if absent so error
+//     messages name a standard path, never the current directory)
+//  2. $HOME/.config/omf/omf.toml  (used only if it exists and (1) does not)
+//
+// It never resolves a cwd-relative path except when the home directory is
+// completely unresolvable, which does not happen in practice.
 func DefaultPath() string {
-	if home := HomeDir(); home != "" {
-		return filepath.Join(home, "forge", "omf.toml")
+	home := HomeDir()
+	if home == "" {
+		return "omf.toml"
 	}
-	return "omf.toml"
+	preferred := filepath.Join(home, "forge", "omf.toml")
+	if fileExists(preferred) {
+		return preferred
+	}
+	if alt := filepath.Join(home, ".config", "omf", "omf.toml"); fileExists(alt) {
+		return alt
+	}
+	return preferred
+}
+
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }
 
 // HomeDir returns the user's home directory, preferring os.UserHomeDir() and

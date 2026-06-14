@@ -54,8 +54,13 @@ type DoctorRunner interface {
 
 func (a App) Run(args []string) int {
 	if len(args) == 0 {
-		a.errorf("usage: omf <profile> [args...]\n")
+		a.printUsage(a.stderr())
 		return ExitUsage
+	}
+	switch args[0] {
+	case "-h", "--help", "help":
+		a.printUsage(a.stdout())
+		return ExitOK
 	}
 	if args[0] == "doctor" {
 		if len(args) != 1 {
@@ -73,11 +78,7 @@ func (a App) Run(args []string) int {
 	if args[0] == "hist" {
 		return a.runHist(args[1:])
 	}
-	path := a.ManifestPath
-	if path == "" {
-		path = defaultManifestPath()
-	}
-	m, logs, err := manifest.LoadFile(path)
+	m, logs, err := manifest.LoadFile(a.manifestPath())
 	if err != nil {
 		a.errorf("omf: load manifest: %v\n", err)
 		return ExitError
@@ -261,12 +262,8 @@ func (a App) doctorRunner() DoctorRunner {
 	if a.Doctor != nil {
 		return a.Doctor
 	}
-	path := a.ManifestPath
-	if path == "" {
-		path = defaultManifestPath()
-	}
 	return doctor.Runner{
-		ManifestPath: path,
+		ManifestPath: a.manifestPath(),
 		Environ:      a.effectiveEnv(),
 		HomeDir:      a.HomeDir,
 		PathExists:   a.PathExists,
@@ -308,6 +305,49 @@ func (a App) stdout() io.Writer {
 		return a.Stdout
 	}
 	return os.Stdout
+}
+
+func (a App) stderr() io.Writer {
+	if a.Stderr != nil {
+		return a.Stderr
+	}
+	return os.Stderr
+}
+
+// manifestPath resolves the manifest in priority order: an explicit
+// App.ManifestPath, then the OMF_MANIFEST env override, then the default
+// ($HOME/forge/omf.toml). It never returns a cwd-relative path in practice.
+func (a App) manifestPath() string {
+	if a.ManifestPath != "" {
+		return a.ManifestPath
+	}
+	if p := a.effectiveEnv()["OMF_MANIFEST"]; p != "" {
+		return p
+	}
+	return defaultManifestPath()
+}
+
+func (a App) printUsage(w io.Writer) {
+	_, _ = io.WriteString(w, usageText(a.manifestPath()))
+}
+
+func usageText(manifestPath string) string {
+	return fmt.Sprintf(`omf - Forge dispatch: route a profile to the right AI backend/account.
+
+Usage:
+  omf <profile> [args...]   run a backend profile from the manifest
+  omf doctor                check the omf environment and manifest
+  omf llm [list]            list local LLM models
+  omf llm load <model>      load a model
+  omf llm unload <model>    unload a model
+  omf llm mlx [model]       inspect (or load) the MLX model
+  omf resume                resume a forge conversation
+  omf hist [args...]        forge history
+  omf help, -h, --help      show this help
+
+Manifest: %s
+  (override with OMF_MANIFEST; defaults to ~/forge/omf.toml)
+`, manifestPath)
 }
 
 func defaultManifestPath() string {
