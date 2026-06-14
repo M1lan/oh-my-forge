@@ -1,0 +1,36 @@
+# erc-llmd -- standalone localhost-only pseudo-ircd daemon.
+#
+# This crate is deliberately NOT a member of the inner `omf/Cargo.toml`
+# workspace (that file is fenced as the FORGE lane). The empty `[workspace]`
+# table below makes this an independent workspace root so cargo never tries
+# to attach it to any ancestor workspace.
+[workspace]
+
+[package]
+name = "erc-llmd"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Standalone AF_UNIX pseudo-ircd: a drop-in replacement for the Emacs-resident erc-llm partyline server."
+publish = false
+
+[[bin]]
+name = "erc-llmd"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
+
+# Zero runtime dependencies: std-only, thread-per-connection + Arc<Mutex<_>>.
+[dependencies]
+
+# Dev-only: the TOON conformance harness (`tests/toon_conformance.rs`) uses
+# serde_json to parse the language-agnostic fixture oracle in
+# `~/mysrc/toon-spec/tests/fixtures/` and convert its `expected` JSON values
+# into the codec's `Value`. The shipped lib + binary remain dependency-free.
+[dev-dependencies]
+# `preserve_order` keeps JSON object key insertion order, which the encode
+# fixtures depend on (TOON preserves key order, §2).
+serde_json = { version = "1", features = ["preserve_order"] }
