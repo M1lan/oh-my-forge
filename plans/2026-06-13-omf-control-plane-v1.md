@@ -183,6 +183,27 @@ fits-model admitted); keychain read never writes; child env = allowlisted names 
 - [ ] P3: plan/subscription switching UI; prompt-scan classifier; breadth
   (gemini/copilot/crush/aider as backends); full `omf tui` control plane; emacs features.
 
+## 11a. Backlog — added 2026-06-15 (user)
+
+- [ ] `--madmax` and `--yolo` global flags (danger/auto-approve modes; mirror
+  the omc/omx semantics — `--madmax` = max-autonomy run, `--yolo` = skip
+  confirmations). Must respect the compiled safety floor (§5) — these flags
+  may loosen UX gates but NEVER the work≠private routing or secrets invariants.
+- [ ] omf as meta-wrapper and top-level orchestrator FOR omc and omx (not just
+  alongside them): omf becomes the primus-inter-pares front that drives omc and
+  omx as managed backends (spawn, route, supervise), consistent with the
+  forge-as-driver primitive in §9.
+- [ ] Close the feature gap: omf is currently hollow. The structure/architecture
+  is good and the existing features justify the tool, but omf is missing the
+  CORE functions and commands that make omc and omx actually useful — these are
+  not optional niceties, they are table stakes. Inventory every core omc/omx
+  command and ensure omf has a discovery+passthrough (or first-class) equivalent.
+  (User: "more details soon. remind me pls." → REMINDER OWED to user.)
+- [ ] Define broad omf command categories — and possibly application domains —
+  as the top-level taxonomy the CLI/TUI is organized around (orchestration,
+  routing, llm, secrets, doctor, compose, …). Decide categories before adding
+  the gap-filling commands above so they land in a coherent surface.
+
 ## 12. Top risks
 
 1. Doomed-abstraction treadmill (omf lags omc/omx/forge as they drift). Mitigation:

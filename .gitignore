@@ -16,3 +16,4 @@ target/
 scorecard.png
 query.json
 omf/dispatch/bin/
+omf/dispatch/omf
