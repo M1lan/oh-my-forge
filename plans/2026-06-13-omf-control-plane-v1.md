@@ -90,7 +90,12 @@ Discovery: the user **already** runs `llama-swap` (config `~/.config/llama-swap/
 documented in that config.
 
 omf **adopts** llama-swap as the engine substrate instead of reinventing lifecycle:
-- [ ] `omf llm` talks to llama-swap (`:8080`) + `ollama` (`:11434`); lists/loads/unloads.
+- [ ] `omf llm` talks to llama-swap (`:4321` — moved from `:8080` on 2026-07-04) +
+  `ollama` (`:11434`); lists/loads/unloads. Prior art already exists and is proven:
+  `~/scripts/tools/local-forge/bin/local-forge.bash` (`plans/2026-07-09-local-model-forge-launcher-v1.md`)
+  discovers models via llama-swap's own `/v1/models`, fzf-picks one, and drives forge's
+  `llama_cpp` provider end-to-end. When `omf llm` is actually built, port that script's
+  discovery/pick/restore logic into the Go dispatcher instead of re-deriving it.
 - [ ] Admission preflight (Rust) is a *light backstop*, not the primary defense: it warns
   if `peak_RSS` would exceed claimable. The proven `set_wired_limit(14 GiB)` split (§6a)
   is what actually prevents the freeze. No refuse-by-default for MLX — the model runs;
@@ -168,6 +173,7 @@ by "removing languages" (knowledge is not language-separable; the size is 256 Mo
 - [ ] `omf-core` (Rust): admission preflight + single-flight + MLX caps; `omf-core secrets`
   read keychain + read/write private vault + env allowlist.
 - [ ] `omf llm`: discover + list llama-swap/ollama models; load/unload; refuse over-budget.
+  See §6's pointer to `local-forge.bash` — reuse its discovery pattern, don't re-derive it.
 - [ ] `omf doctor`: manifest validation + backend discovery + profile creds + dep tiers.
 
 Success criteria: unit test proves work↛private; over-budget model launch refused (a
