@@ -1,7 +1,7 @@
 {
   "$schema": "./catalog-manifest.schema.json",
   "schemaVersion": 1,
-  "catalogVersion": "2026.06.12",
+  "catalogVersion": "2026.07.09",
   "name": "oh-my-forge",
   "description": "A comprehensive v2 ForgeCode (forge) workbench: 40 specialist agents, 46 skills, and 22 commands for multi-agent software engineering.",
   "agents": [
@@ -22,20 +22,20 @@
       "reasoning": false
     },
     {
-      "id": "architect-low",
-      "path": "agents/architect-low.md",
-      "category": "core",
-      "status": "active",
-      "core": false,
-      "reasoning": false
-    },
-    {
       "id": "architect",
       "path": "agents/architect.md",
       "category": "core",
       "status": "active",
       "core": true,
       "reasoning": true
+    },
+    {
+      "id": "architect-low",
+      "path": "agents/architect-low.md",
+      "category": "core",
+      "status": "active",
+      "core": false,
+      "reasoning": false
     },
     {
       "id": "auth-specialist",
@@ -110,16 +110,16 @@
       "reasoning": false
     },
     {
-      "id": "designer-low",
-      "path": "agents/designer-low.md",
+      "id": "designer",
+      "path": "agents/designer.md",
       "category": "frontend",
       "status": "active",
       "core": false,
       "reasoning": false
     },
     {
-      "id": "designer",
-      "path": "agents/designer.md",
+      "id": "designer-low",
+      "path": "agents/designer-low.md",
       "category": "frontend",
       "status": "active",
       "core": false,
@@ -142,6 +142,14 @@
       "reasoning": false
     },
     {
+      "id": "executor",
+      "path": "agents/executor.md",
+      "category": "core",
+      "status": "active",
+      "core": true,
+      "reasoning": false
+    },
+    {
       "id": "executor-high",
       "path": "agents/executor-high.md",
       "category": "core",
@@ -155,14 +163,6 @@
       "category": "core",
       "status": "active",
       "core": false,
-      "reasoning": false
-    },
-    {
-      "id": "executor",
-      "path": "agents/executor.md",
-      "category": "core",
-      "status": "active",
-      "core": true,
       "reasoning": false
     },
     {
@@ -184,6 +184,14 @@
     {
       "id": "git-strategist",
       "path": "agents/git-strategist.md",
+      "category": "specialist",
+      "status": "active",
+      "core": false,
+      "reasoning": false
+    },
+    {
+      "id": "gnu-emacs",
+      "path": "agents/gnu-emacs.md",
       "category": "specialist",
       "status": "active",
       "core": false,
@@ -356,6 +364,13 @@
       "core": true
     },
     {
+      "name": "caveman",
+      "path": "skills/caveman/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
       "name": "code-review",
       "path": "skills/code-review/SKILL.md",
       "category": "quality",
@@ -368,6 +383,13 @@
       "category": "quality",
       "status": "active",
       "core": true
+    },
+    {
+      "name": "ctxcomp",
+      "path": "skills/ctxcomp/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
     },
     {
       "name": "deep-dive",
@@ -426,6 +448,13 @@
       "core": true
     },
     {
+      "name": "justfile-house-style",
+      "path": "skills/justfile-house-style/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
       "name": "karpathy-guidelines",
       "path": "skills/karpathy-guidelines/SKILL.md",
       "category": "tooling",
@@ -440,9 +469,23 @@
       "core": false
     },
     {
+      "name": "llm-data-format",
+      "path": "skills/llm-data-format/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
       "name": "mcp-setup",
       "path": "skills/mcp-setup/SKILL.md",
       "category": "meta",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "monty-playground",
+      "path": "skills/monty-playground/SKILL.md",
+      "category": "tooling",
       "status": "active",
       "core": false
     },
@@ -457,6 +500,13 @@
       "name": "omf-reference",
       "path": "skills/omf-reference/SKILL.md",
       "category": "meta",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "op-secrets",
+      "path": "skills/op-secrets/SKILL.md",
+      "category": "tooling",
       "status": "active",
       "core": false
     },
@@ -594,6 +644,27 @@
       "core": false
     },
     {
+      "name": "urgent-reminder",
+      "path": "skills/urgent-reminder/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "use-ast-grep",
+      "path": "skills/use-ast-grep/SKILL.md",
+      "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "use-cortex",
+      "path": "skills/use-cortex/SKILL.md",
+      "category": "knowledge",
+      "status": "active",
+      "core": false
+    },
+    {
       "name": "use-fd",
       "path": "skills/use-fd/SKILL.md",
       "category": "tooling",
@@ -611,6 +682,13 @@
       "name": "use-grepai",
       "path": "skills/use-grepai/SKILL.md",
       "category": "tooling",
+      "status": "active",
+      "core": false
+    },
+    {
+      "name": "use-mempalace",
+      "path": "skills/use-mempalace/SKILL.md",
+      "category": "knowledge",
       "status": "active",
       "core": false
     },

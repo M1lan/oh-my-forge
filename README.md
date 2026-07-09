@@ -1,8 +1,8 @@
 # oh-my-forge
 
-> A v2 ForgeCode (`forge`) workbench -- 40 specialist agents, 46 skills, 22 commands, MCP-ready, doctor-validated.
+> A v2 ForgeCode (`forge`) workbench -- 41 specialist agents, 56 skills, 22 commands, MCP-ready, doctor-validated.
 
-[![version](https://img.shields.io/badge/catalog-2026.06.12-blue)](./catalog-manifest.json) [![forge](https://img.shields.io/badge/forge-%E2%89%A52.5.2-green)](https://forgecode.dev/) [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![version](https://img.shields.io/badge/catalog-2026.07.09-blue)](./catalog-manifest.json) [![forge](https://img.shields.io/badge/forge-%E2%89%A52.5.2-green)](https://forgecode.dev/) [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
 ---
 
@@ -24,8 +24,8 @@ forge "plan: add user auth with refresh tokens"
 
 **oh-my-forge** is a curated content pack for the [ForgeCode](https://forgecode.dev/) CLI (`forge`). It ships:
 
-- **40 specialist agents** covering core implementation, architecture, review, testing, backend, frontend, DevOps, and specialist domains.
-- **46 skills** including execution modes (`autopilot`, `ralph`, `turbo`, `ultragoal`), planning workflows (`plan`, `ralplan`), QA (`verify`, `critic`, `code-review`, `security-review`, `visual-verdict`), TDD (`tdd`), investigation (`explore`, `deep-dive`, `tracer`), knowledge management (`note`, `recall`, `wiki`, `remember`), meta workflows (`skillify`, `doctor`, `deepinit`, `mcp-setup`, `ask`, `omf-reference`, `release`), and house preferences (`write-bash`, `use-rg`, `use-fd`, `use-gnu-tools`, `karpathy-guidelines`, `use-grepai`, `typescript-pro`, `emacs-integration`).
+- **41 specialist agents** covering core implementation, architecture, review, testing, backend, frontend, DevOps, and specialist domains (including a `gnu-emacs` Projectile/Emacs specialist).
+- **56 skills** including execution modes (`autopilot`, `ralph`, `turbo`, `ultragoal`), planning workflows (`plan`, `ralplan`), QA (`verify`, `critic`, `code-review`, `security-review`, `visual-verdict`), TDD (`tdd`), investigation (`explore`, `deep-dive`, `tracer`), knowledge management (`note`, `recall`, `wiki`, `remember`, `use-cortex`, `use-mempalace`), meta workflows (`skillify`, `doctor`, `deepinit`, `mcp-setup`, `ask`, `omf-reference`, `release`), context/communication tooling (`caveman`, `ctxcomp`, `llm-data-format`, `urgent-reminder`), and house preferences (`write-bash`, `use-rg`, `use-fd`, `use-gnu-tools`, `use-ast-grep`, `karpathy-guidelines`, `use-grepai`, `typescript-pro`, `emacs-integration`, `justfile-house-style`, `monty-playground`, `op-secrets`).
 - **22 slash commands** for common workflows (scaffold, feature, bugfix, review, refactor, test, document, deploy, code-review, security-review, deepinit, ask, etc.).
 - **Template overrides** for forge's built-in Handlebars prompts (stronger doom-loop breaker, smarter todo reminders).
 - **A doctor script** that validates your install.

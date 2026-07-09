@@ -6,6 +6,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This p
 
 ---
 
+## [2026.07.09] -- 2026-07-09
+
+**v2.2 — harness maintenance + runtime parity wave.** Captures high-value house-preference skills that had drifted into the live `~/forge` runtime but were never tracked by the pack, closing a 79-skill drift gap (remaining migration tracked in `br` beads under epic `omf-9dc`-style parity work).
+
+### Added
+
+- **10 house-preference / tooling skills** migrated from the live `~/forge` runtime: `caveman`, `ctxcomp`, `llm-data-format`, `justfile-house-style`, `monty-playground`, `urgent-reminder`, `use-ast-grep`, `op-secrets` (category `tooling`); `use-cortex`, `use-mempalace` (category `knowledge`). Each was self-contained (single `SKILL.md`, plus a `monty-llm` helper for `monty-playground`) with valid `name` + `description` frontmatter.
+- **1 agent**: `gnu-emacs` (category `specialist`) — Emacs/Projectile specialist, conjured 2026-06-14, previously runtime-only.
+
+### Changed
+
+- `catalog-manifest.json` bumped to `2026.07.09`; skill count 46 → 56, agent count 40 → 41. All manifest paths validated against disk (0 missing, 0 orphans), entries sorted by `name`/`id`.
+- README badge + inventory counts updated to match.
+
+### Notes
+
+- The remaining ~69 runtime-only skills (OMC/OMX ports, `plan-*`/`design-*` families, `gstack`, deploy/browser tooling, misc) were **not** bulk-migrated — they need per-skill dedup/judgment and are filed as `br` beads for a reviewed follow-up rather than dumped in wholesale.
+
+---
+
 ## [2026.06.12] -- 2026-06-12
 
 **v2.1 — OMC parity wave.** Closes the gap between the live `~/.claude` install and the oh-my-forge repo.
