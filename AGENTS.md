@@ -5,9 +5,15 @@ current working directory, and `~/forge/AGENTS.md` for global rules). It defines
 the operating contract for AI agents running under the oh-my-forge configuration
 pack.
 
-oh-my-forge is a configuration-only pack for [ForgeCode](https://forgecode.dev):
-no Rust crates, no Node.js, no wrapper CLI. Agents, skills, commands, and
-templates drop into `~/forge/` or `./.forge/` and work.
+oh-my-forge began as a configuration-only pack for
+[ForgeCode](https://forgecode.dev) — the original principle was "no Rust
+crates, no Node.js, no wrapper CLI". Agents, skills, commands, and templates
+still drop into `~/forge/` or `./.forge/` and work with zero build steps.
+Since then the `omf/` directory has grown a Rust wrapper (safety skeleton:
+routing floor, secrets read, MLX guard; registry/orchestration/TUI/memory
+wiring unbuilt), so the config-only claim no longer holds for the whole repo
+(reconciled 2026-07-17, defect D16). Config pack = still the core;
+`omf/` = the optional safety-wrapper track on top.
 
 ---
 
